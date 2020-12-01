@@ -29,6 +29,15 @@ class Actionneur:
         elif len(possibles) > 2:
             self.variete = Variete.DEROULANT
 
+    def __str__(self):
+        nm = self.nom
+        vr = str(self.variete)
+        et = str(self.etat)
+        en = self.possibles[self.etat]
+        ps = self.possibles
+        lp = str(len(self.possibles))
+        return "Act.[{}] Var.: {} Etat: ({}) {} / {} possibles: {}".format(nm, vr, et, en, lp, ps)
+
 class Robot:
     """Classe définissant un robot avec les attributs suivants:
     - id (str): le nom du robot
@@ -47,6 +56,16 @@ class Robot:
         if actionneurs is not None:
             for actionneur in actionneurs:
                 self.updt_act(actionneur)
+
+    def __str__(self):
+        repr_str = "Robot [{}]\n".format(self.rid)
+        x = str(self.x)
+        y = str(self.y)
+        theta = str(self.theta)
+        repr_str += "| Position: x:{} y:{} theta:{}\n".format(x, y, theta)
+        for act in self.actionneurs:
+            repr_str += "| {}\n".format(str(self.actionneurs[act]))
+        return repr_str
 
     def get_pos(self):
         """Récupère la position du robot sous la forme
@@ -90,6 +109,12 @@ class Annuaire:
     sont centralisées"""
     def __init__(self):
         self.robots = {}
+
+    def __str__(self):
+        repr_str = "Annuaire:\n"
+        for robot in self.robots:
+            repr_str += str(self.robots[robot])
+        return repr_str
 
     def check_robot(self, rid):
         """Vérifie si un robot est dans l'annuaire"""
