@@ -1,0 +1,44 @@
+Mémo pour les regex:
+ou : |
+mots|mats|mits => m[oai]ts
+m[^oai]ts = excluts les caractères oai
+[a-z] = lettres minuscules de a à z
+[A-Z] = lettres minuscules de A à z
+[0-9] = chiffres de 0 à 9
+[a-z0-9] = lettres minuscules de a à z et chiffres de 0 à 9
+
+ensembles préconçus:
+. n'importe quoi
+\w = [a-zA-Z0-9_] (négation: \W)
+\d = [0-9] (négation: \D)
+\n = retour ligne
+\t = tabulation
+\s = caractère whitespace (line break, tabs, espaces...) (négation: \S)
+m\wts = m[a-zA-Z0-9_]ts
+
+pour éviter de répéter les crochets, on peut faire:
+{min, max}
+{min,}
+{,max}
+{nombre}
+
+préconçus:
+* = {0,} 0 ou plus rep
++ = {1,} 1 ou plus rep
+? = {,1} O ou 1 rep
+
+pour échapper un caractère:
+\
+
+liste de chars à échapper: ^ $ \ | { } [ ] ( ) ? # ! + * .
+
+^The : matches any string that starts with The
+end$ : matches a string that ends with end
+^The end$ : exact string match (starts and ends with The end)
+roar : matches any string that has the text roar in it
+
+flags:
+/search pattern/flag
+g: does not return after first match restarting subsequent searches from the end of the previous match
+m: multiline: ^ et $ seront le début et la fin d'une line, et pas de toute la string
+i: insensible à la casse

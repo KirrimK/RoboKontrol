@@ -1,0 +1,8 @@
+Questions à poser à Guilhem:
+
+Que penses-tu de l'intérêt des fonctions:
+- pouvoir reconfigurer la carte pendant l'exécution
+- pouvoir modifier la conf des inspecteurs de robots pendant l'éxécution
+- autres fonctions
+Est-ce que selon toi il manque quelque chose?
+Est-ce que tu trouves la disposition facile à utiliser?
