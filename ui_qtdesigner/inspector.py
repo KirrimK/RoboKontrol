@@ -54,7 +54,7 @@ class Box_robot:
         self.layout_box.addLayout(self.layout_name_button)
 
     def layout_location(self):
-        """Créer le layout poisition de la boite roobot"""
+        """Créer le layout poisition de la boite robot"""
         self.label_location.setText("Position:")
         self.layout_box.addWidget(self.label_location)
         self.layout_x.addWidget(self.label_x)
@@ -72,7 +72,7 @@ class Box_robot:
         self.layout_box.addWidget(self.label_actuators)
 
     def add_actuator(self, dic):
-        """"Ajoute les actionneurs à la boite de robot"""""
+        """"Ajoute les actionneurs à la boite robot"""""
         for (actuator_name, options) in dic.items():
             self.layout_add_actuator = QtWidgets.QHBoxLayout()
             self.label_add_actuator = QtWidgets.QLabel(self.box_robot)
@@ -120,3 +120,5 @@ def load_actuator(fic):
 
 
 actuator_dic = load_actuator(ACTUATORS_FILES)
+
+
