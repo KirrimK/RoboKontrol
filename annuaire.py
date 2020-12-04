@@ -38,6 +38,21 @@ class Actionneur:
         lp = str(len(self.possibles))
         return "Act.[{}] Var.: {} Etat: ({}) {} / {} possibles: {}".format(nm, vr, et, en, lp, ps)
 
+    def get_state(self):
+        """Retourne l'état et les possibles d'un actionneur"""
+        return (self.etat, self.possibles)
+
+    def set_state(self, etat):
+        """Change l'état d'un actionneur"""
+        if etat < len(self.possibles):
+            self.etat = etat
+        else:
+            print("L'état {} n'est pas possible pour l'actionneur {}".format(str(etat), self.nom))
+
+    def get_variete(self):
+        """Retourne la variété d'un actionneur"""
+        return self.variete
+
 class Robot:
     """Classe définissant un robot avec les attributs suivants:
     - id (str): le nom du robot
@@ -88,20 +103,15 @@ class Robot:
 
     def get_state_act(self, act_name):
         """Retourne l'état et les possibles d'un actionneur"""
-        etat = self.actionneurs[act_name].etat
-        possibles = self.actionneurs[act_name].possibles
-        return (etat, possibles)
+        return self.actionneurs[act_name].get_state()
 
     def set_state_act(self, act_name, etat):
         """Change l'état d'un actionneur"""
-        if etat < len(self.actionneurs[act_name].possibles):
-            self.actionneurs[act_name].etat = etat
-        else:
-            print("L'état {} n'est pas possible pour l'actionneur {}".format(str(etat), act_name))
+        self.actionneurs[act_name].set_state(etat)
 
     def get_variete(self, act_name):
         """Retourne la variété d'un actionneur"""
-        return self.actionneurs[act_name].variete
+        return self.actionneurs[act_name].get_variete
 
 
 class Annuaire:
