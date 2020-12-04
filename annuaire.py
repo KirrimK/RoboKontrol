@@ -175,3 +175,7 @@ class Annuaire:
         """Retourne la variété d'un actionneur monté sur un robot"""
         if self.check_robot(rid):
             self.robots[rid].get_variete(act_name)
+
+    def get_all_robots(self):
+        """Retourne la liste de tous les robotids des robots présents dans l'annuaire"""
+        return list(self.robots.keys)
