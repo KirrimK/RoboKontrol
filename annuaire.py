@@ -30,13 +30,13 @@ class Actionneur:
             self.variete = Variete.DEROULANT
 
     def __str__(self):
-        nm = self.nom
-        vr = str(self.variete)
-        et = str(self.etat)
-        en = self.possibles[self.etat]
-        ps = self.possibles
-        lp = str(len(self.possibles))
-        return "Act.[{}] Var.: {} Etat: ({}) {} / {} possibles: {}".format(nm, vr, et, en, lp, ps)
+        nom = self.nom
+        vrt = str(self.variete)
+        eta = str(self.etat)
+        enb = self.possibles[self.etat]
+        psb = self.possibles
+        lps = str(len(self.possibles))
+        return "Act.[{}] Var.: {} Etat: ({}) {} / {} états: {}".format(nom, vrt, eta, enb, lps, psb)
 
     def get_state(self):
         """Retourne l'état et les possibles d'un actionneur"""
@@ -101,6 +101,10 @@ class Robot:
         """Enlève un actionneur repéré par son nom du robot"""
         self.actionneurs.pop(act_name, None)
 
+    def get_all_act(self):
+        """Retourne la liste de tous les actionneurs sur le robot"""
+        return list(self.actionneurs.keys())
+
     def get_state_act(self, act_name):
         """Retourne l'état et les possibles d'un actionneur"""
         return self.actionneurs[act_name].get_state()
@@ -109,9 +113,9 @@ class Robot:
         """Change l'état d'un actionneur"""
         self.actionneurs[act_name].set_state(etat)
 
-    def get_variete(self, act_name):
+    def get_variete_act(self, act_name):
         """Retourne la variété d'un actionneur"""
-        return self.actionneurs[act_name].get_variete
+        return self.actionneurs[act_name].get_variete()
 
 
 class Annuaire:
@@ -128,10 +132,7 @@ class Annuaire:
 
     def check_robot(self, rid):
         """Vérifie si un robot est dans l'annuaire"""
-        presence = rid in self.robots
-        if not presence:
-            print("Le robot {} n'est pas dans l'annuaire.".format(rid))
-        return presence
+        return rid in self.robots
 
     def add_robot(self, robot):
         """Ajoute un robot à l'annuaire"""
@@ -141,42 +142,34 @@ class Annuaire:
         """Enlève un robot de l'annuaire"""
         self.robots.pop(robot.rid, None)
 
-    def get_robotpos(self, rid):
+    def get_robot_pos(self, rid):
         """Récupère la position d'un robot dans l'annuaire"""
-        if rid in self.robots:
+        if self.check_robot(rid):
             return self.robots[rid].get_pos()
-        else:
-            print("Le robot {} n'est pas dans l'annuaire.".format(rid))
 
-    def set_robotpos(self, rid, x, y, theta):
+    def set_robot_pos(self, rid, x, y, theta):
         """Met à jour la position d'un robot dans l'annuaire"""
-        if rid in self.robots:
+        if self.check_robot(rid):
             self.robots[rid].set_pos(x, y, theta)
-        else:
-            print("Le robot {} n'est pas dans l'annuaire.".format(rid))
 
-    def updt_robotact(self, rid, actionneur):
-        """Ajoute/met à jour un actionneur
-        sur un robot présent dans l'annuaire"""
-        if rid in self.robots:
+    def updt_robot_act(self, rid, actionneur):
+        """Ajoute/met à jour la disposition d'un actionneur
+        sur un robot présent dans l'annuaire (ne pas utiliser pour mettre l'état à jour)"""
+        if self.check_robot(rid):
             self.robots[rid].updt_act(actionneur)
-        else:
-            print("Le robot {} n'est pas dans l'annuaire.".format(rid))
 
-    def remove_robotact(self, rid, act_name):
+    def remove_robot_act(self, rid, act_name):
         """Enlève un actionneur repéré par son nom d'un robot présent dans l'annuaire"""
-        if rid in self.robots:
+        if self.check_robot(rid):
             self.robots[rid].remove_act(act_name)
-        else:
-            print("Le robot {} n'est pas dans l'annuaire.".format(rid))
 
-    def get_robotact_state(self, rid, act_name):
+    def get_robot_act_state(self, rid, act_name):
         """Retourne l'état et les possibles d'un actionneur
         monté sur un robot dans l'annuaire"""
         if self.check_robot(rid):
-            self.robots[rid].get_state_act(act_name)
+            return self.robots[rid].get_state_act(act_name)
 
-    def set_robotact_state(self, rid, act_name, etat):
+    def set_robot_act_state(self, rid, act_name, etat):
         """Change l'état d'un actionneur monté sur un robot"""
         if self.check_robot(rid):
             self.robots[rid].set_state_act(act_name, etat)
@@ -184,8 +177,12 @@ class Annuaire:
     def get_robot_act_variete(self, rid, act_name):
         """Retourne la variété d'un actionneur monté sur un robot"""
         if self.check_robot(rid):
-            self.robots[rid].get_variete(act_name)
+            return self.robots[rid].get_variete_act(act_name)
+
+    def get_robot_all_act(self, rid):
+        """Retourne la liste de tous les actionneurs d'un robot"""
+        return self.robots[rid].get_all_act()
 
     def get_all_robots(self):
         """Retourne la liste de tous les robotids des robots présents dans l'annuaire"""
-        return list(self.robots.keys)
+        return list(self.robots.keys())
