@@ -40,19 +40,21 @@ class Box_robot:
 
         self.label_actuators = QtWidgets.QLabel(self.box_robot)
 
+        self.boxes = {}
 
-    def label_robot_name(self):
+
+
+    def layout_name_button_delete(self):
+        """Créer le layout contenant le nom et le bouton supprimer du robot"""
 
         self.label_name_robot.setText("Robot" + str(self.robot_number))
         self.layout_name_button.addWidget((self.label_name_robot))
-
-    def delete_button(self):
-        #self.button_delete.setObjectName("button_delete" + str(self.robot_number))
         self.button_delete.setText("Supprimer")
         self.layout_name_button.addWidget(self.button_delete)
         self.layout_box.addLayout(self.layout_name_button)
 
-    def location(self):
+    def layout_location(self):
+        """Créer le layout poisition de la boite roobot"""
         self.label_location.setText("Position:")
         self.layout_box.addWidget(self.label_location)
         self.layout_x.addWidget(self.label_x)
@@ -88,16 +90,18 @@ class Box_robot:
             self.comboBox_add_actuator.setObjectName("comboBox_" + actuator_name + "_robot" + str(self.robot_number))
 
     def add_box_robot(self):
-        self.label_robot_name()
-        self.delete_button()
-        self.button_delete.clicked.connect(self.remove_box_robot)
-        self.location()
+        """Permet l'ajout d'une boite robot"""
+        self.layout_name_button_delete()
+        self.layout_location()
         self.label_actuator()
         self.add_actuator(actuator_dic)
+        n=self.robot_number
+        self.boxes[n] = [self.box_robot, self.button_delete]
+        self.boxes[n][1].clicked.connect(lambda : self.remove_box_robot(n))
 
-    def remove_box_robot(self):
-        self.box_robot.hide()
-
+    def remove_box_robot(self, number_delete):
+        """Permet la suppression de la boite robot dont le numéro est placé en paramètre"""
+        self.boxes[number_delete][0].hide()
 
 def load_actuator(fic):
     """Charge les actionneurs placés dans un fichier texte sous le format:
