@@ -59,7 +59,7 @@ class Robot:
     - x (float): la position selon l'axe x du robot sur la carte (en mm)
     - y (float): la position selon l'axe x du robot sur la carte (en mm)
     - theta (float): l'orientation du robot (en radians/sens trigo depuis axe x)
-    - actionneurs ():
+    - actionneurs (list of Actionneur): liste des actionneurs connectés au robot
     """
     def __init__(self, rid, x=1500, y=1000, theta=0, actionneurs=None):
         self.rid = rid
@@ -116,7 +116,6 @@ class Robot:
     def get_variete_act(self, act_name):
         """Retourne la variété d'un actionneur"""
         return self.actionneurs[act_name].get_variete()
-
 
 class Annuaire:
     """Classe définissant un espace ou toutes les informations sur les robots trackés
