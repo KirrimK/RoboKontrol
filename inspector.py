@@ -1,6 +1,7 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
+import json
 
-ACTUATORS_FILES = "actuator.txt"
+ACTUATORS_FILES = "actuator.json"
 
 
 class Box_robot:
@@ -42,12 +43,10 @@ class Box_robot:
 
         self.boxes = {}
 
-
-
     def layout_name_button_delete(self):
         """Créer le layout contenant le nom et le bouton supprimer du robot"""
 
-        self.label_name_robot.setText("Robot" + str(self.robot_number))
+        self.label_name_robot.setText("Robot [{}]".format(self.robot_number))
         self.layout_name_button.addWidget((self.label_name_robot))
         self.button_delete.setText("Supprimer")
         self.layout_name_button.addWidget(self.button_delete)
@@ -71,54 +70,72 @@ class Box_robot:
         self.label_actuators.setText("Actionneurs")
         self.layout_box.addWidget(self.label_actuators)
 
-    def add_actuator(self, dic):
-        """"Ajoute les actionneurs à la boite robot"""""
-        for (actuator_name, options) in dic.items():
-            self.layout_add_actuator = QtWidgets.QHBoxLayout()
-            self.label_add_actuator = QtWidgets.QLabel(self.box_robot)
-            self.comboBox_add_actuator = QtWidgets.QComboBox(self.box_robot)
-            for elt in options:
-                self.comboBox_add_actuator.addItem(elt)
-            self.label_add_actuator.setText(actuator_name)
+    def add_actuator(self, list_of_dic):
 
-            self.layout_add_actuator.addWidget(self.label_add_actuator)
-            self.layout_add_actuator.addWidget(self.comboBox_add_actuator)
+        data = list_of_dic.copy()
 
-            self.layout_box.addLayout(self.layout_add_actuator)
+        for dic in data:
 
-            self.label_add_actuator.setObjectName("label_" + actuator_name + "_robot" + str(self.robot_number))
-            self.comboBox_add_actuator.setObjectName("comboBox_" + actuator_name + "_robot" + str(self.robot_number))
+            actuator_name  = dic['nom']
+            default_choice = int(dic['choix_initial'])
+            list_options = dic['choix'].strip('][').split(', ')    #conversion str to list
+            list_robot = dic['robot'].strip('][').split(', ')      #conversion str to list
+
+            if int_in_list(self.robot_number, list_robot):
+
+                self.layout_add_actuator = QtWidgets.QHBoxLayout()
+                self.label_add_actuator = QtWidgets.QLabel(self.box_robot)
+                self.comboBox_add_actuator = QtWidgets.QComboBox(self.box_robot)
+                self.comboBox_add_actuator.addItem(list_options[default_choice].strip('"'))
+                for i in range(len(list_options)):
+                    if i != default_choice:
+                        self.comboBox_add_actuator.addItem(list_options[i].strip('"'))
+
+                self.label_add_actuator.setText(actuator_name)
+
+                self.layout_add_actuator.addWidget(self.label_add_actuator)
+                self.layout_add_actuator.addWidget(self.comboBox_add_actuator)
+
+                self.layout_box.addLayout(self.layout_add_actuator)
 
     def add_box_robot(self):
         """Permet l'ajout d'une boite robot"""
         self.layout_name_button_delete()
         self.layout_location()
         self.label_actuator()
-        self.add_actuator(actuator_dic)
-        n=self.robot_number
+        self.add_actuator(list_dic_actuators)
+        n = self.robot_number
         self.boxes[n] = [self.box_robot, self.button_delete]
-        self.boxes[n][1].clicked.connect(lambda : self.remove_box_robot(n))
+        self.boxes[n][1].clicked.connect(lambda: self.remove_box_robot(n))
 
     def remove_box_robot(self, number_delete):
         """Permet la suppression de la boite robot dont le numéro est placé en paramètre"""
         self.boxes[number_delete][0].hide()
 
-def load_actuator(fic):
-    """Charge les actionneurs placés dans un fichier texte sous le format:
-            nom_actionneur_1 options_1 options_2 ...
-            nom_actionners_2 options_1 options_2 ...
-            ...
-    """
-    dic = {}
-    with open(fic, 'r') as f:
-        for line in f:
-            l = line.split()
-            values = tuple(l[1:])
-            key = "".join(tuple(l[0]))
-            dic[key] = values
-    return dic
+
+def int_in_list(n, l):
+    """Teste si l'entier n (type str) est compris dans la liste"""
+    for i in l:
+        if int(i) == n:
+            return True
+        else:
+            pass
 
 
-actuator_dic = load_actuator(ACTUATORS_FILES)
+def load_actuators(fichier):
+    """Retourne les actionneurs placés dans un fichier .json de la forme:
+            - nom
+            - liste des choix (type string)
+            - indince du choix par défauts
+            - liste des robots qui ont cet actionneur (type string)
+        sous la forme d'une liste de dictionnaires"""
+
+    l = []
+    with open(fichier) as f:
+        data = json.load(f)
+    for dic in data["Actionneur"]:
+        l.append(dic)
+    return l
 
 
+list_dic_actuators = load_actuators(ACTUATORS_FILES)

@@ -1,8 +1,6 @@
 from PyQt5 import QtCore, QtWidgets
 import inspector
 
-ACTUATORS_FILE = "actuator.txt"
-
 
 class Window(object):
     def __init__(self, base_window, number_of_robots=0):
