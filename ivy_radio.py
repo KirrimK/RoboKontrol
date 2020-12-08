@@ -1,4 +1,4 @@
-from ivy.std_api import *
+from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
 #import annuaire
 from time import sleep, time, gmtime, struct_time
 
@@ -55,14 +55,13 @@ class Radio :
 
 
 if __name__ == '__main__' :
+
+    #Tests du programme
     Radio1 = Radio ()
-    Radio1.record_all = True
     Radio1.start()
     sleep (5)
     Radio1.send_cmd (POS_CMD.format('test',0,0))
     sleep (5)
-    Radio1.send_cmd (KILL_CMD.format ('test'))
-    sleep (1)
     Radio1.stop ()
     
     
