@@ -6,3 +6,4 @@ Que penses-tu de l'intérêt des fonctions:
 - autres fonctions
 Est-ce que selon toi il manque quelque chose?
 Est-ce que tu trouves la disposition facile à utiliser?
+Peux tu nous en dire plus sur ce qui doit etre affiché sur la carte(drapeaux,...)? 
