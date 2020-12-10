@@ -65,8 +65,8 @@ class Actionneur(Equipement):
 
     Nouveaux:
     - valeur (int): valeur imposée à l'actionneur (compris entre min et max)
-    - min (int): valeur minimale prise par l'actionneur
-    - max (int): valeur max prise par l'actionneur
+    - min_val (int): valeur minimale prise par l'actionneur
+    - max_val (int): valeur max prise par l'actionneur
     """
     def __init__(self, nom, valeur, min_val, max_val, unite=None):
         super().__init__(nom)
@@ -88,9 +88,9 @@ class Actionneur(Equipement):
 
         Sortie:
         - state (int, int, int)
-            [0]: valeur de l'actionneur
-            [1]: valeur min
-            [2]: valeur max
+            - [0]: valeur de l'actionneur
+            - [1]: valeur min
+            - [2]: valeur max
         """
         return (self.valeur, self.min_val, self.max_val)
 
@@ -119,6 +119,12 @@ class Capteur(Equipement):
         super().__init__(nom)
         self.valeur = valeur
         self.unite = unite
+
+    def __str__(self):
+        nom = self.nom
+        val = self.valeur
+        unite = self.unite
+        return "Capteur [{}] Val.:{} ({})".format(nom, val, unite)
 
     def get_state(self):
         """Renvoie la valeur du capteur
@@ -155,13 +161,22 @@ class ActioCapteur(Equipement):
         self.capteur = capteur
         self.unite = unite_cmn
 
+    def __str__(self):
+        nom = self.nom
+        unt = self.unite
+        cpt = self.capteur.valeur
+        act = self.actionneur.valeur
+        mnv = self.actionneur.min_val
+        mxv = self.actionneur.max_val
+        return "ActCpt [{}]({}) Cpt: {} Act: {} entre {} et {}".format(nom, unt, cpt, act, mnv, mxv)
+
     def set_state(self, valeur):
         """Met à jour la valeur de l'un des composants
 
         Entrée:
         - valeur (int, int)
-            [0]: valeur de l'actionneur (None pour ne pas changer)
-            [1]: valeur du capteur (None pour ne pas changer)
+            - [0]: valeur de l'actionneur (None pour ne pas changer)
+            - [1]: valeur du capteur (None pour ne pas changer)
         """
         if valeur[0] is not None:
             self.actionneur.set_state(valeur[0])
@@ -175,10 +190,10 @@ class ActioCapteur(Equipement):
 
         Sortie:
         - state (int, int, int, int)
-            [0]: valeur de l'actionneur
-            [1]: min actionneur
-            [2]: max actionneur
-            [3]: valeur capteur
+            - [0]: valeur de l'actionneur
+            - [1]: min actionneur
+            - [2]: max actionneur
+            - [3]: valeur capteur
         """
         a_vl, a_mn, a_mx = self.actionneur.get_state()
         return (a_vl, a_mn, a_mx, self.capteur.get_state())
@@ -188,8 +203,8 @@ class ActioCapteur(Equipement):
 
         Sortie:
         - (float, float)
-            [0]: last_updt actionneur
-            [1]: last_updt capteur
+            - [0]: last_updt actionneur
+            - [1]: last_updt capteur
         """
         return (self.actionneur.last_updt, self.actionneur.last_updt)
 
@@ -202,9 +217,10 @@ class Robot:
     - y (float): la position selon l'axe x du robot sur la carte (en mm)
     - theta (float): l'orientation du robot (en radians/sens trigo depuis axe x)
     - equipements (dict): liste des équipements connectés au robot
-        clé: nom (str)
-        valeur: equipement (Equipement)
-        (passer les equipements lors de la construction sous forme de list)
+        - clé: nom (str)
+        - valeur: equipement (Equipement)
+
+    (passer les equipements lors de la construction sous forme de list)
     """
     def __init__(self, rid, x=1500, y=1000, theta=0, equipements=None):
         self.rid = rid
@@ -220,10 +236,10 @@ class Robot:
 
     def __str__(self):
         repr_str = "Robot [{}]\n".format(self.rid)
-        x = str(self.x)
-        y = str(self.y)
+        pos_x = str(self.x)
+        pos_y = str(self.y)
         theta = str(self.theta)
-        repr_str += "| Position: x:{} y:{} theta:{}\n".format(x, y, theta)
+        repr_str += "| Position: x:{} y:{} theta:{}\n".format(pos_x, pos_y, theta)
         for eqp in self.equipements:
             repr_str += "| {}\n".format(str(self.equipements[eqp]))
         return repr_str
@@ -233,9 +249,9 @@ class Robot:
 
         Sortie:
         - (float, float, float):
-            [0]: x
-            [1]: y
-            [2]: theta
+            - [0]: x
+            - [1]: y
+            - [2]: theta
         """
         return (self.x, self.y, self.theta)
 
@@ -286,14 +302,18 @@ class Robot:
         """Retourne la valeur d'un équipement (et autres informations le cas échéant)
 
         Sortie: dépend du type de l'équipement portant le nom eqp_name
+
         > Equipement:
-            - None
+        - None
+
         > Capteur:
-            - int (Se référer à Capteur.get_state())
+        - int (Se référer à Capteur.get_state())
+
         > Actionneur:
-            - (int, int, int) (Se référer à Actionneur.get_state())
+        - (int, int, int) (Se référer à Actionneur.get_state())
+
         > ActioCapteur:
-            - (int, int, int, int) (Se référer à ActioCapteur.get_state())
+        - (int, int, int, int) (Se référer à ActioCapteur.get_state())
         """
         return self.equipements[eqp_name].get_state()
 
@@ -335,8 +355,8 @@ class Annuaire:
 
     Attributs:
     - robots (dict): dictionnaire contenant tous les objets Robot gardés en mémoire
-        clé: nom (str)
-        valeur: robot (Robot)
+        - clé: nom (str)
+        - valeur: robot (Robot)
     """
     def __init__(self):
         self.robots = {}
@@ -377,9 +397,9 @@ class Annuaire:
 
         Sortie:
         - (float, float, float)
-            [0]: x
-            [1]: y
-            [2]: theta
+            - [0]: x
+            - [1]: y
+            - [2]: theta
         """
         if self.check_robot(rid):
             return self.robots[rid].get_pos()
@@ -486,5 +506,4 @@ class Annuaire:
         """
         return list(self.robots.keys())
 
-#TODO: Faire les tests de toutes les fonctions nouvellement ajoutées
-#TODO: Rajouter les méthodes qui manquent à la suite des tests
+#TODO: ajouter plus de features recommandées
