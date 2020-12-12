@@ -20,8 +20,7 @@ KILL_CMD = "Shutdown {}"
 
 MSG = '(.*)'
 
-def temps ():
-    t= time()
+def temps (t):
     i = gmtime(t)
     return ('{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (i.tm_year, i.tm_mon, i.tm_mday, i.tm_hour, i.tm_min, i.tm_sec)+'{:.3}'.format (t%1)[1:])
 
@@ -36,7 +35,8 @@ class Radio :
         self.nom = "radio"
         IvyBindMsg (self.on_posreg, POS_REG)
         IvyBindMsg (self.on_msg, MSG)
-        #IvyBindMsg (
+        IvyBindMsg (self.on_captreg, CAPT_REG)
+        IvyBindMsg (self.on_descrreg, DESCR_REG)
 
     #ENREGISTREMENT
 
@@ -50,7 +50,7 @@ class Radio :
 
     def on_msg (self, sender, message):
         if self.record_msgs :
-            self.msgsBuffer.append (temps () + '\t' + str(sender)+'\t'+ message +'\n')
+            self.msgsBuffer.append ((time(),sender, message))
             
     def register_stop (self, save, *args):
         if 'all' in args :
@@ -60,35 +60,43 @@ class Radio :
             if save :
                 path = 'messages.txt' #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
                 with open (path,'a') as fichier :
+                    fichier.write ('Heure\t\tExpediteur\t\tMessage\n\n')
                     for ligne in self.msgsBuffer :
-                        fichier.write (ligne)
+                        fichier.write (temps (ligne[0])+'\t'+str (ligne[1])+'\t'+ligne[2]+'\n')
             self.msgsBuffer = []
         if 'cmds' in args :
             self.record_cmds = False
             if save :
                     path = 'commandes.txt' #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
                     with open (path,'a') as fichier :
+                        fichier.write ('Heure\t\tCommande\n\n')
                         for ligne in self.cmdsBuffer :
-                            fichier.write (ligne)
+                            fichier.write (temps (ligne[0])+'\t'+str (ligne[1])+'\n')
             self.cmdsBuffer = []
         
     def on_posreg (self,*args):
         #print (args[1:])
         pass
 
+
+    def on_captreg (self,*args):
+        pass
+
+    def on_descrreg (self,*args):
+        pass
+
+    def send_cmd (self,cmd):
+        if self.record_cmds :
+            self.cmdsBuffer.append ((time(),cmd))
+        if self.record_msgs :
+            self.msgsBuffer.append ((time(),'Commande de l\'interface',cmd))
+        IvySendMsg (cmd)
+
     def start (self):
         IvyStart (self.bus)
 
     def stop(self):
         IvyStop()
-
-    def send_cmd (self,cmd):
-        if self.record_cmds :
-            self.cmdsBuffer.append (temps()+'\t'+cmd+'\n')
-        if self.record_msgs :
-            self.msgsBuffer.append (temps()+'\tCommande de l\'interface\t'+cmd+'\n')
-        IvySendMsg (cmd)
-
 
 if __name__ == '__main__' :
     #Tests du programme
