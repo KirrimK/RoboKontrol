@@ -30,7 +30,7 @@ class Radio :
         self.msgsBuffer = []
         self.record_msgs = False
         self.record_cmds = False
-        IvyInit ("radio","radio ready!")
+        IvyInit (IVYAPPNAME,IVYAPPNAME+" is ready!")
         self.bus = "127.255.255.255:2010"
         self.nom = "radio"
         IvyBindMsg (self.on_posreg, POS_REG)
@@ -49,6 +49,7 @@ class Radio :
             self.record_cmds = True
 
     def on_msg (self, sender, message):
+        """Stocke les messages sous forme de tupple dans msgs"""
         if self.record_msgs :
             self.msgsBuffer.append ((time(),sender, message))
             
@@ -60,7 +61,7 @@ class Radio :
             if save :
                 path = 'messages.txt' #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
                 with open (path,'a') as fichier :
-                    fichier.write ('Heure\t\tExpediteur\t\tMessage\n\n')
+                    fichier.write ('Jour\t\tHeure\t\tExpediteur\t\tMessage\n\n')
                     for ligne in self.msgsBuffer :
                         fichier.write (temps (ligne[0])+'\t'+str (ligne[1])+'\t'+ligne[2]+'\n')
             self.msgsBuffer = []
@@ -69,7 +70,7 @@ class Radio :
             if save :
                     path = 'commandes.txt' #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
                     with open (path,'a') as fichier :
-                        fichier.write ('Heure\t\tCommande\n\n')
+                        fichier.write ('Jour\t\tHeure\t\tCommande\n\n')
                         for ligne in self.cmdsBuffer :
                             fichier.write (temps (ligne[0])+'\t'+str (ligne[1])+'\n')
             self.cmdsBuffer = []
@@ -103,6 +104,7 @@ if __name__ == '__main__' :
     Radio1 = Radio ()
     Radio1.start()
     #Actual tests :
+    
 
 
     #End tests
