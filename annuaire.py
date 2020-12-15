@@ -403,6 +403,7 @@ class Annuaire:
         """
         if self.check_robot(rid):
             return self.robots[rid].get_pos()
+        return None
 
     def set_robot_pos(self, rid, x, y, theta):
         """Met à jour la position d'un robot dans l'annuaire
@@ -449,6 +450,7 @@ class Annuaire:
             (Se référer à Robot.get_state_eqp())"""
         if self.check_robot(rid):
             return self.robots[rid].get_state_eqp(eqp_name)
+        return None
 
     def set_robot_eqp_state(self, rid, eqp_name, valeur):
         """Change l'état d'un équipement monté sur un robot
@@ -473,6 +475,7 @@ class Annuaire:
         """
         if self.check_robot(rid):
             return self.robots[rid].get_type_eqp(eqp_name)
+        return None
 
     def get_robot_eqp_unit(self, rid, eqp_name):
         """Retourne l'unité d'un équipement monté sur un robot
@@ -486,6 +489,7 @@ class Annuaire:
         """
         if self.check_robot(rid):
             return self.robots[rid].get_unit_eqp(eqp_name)
+        return None
 
     def get_robot_all_eqp(self, rid):
         """Retourne la liste de tous les équipements d'un robot
