@@ -26,6 +26,7 @@ def temps (t):
 
 class Radio :
     def __init__ (self):
+        self.backend = None
         self.cmdsBuffer = []
         self.msgsBuffer = []
         self.record_msgs = False
@@ -68,11 +69,11 @@ class Radio :
         if 'cmds' in args :
             self.record_cmds = False
             if save :
-                    path = 'commandes.txt' #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
-                    with open (path,'a') as fichier :
-                        fichier.write ('Jour\t\tHeure\t\tCommande\n\n')
-                        for ligne in self.cmdsBuffer :
-                            fichier.write (temps (ligne[0])+'\t'+str (ligne[1])+'\n')
+                path = 'commandes.txt' #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
+                with open (path,'a') as fichier :
+                    fichier.write ('Jour\t\tHeure\t\tCommande\n\n')
+                    for ligne in self.cmdsBuffer :
+                        fichier.write (temps (ligne[0])+'\t'+str (ligne[1])+'\n')
             self.cmdsBuffer = []
         
     def on_posreg (self,*args):

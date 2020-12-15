@@ -53,6 +53,7 @@ class Equipement:
         """
         return self.last_updt
 
+#TODO: rajouter un step aux actionneurs standards
 class Actionneur(Equipement):
     """Définit un actionneur basique attaché à un robot,
     pouvant prendre une valeur (int) entre max et min (int), le tout dans une certaine unité
@@ -349,6 +350,22 @@ class Robot:
         - unite (str)"""
         return self.equipements[eqp_name].get_unit()
 
+    def get_last_updt_pos(self):
+        """Retourne la dernière mise à jour de la position
+
+        Sortie:
+            - last_updt_pos (float)
+        """
+        return self.last_updt_pos
+
+    def get_last_updt_eqp(self, eqp_name):
+        """Retourne la dernière mise à jour de la position
+
+        Sortie:
+            - last_updt_pos (float)
+        """
+        return self.equipements[eqp_name].get_last_updt()
+
 class Annuaire:
     """Classe définissant un espace ou toutes les informations sur les robots trackés
     sont centralisées
@@ -509,5 +526,28 @@ class Annuaire:
         - list of (str)
         """
         return list(self.robots.keys())
+
+    def check_robot_eqp(self, robot_name, eqp_name):
+        """Vérifie si un équipement est présent sur un robot
+
+        Entrée:
+            - robot_name (str): nom du robot
+            - eqp_name (str): nom de l'équipement
+        Sortie:
+            - bool
+        """
+        if self.check_robot(robot_name):
+            return self.robots[robot_name].check_eqp(eqp_name)
+        return False
+
+    def get_robot_eqp_last_updt(self, robot_name, eqp_name):
+        """Retourne le timestamp de la dernière mise à jour de l'équipement"""
+        if self.check_robot_eqp(robot_name, eqp_name):
+            return self.robots[robot_name].get_last_updt_eqp()
+
+    def get_robot_last_updt_pos(self, robot_name):
+        """Retourne le timestamp de la dernière mise à jour de positions"""
+        if self.check_robot(robot_name):
+            return self.robots[robot_name].get_last_updt_pos()
 
 #TODO: ajouter plus de features recommandées
