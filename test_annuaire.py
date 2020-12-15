@@ -124,3 +124,7 @@ def test_annuaire():
     annu.remove_robot('robot_a')
     assert not annu.check_robot('robot_a')
     assert annu.get_all_robots() == []
+    assert annu.get_robot_pos("osef") is None
+    assert annu.get_robot_eqp_state("osef", "osef") is None
+    assert annu.get_robot_eqp_type("osef", "osef") is None
+    assert annu.get_robot_eqp_unit('osef', 'osef') is None
