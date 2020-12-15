@@ -34,24 +34,13 @@ class Backend:
         """Invoqué lors de la demande de tracking d'un robot via l'interface graphique,
         ou lors de la découverte d'un robot inconnu par la radio (si implémenté).
         Ajoute le robot à l'annuaire
-        et émet un message de demande de configuration à destination de ce robot
+        (et émet un message de demande de configuration à destination de ce robot) (pas implémenté)
 
         Entrée:
             - robot_name (str): nom du robot à tracker
         """
         self.annu.add_robot(annuaire.Robot(robot_name))
-        self.radio.send_cmd (rd.DESCR_CMD.format (robot_name))
-
-    def istracked_robot(self, robot_name):
-        """Evalue si le robot en question est actuellement tracké ou non.
-
-        Entrée:
-            - robot_name (str): nom du robot
-
-        Sortie:
-            - bool
-        """
-        return self.annu.check_robot(robot_name)
+        #self.radio.send_cmd (rd.DESCR_CMD.format (robot_name))
 
     def stopandforget_robot(self, robot_name):
         """Permet d'arrêter le robot en question (via un message Shutdown ivy)
@@ -81,7 +70,7 @@ class Backend:
                 - [1]: y
                 - [2]: theta (si non spécifié, mettre à None)
         """
-        if self.istracked_robot(robot_name):
+        if self.annu.check_robot(robot_name):
             if pos[2] is None:
                 self.radio.send_cmd (rd.POS_CMD.format (pos[0], pos[1]))
             else:
@@ -96,12 +85,8 @@ class Backend:
             - eqp_name (str): nom de l'équipement
             - state (variable): l'état souhaité (se reférer au type d'equipement)
         """
-        if self.istracked_robot(robot_name) and self.annu.check_robot_eqp(robot_name, eqp_name):
-            eqp_type = self.annu.get_robot_eqp_type(robot_name, eqp_name)
-            if eqp_type == annuaire.Actionneur:
-                self.annu.set_robot_eqp_state(robot_name, eqp_name, state)
-            elif eqp_type == annuaire.ActioCapteur:
-                self.annu.set_robot_eqp_state(robot_name, eqp_name, (state, None))
+        if self.annu.check_robot(robot_name) and self.annu.check_robot_eqp(robot_name, eqp_name):
+            self.annu.set_robot_eqp_state(robot_name, eqp_name, state)
 
     def getdata_robot(self, robot_name):
         """Renvoie toutes les informations connues sur le robot

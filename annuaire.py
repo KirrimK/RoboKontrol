@@ -53,57 +53,78 @@ class Equipement:
         """
         return self.last_updt
 
-#TODO: rajouter un step aux actionneurs standards
 class Actionneur(Equipement):
     """Définit un actionneur basique attaché à un robot,
-    pouvant prendre une valeur (int) entre max et min (int), le tout dans une certaine unité
+    dont les commandes peuvent prendre une valeur (int) entre max et min (int),
+    le tout dans une certaine unité.
+    Un capteur peut aussi être associé à l'actionneur,
+    auquel cas la valeur de ce capteur sera aussi stockée dans ce même objet
 
     Attributs:
-    Hérités d'Equipement
+    Hérités d'Equipement:
     - nom (str): le nom de l'actionneur
     - unite (str): l'unité dans laquelle les valeurs de l'actionneurs sont exprimées
     - last_updt (float): timestamp de la derniere update de la valeur
 
     Nouveaux:
-    - valeur (int): valeur imposée à l'actionneur (compris entre min et max)
-    - min_val (int): valeur minimale prise par l'actionneur
-    - max_val (int): valeur max prise par l'actionneur
+    - valeur (float|None): valeur retournée par le capteur associé (None si sans retour)
+    - min_val (float): valeur minimale de la commande
+    - max_val (float): valeur max de la commannde
+    - step (float): le step de l'actionneur (la commande doit être un multiple)
+    - last_cmd (float): le timestamp de la dernière commande envoyée
     """
-    def __init__(self, nom, valeur, min_val, max_val, unite=None):
+    def __init__(self, nom, min_val, max_val, step=1, unite=None):
         super().__init__(nom)
-        self.valeur = valeur
+        self.valeur = None
         self.min_val = min_val
         self.max_val = max_val
         self.unite = unite
+        self.step = step
+        self.last_cmd = None
 
     def __str__(self):
         nom = self.nom
         val = self.valeur
         min_v = self.min_val
         max_v = self.max_val
-        unite = self.unite
-        return "Actionneur [{}] Val.: {} ({}) entre {} et {}".format(nom, val, unite, min_v, max_v)
+        unt = self.unite
+        stp = self.step
+        return "Act. [{}] Val.: {} ({}) {} -> {} ({})".format(nom, val, unt, min_v, max_v, stp)
 
     def get_state(self):
         """Retourne la valeur et le min/max d'un actionneur
 
         Sortie:
-        - state (int, int, int)
-            - [0]: valeur de l'actionneur
+        - state (float|None, float, float, float)
+            - [0]: valeur de l'actionneur (None si sans retour)
             - [1]: valeur min
             - [2]: valeur max
+            - [3]: step actionneur
         """
-        return (self.valeur, self.min_val, self.max_val)
+        return (self.valeur, self.min_val, self.max_val, self.step)
 
     def set_state(self, valeur):
-        """Change la valeur de l'actionneur
+        """Change la valeur du capteur associé
 
         Entrée:
-        - valeur (int) (devrait être compris entre min et max actionneur inclus)
+        - valeur (float) (devrait être compris entre min et max actionneur inclus)
         """
-        if self.min_val <= valeur <= self.max_val:
-            self.valeur = valeur
-            self.updt()
+        self.valeur = valeur
+        self.updt()
+
+    def updt_cmd(self):
+        """Met à jour le timestamp de dernière commande"""
+        self.last_cmd = time.time()
+
+    def get_last_cmd(self):
+        """Retourne le timestamp de la dernière commande envoyée"""
+        return self.last_cmd
+
+class Binaire(Actionneur):
+    """Définit un actionneur prenant deux états (0 et 1),
+    par exemple une pompe."""
+    def __init__(self, nom):
+        super().__init__(nom, 0, 1)
 
 class Capteur(Equipement):
     """Définit un capteur avec un nom, une valeur et une unité
@@ -115,7 +136,7 @@ class Capteur(Equipement):
     - last_updt (float): timestamp de la derniere update de la valeur
 
     Nouveaux:
-    - valeur (int): valeur du capteur"""
+    - valeur (float): valeur du capteur"""
     def __init__(self, nom, valeur, unite=None):
         super().__init__(nom)
         self.valeur = valeur
@@ -141,73 +162,6 @@ class Capteur(Equipement):
         - valeur (int)"""
         self.valeur = valeur
         self.updt()
-
-class ActioCapteur(Equipement):
-    """Définit un actionneur basique couplé à un capteur, possédant la même unité,
-    et le capteur mesurant une valeur supposément régie par l'actionneur
-
-    Attributs:
-    Hérités d'Equipement
-    - nom (str): le nom de l'ensemble
-    - unite (str): l'unité commune (remplace les unités des actionneurs)
-    - last_updt (float): timestamp de la derniere update de la valeur
-
-    Nouveaux:
-    - actionneur (Equipement): l'actionneur à relier (pas besoin de préciser l'unité)
-    - capteur (Equipement): le capteur à relier (pas besoin de préciser l'unité)
-    """
-    def __init__(self, nom, actionneur, capteur, unite_cmn):
-        super().__init__(nom)
-        self.actionneur = actionneur
-        self.capteur = capteur
-        self.unite = unite_cmn
-
-    def __str__(self):
-        nom = self.nom
-        unt = self.unite
-        cpt = self.capteur.valeur
-        act = self.actionneur.valeur
-        mnv = self.actionneur.min_val
-        mxv = self.actionneur.max_val
-        return "ActCpt [{}]({}) Cpt: {} Act: {} entre {} et {}".format(nom, unt, cpt, act, mnv, mxv)
-
-    def set_state(self, valeur):
-        """Met à jour la valeur de l'un des composants
-
-        Entrée:
-        - valeur (int, int)
-            - [0]: valeur de l'actionneur (None pour ne pas changer)
-            - [1]: valeur du capteur (None pour ne pas changer)
-        """
-        if valeur[0] is not None:
-            self.actionneur.set_state(valeur[0])
-            self.capteur.updt()
-        if valeur[1] is not None:
-            self.capteur.set_state(valeur[1])
-            self.capteur.updt()
-
-    def get_state(self):
-        """Retourne la valeur de l'actionneur, son min, max et la valeur du capteur
-
-        Sortie:
-        - state (int, int, int, int)
-            - [0]: valeur de l'actionneur
-            - [1]: min actionneur
-            - [2]: max actionneur
-            - [3]: valeur capteur
-        """
-        a_vl, a_mn, a_mx = self.actionneur.get_state()
-        return (a_vl, a_mn, a_mx, self.capteur.get_state())
-
-    def get_last_updt(self):
-        """Retourne les dernières actualisations de l'actionneur et du capteur
-
-        Sortie:
-        - (float, float)
-            - [0]: last_updt actionneur
-            - [1]: last_updt capteur
-        """
-        return (self.actionneur.last_updt, self.actionneur.last_updt)
 
 class Robot:
     """Classe définissant un robot avec les attributs suivants:
@@ -311,10 +265,8 @@ class Robot:
         - int (Se référer à Capteur.get_state())
 
         > Actionneur:
-        - (int, int, int) (Se référer à Actionneur.get_state())
+        - (float|None, float, float, float) (Se référer à Actionneur.get_state())
 
-        > ActioCapteur:
-        - (int, int, int, int) (Se référer à ActioCapteur.get_state())
         """
         return self.equipements[eqp_name].get_state()
 
@@ -328,8 +280,6 @@ class Robot:
             - int (Se référer à Capteur.set_state()
         > Actionneur:
             - int (Se référer à Actionneur.set_state()
-        > ActioCapteur:
-            - (int, int) (Se référer à ActioCapteur.set_state())
         """
         if self.check_eqp(eqp_name):
             self.equipements[eqp_name].set_state(valeur)

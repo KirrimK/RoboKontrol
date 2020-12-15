@@ -21,33 +21,21 @@ def test_capteur():
 
 def test_actionneur():
     """Tests de la classe Actionneur"""
-    act_a = annuaire.Actionneur('act_a', 0, 0, 1, "pascal")
-    assert act_a.get_state() == (0, 0, 1)
+    act_a = annuaire.Actionneur('act_a', 0, 1, 1, "pascal")
+    assert act_a.get_state() == (None, 0, 1, 1)
     act_a.set_state(1)
-    assert act_a.get_state() == (1, 0, 1)
+    assert act_a.get_state() == (1, 0, 1, 1)
     assert act_a.get_unit() == 'pascal'
-    assert act_a.__str__() == "Actionneur [act_a] Val.: 1 (pascal) entre 0 et 1"
+    assert act_a.__str__() == "Act. [act_a] Val.: 1 (pascal) 0 -> 1 (1)"
 
-    act_b = annuaire.Actionneur('act_b', 1, 0, 2, "radians")
-    assert act_b.get_state() == (1, 0, 2)
+    act_b = annuaire.Actionneur('act_b', 0, 1, 2, "radians")
+    assert act_b.get_state() == (None, 0, 1, 2)
     assert act_b.get_unit() == 'radians'
 
     act_c = annuaire.Actionneur('act_c', 0, 0, 0, "volts")
     act_c.set_state(1)
-    assert act_c.get_state() == (0, 0, 0)
+    assert act_c.get_state() == (1, 0, 0, 0)
     assert act_c.get_unit() == 'volts'
-
-def test_actiocapteur():
-    """Tests de la classe ActioCapteur"""
-    act = annuaire.Actionneur("act", 0, 0, 100)
-    cpt = annuaire.Capteur("cpt", 0)
-    acpt = annuaire.ActioCapteur("acpt", act, cpt, "%")
-    acpt.set_state((50, 55))
-    assert acpt.get_state() == (50, 0, 100, 55)
-    assert acpt.get_unit() == "%"
-    assert isinstance(acpt.get_last_updt()[0], float)
-    assert isinstance(acpt.get_last_updt()[1], float)
-    assert acpt.__str__() == "ActCpt [acpt](%) Cpt: 55 Act: 50 entre 0 et 100"
 
 def test_robot():
     """Tests de la classe Robot"""
@@ -65,16 +53,16 @@ def test_robot():
     act_a = annuaire.Actionneur('act_a', 0, 0, 1, "-")
     robot_a.updt_eqp(act_a)
     assert robot_a.get_all_eqp() == ['cpt', "act_a"]
-    assert robot_a.get_state_eqp('act_a') == (0, 0, 1)
+    assert robot_a.get_state_eqp('act_a') == (None, 0, 0, 1)
     assert robot_a.get_unit_eqp("act_a") == "-"
     assert robot_a.get_type_eqp('nope') is None
 
     act_a2 = annuaire.Actionneur('act_a', 0, 0, 2, '(nope)')
     robot_a.updt_eqp(act_a2)
-    assert robot_a.get_state_eqp('act_a') == (0, 0, 2)
+    assert robot_a.get_state_eqp('act_a') == (None, 0, 0, 2)
 
     robot_a.set_state_eqp('act_a', 1)
-    assert robot_a.get_state_eqp('act_a') == (1, 0, 2)
+    assert robot_a.get_state_eqp('act_a') == (1, 0, 0, 2)
     assert robot_a.get_type_eqp('act_a') == annuaire.Actionneur
     assert robot_a.get_type_eqp('cpt') == annuaire.Capteur
 
@@ -91,13 +79,13 @@ def test_annuaire():
     assert annu.__str__() == "Annuaire:\n"
 
     robot_a = annuaire.Robot('robot_a')
-    act_a = annuaire.Actionneur('act_a', 0, 0, 1, "rien")
+    act_a = annuaire.Actionneur('act_a', 0, 1, 1, "rien")
     robot_a.updt_eqp(act_a)
     annu.add_robot(robot_a)
     assert annu.get_all_robots() == ["robot_a"]
     annu_str = "Annuaire:\nRobot [robot_a]\n"
     annu_str += "| Position: x:1500 y:1000 theta:0\n"
-    annu_str += "| Actionneur [act_a] Val.: 0 (rien) entre 0 et 1\n"
+    annu_str += "| Act. [act_a] Val.: None (rien) 0 -> 1 (1)\n"
     assert annu.__str__() == annu_str
 
     act_b = annuaire.Actionneur('act_b', 1, 0, 1, "(nope)")
@@ -109,7 +97,7 @@ def test_annuaire():
 
     assert annu.get_robot_eqp_type('robot_a', 'act_a') == annuaire.Actionneur
 
-    assert annu.get_robot_eqp_state('robot_a', 'act_a') == (0, 0, 1)
+    assert annu.get_robot_eqp_state('robot_a', 'act_a') == (None, 0, 1, 1)
 
     assert annu.get_robot_pos('robot_a') == (1500, 1000, 0)
 
