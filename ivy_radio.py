@@ -94,7 +94,7 @@ class Radio :
 
     def on_posreg (self, sender, rid, x, y, theta):
         #A modifier avec l'appel à une méthode qui change l'affichage des données
-        self.backend.annuaire.set_robot_pos (rid, x, y, theta)
+        self.backend.annuaire.set_robot_pos (rid, float (x), float(y), float(theta))
 
     def on_actudecl (self, sender, *args):
         pass
