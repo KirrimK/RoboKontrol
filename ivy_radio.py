@@ -31,6 +31,16 @@ def temps (t):
     return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (i.tm_year, i.tm_mon, i.tm_mday, i.tm_hour, i.tm_min, i.tm_sec)+'{:.3}'.format (t%1)[1:]
 
 class Radio :
+    """Classe de l'objet qui est connecté au channel Ivy
+
+    Attributs :
+    _ backend (backend.Backend) : objet faisant le lien entre l'annuaire et la radio
+    _ cmdsBuffer (list) : Stocke les commandes envoyées sous forme de tuple (timestamp, commande)
+    _ msgsBuffer (list) : Stocke tous les messages sous forme de tuple (timestamp, sender, message)
+    _ record_msgs (bool) : Condition d'enregistrement de tous les messages
+    _ record_cmds (bool) : Condition d'enregistrement des commandes envoyées
+    _ bus (str) : Utile pour faire tourner Ivy
+    _ nom (str) : Stocke l'IVYAPPNAME"""
     def __init__ (self):
         self.backend = None
         self.cmdsBuffer = []
@@ -39,7 +49,7 @@ class Radio :
         self.record_cmds = False
         IvyInit (IVYAPPNAME,IVYAPPNAME+" is ready!")
         self.bus = "127.255.255.255:2010"
-        self.nom = "radio"
+        self.nom = IVYAPPNAME
         IvyBindMsg (self.on_posreg, POS_REG)
         IvyBindMsg (self.on_msg, MSG)
         IvyBindMsg (self.on_captreg, CAPT_REG)
@@ -49,6 +59,8 @@ class Radio :
     #ENREGISTREMENT
 
     def register_start (self, *args):
+        """Change l'attribut record_msgs et/ou record_cmds vers True"""
+        Input : 'all', 'msgs' et/ou 'cmds' (strings)"""
         if 'all' in args :
             args += ('msgs','cmds')
         if 'msgs' in args :
@@ -57,7 +69,9 @@ class Radio :
             self.record_cmds = True
 
     def on_msg (self, sender, message):
-        """Stocke les messages sous forme de tupple dans msgsBuffer si le booléen self.record_msgs est True"""
+        """Input fait par IvyBindMsg ('(.*)')
+        Stocke les messages sous forme de tupple dans msgsBuffer si le booléen self.record_msgs est True
+        Vérifie si l'expéditeur est enregistré et l'enregistre si ce n'est pas fait."""
         if self.record_msgs :
             self.msgsBuffer.append ((time(),sender, message))
         nom_robot = str(sender).split ('@')[0]
@@ -65,6 +79,11 @@ class Radio :
             self.backend.track_robot (nom_robot)
 
     def register_stop (self, save = True, del_buffers = True, *args):
+        """Arrête un enregistrement, supprime optionellemnt le tampon, et le sauvegarde vers un document .txt
+        Input : 
+            _ save (bool) : condition d'enregistrement dans un document texte (True par défaut)
+            _ del_buffers : condition d'effacement du tampon (True par défaut)
+            _ args : autres arguments entrés ('all', 'msgs' et/ou 'cmds' (strings)) considérés comme un tupple"""
         if 'all' in args :
             args += ('msgs','cmds')
         if 'msgs' in args :
@@ -87,13 +106,11 @@ class Radio :
                         fichier.write (temps (ligne[0])+'\t'+str (ligne[1])+'\n')
             if del_buffers :
                 self.cmdsBuffer = []
-            if del_buffers :
-                self.cmdsBuffer = []
-
      #REACTIONS AUX REGEXPS
 
     def on_posreg (self, sender, rid, x, y, theta):
-        #A modifier avec l'appel à une méthode qui change l'affichage des données
+        """Input fait par IvyBindMsg
+        Transmet les valeurs envoyées par le robot vers l'annuaire"""
         self.backend.annuaire.set_robot_pos (rid, float (x), float(y), float(theta))
 
     def on_actudecl (self, sender, *args):
@@ -108,6 +125,8 @@ class Radio :
         pass
 
     def send_cmd (self,cmd):
+        """Envoie du texte vers le bus Ivy et le stocke optionnellement sur les tampons
+        Input : _ cmd (str) : Le message à envoyer"""
         if self.record_cmds :
             self.cmdsBuffer.append ((time(),cmd))
         if self.record_msgs :
@@ -117,9 +136,11 @@ class Radio :
 
     #Autres méthodes très utiles
     def start (self):
+        """Démare la radio"""
         IvyStart (self.bus)
 
     def __exit__(self, *args):
+        """Appelé automatiquement à l'arrêt du programme. Enlève la radio du bus Ivy."""
         IvyStop()
 
 if __name__ == '__main__' :
