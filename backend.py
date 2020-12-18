@@ -10,18 +10,10 @@ class Backend:
     et une Radio (module ivy_radio)"""
 
     def __init__(self, annu=None, radio=None):
-        self.annu = annu
-        self.radio = radio
-        print(self.radio)
-        if self.radio is not None:
-            print("should start")
-            self.radio.backend = self
-            self.radio.start()
-        if self.annu is not None:
-            print("should print")
-            #self.run_print_moche(60)
-            _thread.start_new_thread(self.run_print_console())
-            #attention, bloque le thread si utilisé dans boucle principale
+        if radio is not None:
+            self.attach_radio(radio)
+        if annu is not None:
+            self.attach_annu(annu)
 
     def run_print_console(self):
         """une fonction qui va continuellement afficher l'annuaire dans la console
@@ -41,7 +33,7 @@ class Backend:
         """
         if isinstance(annu, annuaire.Annuaire):
             self.annu = annu
-            _thread.start_new_thread(self.run_print_console(60))
+            _thread.start_new_thread(self.run_print_console())
 
     def attach_radio(self, radio):
         """Attache la radio 'radio' au backend

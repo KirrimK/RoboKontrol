@@ -137,7 +137,7 @@ class Capteur(Equipement):
 
     Nouveaux:
     - valeur (float): valeur du capteur"""
-    def __init__(self, nom, valeur, unite=None):
+    def __init__(self, nom, valeur=0, unite=None):
         super().__init__(nom)
         self.valeur = valeur
         self.unite = unite
