@@ -10,18 +10,10 @@ class Backend:
     et une Radio (module ivy_radio)"""
 
     def __init__(self, annu=None, radio=None):
-        self.annu = annu
-        self.radio = radio
-        print(self.radio)
-        if self.radio is not None:
-            print("should start")
-            self.radio.backend = self
-            self.radio.start()
-        if self.annu is not None:
-            print("should print")
-            #self.run_print_moche(60)
-            _thread.start_new_thread(self.run_print_console())
-            #attention, bloque le thread si utilisé dans boucle principale
+        if radio is not None:
+            self.attach_radio(radio)
+        if annu is not None:
+            self.attach_annu(annu)
 
     def run_print_console(self):
         """une fonction qui va continuellement afficher l'annuaire dans la console
@@ -110,7 +102,8 @@ class Backend:
             - state (variable): l'état souhaité (se reférer au type d'equipement)
         """
         if self.annu.check_robot(robot_name) and self.annu.check_robot_eqp(robot_name, eqp_name):
-            self.annu.set_robot_eqp_state(robot_name, eqp_name, state)
+            self.annu.set_robot_eqp_cmd(robot_name, eqp_name)
+            #rajouter l'envoi du message ici (utilise state)
 
     def getdata_robot(self, robot_name):
         """Renvoie toutes les informations connues sur le robot
