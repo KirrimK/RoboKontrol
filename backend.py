@@ -1,5 +1,7 @@
 """Module backend.py - Gestion jointe de l'annuaire et de la communication par ivy"""
 
+from time import sleep
+import _thread
 import annuaire
 import ivy_radio as rd
 
@@ -7,9 +9,27 @@ class Backend:
     """Un objet faisant le lien entre un Annuaire (module annuaire)
     et une Radio (module ivy_radio)"""
 
-    def __init__(self):
-        self.annu = None
-        self.radio = None
+    def __init__(self, annu=None, radio=None):
+        self.annu = annu
+        self.radio = radio
+        print(self.radio)
+        if self.radio is not None:
+            print("should start")
+            self.radio.start()
+        if self.annu is not None:
+            print("should print")
+            #self.run_print_moche(60)
+            _thread.start_new_thread(self.run_print_console(60))
+            #attention, bloque le thread si utilisé dans boucle principale
+
+    def run_print_console(self, time):
+        """une fonction qui va continuellement afficher l'annuaire dans la console
+        très laide du pdv code, ne pas utiliser sur le long terme"""
+        runned_time = 0
+        while runned_time <= time:
+            sleep(0.2)
+            print(self.annu)
+            runned_time += 0.2
 
     def attach_annu(self, annu):
         """Attache l'annuaire 'annu' au backend
@@ -19,6 +39,7 @@ class Backend:
         """
         if isinstance(annu, annuaire.Annuaire):
             self.annu = annu
+            _thread.start_new_thread(self.run_print_console(60))
 
     def attach_radio(self, radio):
         """Attache la radio 'radio' au backend
@@ -29,6 +50,7 @@ class Backend:
         if isinstance(radio, rd.Radio):
             self.radio = radio
             self.radio.backend = self
+            self.radio.start()
 
     def track_robot(self, robot_name):
         """Invoqué lors de la demande de tracking d'un robot via l'interface graphique,
@@ -122,3 +144,5 @@ class Backend:
         eqp_state = self.annu.get_robot_eqp_state(robot_name, eqp_name)
         eqp_last_updt = self.annu.get_robot_eqp_last_updt(robot_name, eqp_name)
         return eqp_type, eqp_state, eqp_last_updt
+
+back = Backend(annuaire.Annuaire(), rd.Radio())
