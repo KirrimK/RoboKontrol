@@ -1,0 +1,64 @@
+{
+  "Actionneur": [
+    {
+      "type": "BINAIRE",
+      "nom": "Pompe",
+      "valeur": 0,
+      "min_value": 0,
+      "max_value": 1,
+      "info": "",
+      "robot": "[0, 1, 2, 5, 6]"
+
+    },
+    {
+      "type" : "DISCRET",
+      "nom": "Bras",
+      "valeur": 45,
+      "min_value": 0,
+      "max_value": 90,
+      "info": "",
+      "robot": "[0, 2, 3, 4, 6, 7]"
+    },
+    {
+      "type": "MULTIPLE",
+      "nom": "Actionneur3",
+      "valeur": 2,
+      "min_value": 0,
+      "max_value": 4,
+      "info": "[\"etat1\", \"etat2\", \"etat3\", \"etat4\", \"etat5\"]",
+      "robot": "[0,3, 4, 5]"
+    },
+    {
+      "type": "COMPLEXE",
+      "nom": "Actionneur4",
+      "valeur": 0,
+      "min_value": 0,
+      "max_value": 1,
+      "info": "colorchooser.py",
+      "robot": "[0,3, 4, 5, 1 , 4]"
+    }
+  ],
+  "Capteur": [
+    {
+      "nom": "Batterie",
+      "valeur": 12,
+      "unite": "V",
+      "robot": "[0, 1, 2, 5, 6]"
+
+    },
+    {
+      "nom": "Capteur 2",
+      "valeur": 20,
+      "unite": "unité",
+      "robot": "[0, 2, 3, 4, 6, 7]"
+    },
+    {
+      "nom": "Capteur 3",
+      "valeur": 0,
+      "unite": "unité",
+      "robot": "[0,3, 4, 5]"
+
+    }
+  ]
+}
+

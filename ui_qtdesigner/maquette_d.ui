@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1384</width>
-    <height>1271</height>
+    <width>1091</width>
+    <height>782</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,7 +22,7 @@
      <property name="alignment">
       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="layout_menu">
       <item>
        <widget class="QPushButton" name="button_map">
         <property name="maximumSize">
@@ -83,9 +83,15 @@
        <property name="enabled">
         <bool>true</bool>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>350</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
-         <width>450</width>
+         <width>350</width>
          <height>16777215</height>
         </size>
        </property>
@@ -109,11 +115,11 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>429</width>
-          <height>1145</height>
+          <width>333</width>
+          <height>882</height>
          </rect>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
+        <layout class="QVBoxLayout" name="layout_inspector">
          <item>
           <widget class="QPushButton" name="button_add_robot">
            <property name="minimumSize">
@@ -150,7 +156,7 @@
            <property name="checked">
             <bool>false</bool>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_2">
+           <layout class="QVBoxLayout" name="layout_box_robot">
             <item>
              <layout class="QHBoxLayout" name="layout_name_delete">
               <property name="sizeConstraint">
@@ -226,6 +232,9 @@
                 </property>
                 <property name="text">
                  <string>X (mm) :</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -327,7 +336,7 @@
               <property name="flat">
                <bool>true</bool>
               </property>
-              <layout class="QVBoxLayout" name="verticalLayout_5">
+              <layout class="QVBoxLayout" name="layout_box_actuators">
                <item>
                 <layout class="QGridLayout" name="gridLayout_actuator1">
                  <property name="sizeConstraint">
@@ -371,7 +380,7 @@
                    <property name="maximumSize">
                     <size>
                      <width>16777215</width>
-                     <height>50</height>
+                     <height>30</height>
                     </size>
                    </property>
                   </widget>
@@ -379,9 +388,12 @@
                 </layout>
                </item>
                <item>
-                <spacer name="verticalSpacer_12">
+                <spacer name="verticalSpacer_actuators_12">
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Fixed</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -428,7 +440,7 @@
                    <property name="maximumSize">
                     <size>
                      <width>16777215</width>
-                     <height>50</height>
+                     <height>30</height>
                     </size>
                    </property>
                   </widget>
@@ -436,9 +448,12 @@
                 </layout>
                </item>
                <item>
-                <spacer name="verticalSpacer_23">
+                <spacer name="verticalSpacer_actuators_23">
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Fixed</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -493,7 +508,7 @@
                    <property name="maximumSize">
                     <size>
                      <width>16777215</width>
-                     <height>50</height>
+                     <height>30</height>
                     </size>
                    </property>
                   </widget>
@@ -501,9 +516,12 @@
                 </layout>
                </item>
                <item>
-                <spacer name="verticalSpacer_34">
+                <spacer name="verticalSpacer_actuators_34">
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Fixed</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -571,7 +589,7 @@
               <property name="checked">
                <bool>false</bool>
               </property>
-              <layout class="QVBoxLayout" name="verticalLayout_3">
+              <layout class="QVBoxLayout" name="layout_box_sensors">
                <item>
                 <layout class="QGridLayout" name="gridLayout_battery">
                  <item row="0" column="0">
@@ -623,6 +641,9 @@
                 <spacer name="verticalSpacer_2">
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Fixed</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -693,7 +714,7 @@
      <property name="title">
       <string/>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <layout class="QHBoxLayout" name="layout_message_menu">
       <item>
        <widget class="QLabel" name="message_robot1">
         <property name="maximumSize">
