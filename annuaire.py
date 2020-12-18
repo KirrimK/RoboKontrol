@@ -273,16 +273,28 @@ class Robot:
     def set_state_eqp(self, eqp_name, valeur):
         """Change la valeur d'un équipement
 
-        Entrée: dépend du type de l'équipement portant le nom eqp_name
-        > Equipement:
-            - non utilisé, passer None
-        > Capteur:
-            - int (Se référer à Capteur.set_state()
-        > Actionneur:
-            - int (Se référer à Actionneur.set_state()
+        Entrée: 
+            - eqp_name (str): nom de l'équipement
+            - valeur (variable): dépend du type de l'équipement portant le nom eqp_name
+            > Equipement:
+                - non utilisé, passer None
+            > Capteur:
+                - int (Se référer à Capteur.set_state()
+            > Actionneur:
+                - int (Se référer à Actionneur.set_state()
         """
         if self.check_eqp(eqp_name):
             self.equipements[eqp_name].set_state(valeur)
+    
+    def set_cmd_eqp(self, eqp_name):
+        """Met à jour le fait qu'un équipement à recu une commande
+        (Ne fonctionne qu'avec les Actionneur et dérivés)
+
+        Entrée:
+            -eqp_name (str): nom de l'équipement
+        """
+        if self.check_eqp(eqp_name):
+            self.equipements[eqp_name].updt_cmd()
 
     def get_type_eqp(self, eqp_name):
         """Retourne le type d'un équipement
@@ -429,6 +441,16 @@ class Annuaire:
         """
         if self.check_robot(rid):
             self.robots[rid].set_state_eqp(eqp_name, valeur)
+    
+    def set_robot_eqp_cmd(self, rid, eqp_name):
+        """Actualise le timestamp de la dernière commande envoyée à l'actionneur
+        
+        Entrée:
+            - rid (str)
+            - eqp_name (str)
+        """
+        if self.check_robot(rid):
+            self.robots[rid].set_cmd_eqp(eqp_name)
 
     def get_robot_eqp_type(self, rid, eqp_name):
         """Retourne la variété d'un équipement monté sur un robot

@@ -102,7 +102,8 @@ class Backend:
             - state (variable): l'état souhaité (se reférer au type d'equipement)
         """
         if self.annu.check_robot(robot_name) and self.annu.check_robot_eqp(robot_name, eqp_name):
-            self.annu.set_robot_eqp_state(robot_name, eqp_name, state)
+            self.annu.set_robot_eqp_cmd(robot_name, eqp_name)
+            #rajouter l'envoi du message ici (utilise state)
 
     def getdata_robot(self, robot_name):
         """Renvoie toutes les informations connues sur le robot
