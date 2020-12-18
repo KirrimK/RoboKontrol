@@ -16,8 +16,6 @@ class Ui_window(object):
         self.layout_window = QtWidgets.QVBoxLayout(main_window)
 
         self.menu_area = QtWidgets.QGroupBox(main_window)
-        self.menu_area.setTitle("")
-        self.menu_area.setAlignment(QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft)
 
         self.layout_menu = QtWidgets.QHBoxLayout(self.menu_area)
 
@@ -40,7 +38,7 @@ class Ui_window(object):
         self.layout_window.addWidget(self.menu_area)
 
         self.layout_map_inspector = QtWidgets.QHBoxLayout()
-        self.map_view = QtWidgets.QGraphicsView(main_window)
+        self.map_view = QtWidgets.QGraphicsView(main_window)     #TODO: intégrer la map de Jacques
         self.map_view.setMinimumSize(QtCore.QSize(0, 250))
         self.layout_map_inspector.addWidget(self.map_view)
 
@@ -48,7 +46,7 @@ class Ui_window(object):
 
         self.add_robot()
 
-        self.inspector_scroll_area.setWidget(self.scrollAreaWidgetContents)
+        self.inspector_scroll_area.setWidget(self.scrollArea)
         self.layout_map_inspector.addWidget(self.inspector_scroll_area)
         self.layout_window.addLayout(self.layout_map_inspector)
 
@@ -57,8 +55,7 @@ class Ui_window(object):
         self.button_help.clicked.connect(lambda: show_help(main_window))
 
     def add_robot(self):
-        self.boite_robot = inspecteur.BoiteRobot(self.scrollAreaWidgetContents, self.layout_inspector,
-                                                 self.number_robots)
+        self.boite_robot = inspecteur.BoiteRobot(self.scrollArea, self.layout_inspector, self.number_robots)
         self.boite_robot.add_box_robot()
         self.number_robots += 1
 
@@ -70,12 +67,12 @@ class Ui_window(object):
         self.inspector_scroll_area.setMaximumSize(QtCore.QSize(350, 16777215))
         self.inspector_scroll_area.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.inspector_scroll_area.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 333, 882))
-        self.layout_inspector = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
+        self.scrollArea = QtWidgets.QWidget()
+        self.scrollArea.setGeometry(QtCore.QRect(0, 0, 333, 882))
+        self.layout_inspector = QtWidgets.QVBoxLayout(self.scrollArea)
 
         """Crée le QPushButton et l'ajoute à la QScrollBar"""
-        self.button_add_robot = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.button_add_robot = QtWidgets.QPushButton(self.scrollArea)
         self.button_add_robot.setMinimumSize(QtCore.QSize(0, 30))
         self.button_add_robot.setText("Ajouter un robot")
         self.button_add_robot.clicked.connect(lambda: self.add_robot())

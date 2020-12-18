@@ -15,16 +15,7 @@ class BoiteRobot:
         self.robot_number = robot_number
 
         self.groupBox_robot = QtWidgets.QGroupBox(self.parent_widget)
-        self.groupBox_robot.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.groupBox_robot.setAutoFillBackground(True)
-        self.groupBox_robot.setTitle("")
-        self.groupBox_robot.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        self.groupBox_robot.setFlat(False)
-        self.groupBox_robot.setCheckable(False)
-        self.groupBox_robot.setChecked(False)
-
         self.layout_box_robot = QtWidgets.QVBoxLayout(self.groupBox_robot)
-
         self.parent_layout.addWidget(self.groupBox_robot, 0, QtCore.Qt.AlignTop)
 
         self.boites = {}
@@ -36,18 +27,12 @@ class BoiteRobot:
         self.layout_name_delete.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
 
         self.label_name = QtWidgets.QLabel(self.groupBox_robot)
-
         self.label_name.setMinimumSize(QtCore.QSize(0, 30))
         self.label_name.setMaximumSize(QtCore.QSize(100, 30))
         self.label_name.setText("Nom du robot 1")
         self.layout_name_delete.addWidget(self.label_name)
 
         self.button_delete = QtWidgets.QPushButton(self.groupBox_robot)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.button_delete.sizePolicy().hasHeightForWidth())
-        self.button_delete.setSizePolicy(sizePolicy)
         self.button_delete.setMaximumSize(QtCore.QSize(150, 30))
         self.button_delete.setText("Supprimer")
         self.layout_name_delete.addWidget(self.button_delete)
@@ -65,7 +50,7 @@ class BoiteRobot:
         self.label = QtWidgets.QLabel(self.groupBox_robot)
         self.label.setMaximumSize(QtCore.QSize(100, 30))
         self.label.setText('{0} ({1}):'.format(coord, unite))
-        self.label.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        #self.label.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.layout.addWidget(self.label)
         self.lcdNumber = QtWidgets.QLCDNumber(self.groupBox_robot)
         self.lcdNumber.setMaximumSize(QtCore.QSize(50, 25))
@@ -74,20 +59,18 @@ class BoiteRobot:
 
     def create_grid_actionneurs(self):
         self.groupBox_actuator = QtWidgets.QGroupBox(self.groupBox_robot)
-        self.groupBox_actuator.setAlignment(QtCore.Qt.AlignCenter)
+        #self.groupBox_actuator.setAlignment(QtCore.Qt.AlignCenter)
         self.groupBox_actuator.setTitle("Actionneurs")
-
         self.layout_box_actuators = QtWidgets.QVBoxLayout(self.groupBox_actuator)
 
     def create_grid_capteurs(self):
         self.groupBox_sensors = QtWidgets.QGroupBox(self.groupBox_robot)
-        self.groupBox_sensors.setAlignment(QtCore.Qt.AlignCenter)
+        #self.groupBox_sensors.setAlignment(QtCore.Qt.AlignCenter)
         self.groupBox_sensors.setTitle("Capteurs:")
-
         self.layout_box_capteurs = QtWidgets.QVBoxLayout(self.groupBox_sensors)
 
     def add_actuators(self, actionneurs):
-        "Initialise l'ajout des actionneurs à la boite robot sous forme d'un QGridLayout dans une QGroupBox"
+        """Ajoute les actionneurs (QGridLayout) dans la boite actionneurs (QGroupBox)"""
 
         data = actionneurs.copy()
         n = 0
@@ -95,7 +78,7 @@ class BoiteRobot:
 
             actionneur = annuaire.Actionneur(dic['nom'], dic['min_value'], dic['max_value'], unite=dic['unite'])
 
-            actuator_type = dic['type']
+            actuator_type = dic['type']               #TODO : utiliser annuaire
             actuator_value = dic['valeur']
             actuator_info = dic["info"].strip('][').split(', ')
             # list_robot = dic['robot'].strip('][').split(', ')
@@ -135,7 +118,7 @@ class BoiteRobot:
                 self.add_actuator_complexe(actuator_info)
 
     def add_actuator_binaire(self):
-        "Ajoute les actionneurs types binaires"
+        "Crée et ajoute les actionneurs types binaires"
 
         self.checkBox_actuator = QtWidgets.QCheckBox(self.groupBox_actuator)
         self.checkBox_actuator.setText("")
@@ -143,7 +126,7 @@ class BoiteRobot:
                                            QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
 
     def add_actuator_discret(self, value: int, min_value, max_value):
-        "Ajoute les actionneurs types discrets"
+        "Crée et ajoute les actionneurs types discrets"
 
         self.doubleSpinBox_actuator = QtWidgets.QDoubleSpinBox(self.groupBox_actuator)
         self.doubleSpinBox_actuator.setMinimumSize(QtCore.QSize(0, 30))
@@ -153,7 +136,7 @@ class BoiteRobot:
         self.gridLayout_actuator.addWidget(self.doubleSpinBox_actuator, 0, 1, 1, 1)
 
     def add_actuator_multiple(self, list_options, value):
-        "Ajoute les actionneurs types multiples"
+        "Crée et ajoute les actionneurs types multiples"
 
         self.comboBox_actuator = QtWidgets.QComboBox(self.groupBox_actuator)
 
@@ -165,17 +148,16 @@ class BoiteRobot:
         self.gridLayout_actuator.addWidget(self.comboBox_actuator, 0, 1, 1, 1)
 
     def add_actuator_complexe(self, info):
-        """Ajoute les actionneurs types complexes : il s'agit d'un bouton qui peut ouvrir un menu plus détaillée de l'actionneur"""
+        """Crée et ajoute les actionneurs types complexes : il s'agit d'un bouton qui peut ouvrir un menu plus détaillée de l'actionneur"""
 
         self.pushButton_actuator = QtWidgets.QPushButton(self.groupBox_actuator)
         self.pushButton_actuator.setText(info[0])
         self.gridLayout_actuator.addWidget(self.pushButton_actuator, 0, 1, 1, 1)
 
     def add_capteurs(self, capteurs):
-
-        data = capteurs.copy()
+        capteurs = capteurs.copy()
         n = 0
-        for d in data:
+        for d in capteurs:
 
             capteur = annuaire.Capteur(d['nom'], d['valeur'], d['unite'])
 
@@ -218,8 +200,8 @@ class BoiteRobot:
 
         self.create_position()
         self.create_grid_actionneurs()
-        self.add_actuators(actionneurs)
         self.create_grid_capteurs()
+        self.add_actuators(actionneurs)
         self.add_capteurs(capteurs)
 
         self.layout_box_robot.addWidget(self.groupBox_sensors, 0, QtCore.Qt.AlignTop)
@@ -247,9 +229,9 @@ def load_fichier(fichier):
     actionneurs, capteurs = [], []
     with open(fichier, encoding='utf-8') as f:
         data = json.load(f)
-    for dic in data["Actionneur"]:
+    for dic in data["Actionneurs"]:
         actionneurs.append(dic)
-    for dic in data["Capteur"]:
+    for dic in data["Capteurs"]:
         capteurs.append(dic)
     return actionneurs, capteurs
 

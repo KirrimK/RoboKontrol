@@ -1,5 +1,5 @@
 {
-  "Actionneur": [
+  "Actionneurs": [
     {
       "type": "BINAIRE",
       "nom": "Pompe",
@@ -42,7 +42,7 @@
       "robot": "[0,3, 4, 1 , 4]"
     }
   ],
-  "Capteur": [
+  "Capteurs": [
     {
       "nom": "Batterie",
       "valeur": 12,
