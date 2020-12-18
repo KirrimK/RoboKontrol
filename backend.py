@@ -101,13 +101,13 @@ class Backend:
             - eqp_name (str): nom de l'équipement
             - state (variable): l'état souhaité (se reférer au type d'equipement)
         """
-        if self.annu.check_robot(robot_name) and self.annu.check_robot_eqp(robot_name, eqp_name):
-            self.annu.set_robot_eqp_cmd(robot_name, eqp_name)
+        if self.annu.find(robot_name) and self.annu.find(robot_name, eqp_name):
+            self.annu.find(robot_name, eqp_name).updt_cmd()
             #rajouter l'envoi du message ici (utilise state)
 
     def get_all_robots(self):
         """Retourne la liste de tous les noms des robots
-        
+
         Sortie:
             - list of (str): les noms des robots
         """
@@ -124,10 +124,10 @@ class Backend:
             - eqps (list of str): liste des noms des équipements attachés au robot
             - last_updt_pos (float): le timestamp de dernière mise à jour de la position
         """
-        pos = self.annu.get_robot_pos(robot_name)
-        eqps = self.annu.get_robot_all_eqp(robot_name)
-        last_updt_pos = self.annu.get_robot_last_updt_pos(robot_name)
-        return pos, eqps, last_updt_pos
+        rbt = self.annu.find(robot_name)
+        pos = rbt.get_pos()
+        eqps = rbt.get_all_eqp()
+        return pos, eqps, rbt.last_updt_pos
 
     def getdata_eqp(self, robot_name, eqp_name):
         """Renvoie toutes les informations sur un équipement
@@ -143,11 +143,12 @@ class Backend:
             - eqp_last_updt (variable): l'état actuel de l'équipement
                 (se référer à l'équipement en question)
         """
-        eqp_type = self.annu.get_robot_eqp_type(robot_name, eqp_name)
-        eqp_state = self.annu.get_robot_eqp_state(robot_name, eqp_name)
-        eqp_last_updt = self.annu.get_robot_eqp_last_updt(robot_name, eqp_name)
+        eqp = self.annu.find(robot_name, eqp_name)
+        eqp_type = eqp.get_type()
+        eqp_state = eqp.get_state()
+        eqp_last_updt = eqp.get_last_updt()
         if eqp_type == annuaire.Actionneur or eqp_type == annuaire.Binaire:
-            eqp_last_cmd = self.annu.get_robot_eqp_cmd(robot_name, eqp_name)
+            eqp_last_cmd = eqp.get_last_cmd()
         else:
             eqp_last_cmd = None
         return eqp_type, eqp_state, eqp_last_updt, eqp_last_cmd

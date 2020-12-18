@@ -53,6 +53,10 @@ class Equipement:
         """
         return self.last_updt
 
+    def get_type(self):
+        """Retourne le type de l'équipement"""
+        return type(self)
+
 class Actionneur(Equipement):
     """Définit un actionneur basique attaché à un robot,
     dont les commandes peuvent prendre une valeur (int) entre max et min (int),
@@ -231,6 +235,40 @@ class Robot:
         """
         return eqp_name in self.get_all_eqp()
 
+    def create_eqp(self, eqp_name, eqp_type, *args):
+        """Crée un nouvel équipement, et l'ajoute au robot
+        (sans avoir besoin de manipuler des objets Equipement
+
+        Entrée:
+            - eqp_name (str)
+            - eqp_type (str): le type d'équipement,
+            à choisir en inscrivant la chaine de caractère du nom de classe associé:
+                'Equipement' / 'Actionneur' / 'Binaire' / 'Capteur'
+            - args (tuple): tous les autres arguments liés à la création des eqps
+                si actionneur: (min, max, step (, unit))
+                si capteur: (unit)
+        """
+        eqp = None
+        if eqp_type == "Equipement":
+            eqp = Equipement(eqp_name)
+        elif eqp_type == "Actionneur":
+            min_v = args[0]
+            max_v = args[1]
+            step = args[2]
+            if len(args) == 4:
+                unit = args[3]
+            else:
+                unit = None
+            eqp = Actionneur(eqp_name, min_v, max_v, step, unit)
+        elif eqp_type == "Binaire":
+            eqp = Binaire(eqp_name)
+        elif eqp_type == "Capteur":
+            unit = args[0]
+            eqp = Capteur(eqp_name, unite=unit)
+
+        if eqp is not None:
+            self.updt_eqp(eqp)
+
     def updt_eqp(self, equipement):
         """Ajoute/met à jour un actionneur du robot
 
@@ -253,88 +291,20 @@ class Robot:
         - list of (str): liste des noms des équipements"""
         return list(self.equipements.keys())
 
-    def get_state_eqp(self, eqp_name):
-        """Retourne la valeur d'un équipement (et autres informations le cas échéant)
-
-        Sortie: dépend du type de l'équipement portant le nom eqp_name
-
-        > Equipement:
-        - None
-
-        > Capteur:
-        - int (Se référer à Capteur.get_state())
-
-        > Actionneur:
-        - (float|None, float, float, float) (Se référer à Actionneur.get_state())
-
-        """
-        return self.equipements[eqp_name].get_state()
-
-    def set_state_eqp(self, eqp_name, valeur):
-        """Change la valeur d'un équipement
+    def find(self, eqp_name):
+        """Trouve un Equipement (ou dérivé) attaché au robot par son nom,
+        et le renvoie:
 
         Entrée:
             - eqp_name (str): nom de l'équipement
-            - valeur (variable): dépend du type de l'équipement portant le nom eqp_name
-            > Equipement:
-                - non utilisé, passer None
-            > Capteur:
-                - int (Se référer à Capteur.set_state()
-            > Actionneur:
-                - int (Se référer à Actionneur.set_state()
-        """
-        if self.check_eqp(eqp_name):
-            self.equipements[eqp_name].set_state(valeur)
-
-    def set_cmd_eqp(self, eqp_name):
-        """Met à jour le fait qu'un équipement à recu une commande
-        (Ne fonctionne qu'avec les Actionneur et dérivés)
-
-        Entrée:
-            -eqp_name (str): nom de l'équipement
-        """
-        if self.check_eqp(eqp_name):
-            self.equipements[eqp_name].updt_cmd()
-
-    def get_type_eqp(self, eqp_name):
-        """Retourne le type d'un équipement
 
         Sortie:
-        - type (Type)"""
-        if self.check_eqp(eqp_name):
-            return type(self.equipements[eqp_name])
-        return None
-
-    def get_unit_eqp(self, eqp_name):
-        """Retourne l'unité d'un équipement
-
-        Sortie:
-        - unite (str)"""
-        return self.equipements[eqp_name].get_unit()
-
-    def get_last_updt_pos(self):
-        """Retourne la dernière mise à jour de la position
-
-        Sortie:
-            - last_updt_pos (float)
+            - Equipement (ou dérivé) | None
         """
-        return self.last_updt_pos
-
-    def get_last_updt_eqp(self, eqp_name):
-        """Retourne la dernière mise à jour de la position
-
-        Sortie:
-            - last_updt_pos (float)
-        """
-        return self.equipements[eqp_name].get_last_updt()
-    
-    def get_last_cmd_eqp(self, eqp_name):
-        """Retourne la dernière mise à jour de la commande
-
-        Sortie:
-            - last_updt_cmd (float)
-        """
-        return self.equipements[eqp_name].get_last_cmd()
+        if eqp_name in self.equipements:
+            return self.equipements[eqp_name]
+        else:
+            return None
 
 class Annuaire:
     """Classe définissant un espace ou toutes les informations sur les robots trackés
@@ -376,140 +346,23 @@ class Annuaire:
         """
         self.robots.pop(rid, None)
 
-    def get_robot_pos(self, rid):
-        """Récupère la position d'un robot stocké dans l'annuaire
+    def find(self, robot_name, eqp_name=None):
+        """Retourne l'objet Robot identifié par robot_name,
+        ou l'equipement désigné par eqp_name qui y est rattaché (si mentionné)
 
         Entrée:
-        - rid (str)
-
-        Sortie:
-        - (float, float, float)
-            - [0]: x
-            - [1]: y
-            - [2]: theta
-        """
-        if self.check_robot(rid):
-            return self.robots[rid].get_pos()
-        return None
-
-    def set_robot_pos(self, rid, x, y, theta):
-        """Met à jour la position d'un robot dans l'annuaire
-
-        Entrée:
-        - rid (str)
-        - x (float)
-        - y (float)
-        - theta (float)
-        """
-        if self.check_robot(rid):
-            self.robots[rid].set_pos(x, y, theta)
-
-    def updt_robot_eqp(self, rid, equipement):
-        """Ajoute/met à jour la disposition d'un équipement
-        sur un robot présent dans l'annuaire (ne pas utiliser pour mettre la valeur à jour)
-
-        Entrée:
-        - rid (str)
-        - equipement (Equipement)
-        """
-        if self.check_robot(rid):
-            self.robots[rid].updt_eqp(equipement)
-
-    def remove_robot_eqp(self, rid, eqp_name):
-        """Enlève un équipement repéré par son nom d'un robot présent dans l'annuaire
-
-        Entrée:
-        - rid (str)
-        - eqp_name (str)
-        """
-        if self.check_robot(rid):
-            self.robots[rid].remove_eqp(eqp_name)
-
-    def get_robot_eqp_state(self, rid, eqp_name):
-        """Retourne l'état et les possibles d'un équipement
-        monté sur un robot dans l'annuaire
-
-        Entrée:
-        - rid (str)
-        - eqp_name (str)
-
-        Sortie:
-            (Se référer à Robot.get_state_eqp())"""
-        if self.check_robot(rid):
-            return self.robots[rid].get_state_eqp(eqp_name)
-        return None
-
-    def set_robot_eqp_state(self, rid, eqp_name, valeur):
-        """Change l'état d'un équipement monté sur un robot
-
-        Entrée:
-        - rid (str)
-        - eqp_name (str)
-        - valeur (Se référer à Robot.set_state_eqp())
-        """
-        if self.check_robot(rid):
-            self.robots[rid].set_state_eqp(eqp_name, valeur)
-
-    def set_robot_eqp_cmd(self, rid, eqp_name):
-        """Actualise le timestamp de la dernière commande envoyée à l'actionneur
-
-        Entrée:
-            - rid (str)
+            - robot_name (str)
             - eqp_name (str)
-        """
-        if self.check_robot(rid):
-            self.robots[rid].set_cmd_eqp(eqp_name)
-    
-    def get_robot_eqp_cmd(self, rid, eqp_name):
-        """Retourne le timestamp de la derniere commande envoyée à l'actionneur
-        
-        Entrée:
-            - rid (str)
-            - eqp_name (str)
-        Sortie:
-            - float
-        """
-        if self.check_robot(rid):
-            self.robots[rid].get_last_cmd_eqp(eqp_name)
-
-    def get_robot_eqp_type(self, rid, eqp_name):
-        """Retourne la variété d'un équipement monté sur un robot
-
-        Entrée:
-        - rid (str)
-        - eqp_name (str)
 
         Sortie:
-        - (Se référer à Robot.get_type_eqp())
+            - Robot | Equipement (ou dérivé)
         """
-        if self.check_robot(rid):
-            return self.robots[rid].get_type_eqp(eqp_name)
-        return None
-
-    def get_robot_eqp_unit(self, rid, eqp_name):
-        """Retourne l'unité d'un équipement monté sur un robot
-
-        Entrée:
-        - rid (str)
-        - eqp_name (str)
-
-        Sortie:
-        - (Se référer à Robot.get_unit_eqp())
-        """
-        if self.check_robot(rid):
-            return self.robots[rid].get_unit_eqp(eqp_name)
-        return None
-
-    def get_robot_all_eqp(self, rid):
-        """Retourne la liste de tous les équipements d'un robot
-
-        Entrée:
-        - rid (str)
-
-        Sortie:
-        - (Se réferer à Robot.get_all_eqp())
-        """
-        return self.robots[rid].get_all_eqp()
+        if eqp_name is None and robot_name in self.robots:
+            return self.robots[robot_name]
+        if eqp_name is not None and robot_name in self.robots:
+            return self.find(robot_name).find(eqp_name)
+        else:
+            return None
 
     def get_all_robots(self):
         """Retourne la liste de tous les robotids des robots présents dans l'annuaire
@@ -518,62 +371,5 @@ class Annuaire:
         - list of (str)
         """
         return list(self.robots.keys())
-
-    def check_robot_eqp(self, robot_name, eqp_name):
-        """Vérifie si un équipement est présent sur un robot
-
-        Entrée:
-            - robot_name (str): nom du robot
-            - eqp_name (str): nom de l'équipement
-        Sortie:
-            - bool
-        """
-        if self.check_robot(robot_name):
-            return self.robots[robot_name].check_eqp(eqp_name)
-        return False
-
-    def get_robot_eqp_last_updt(self, robot_name, eqp_name):
-        """Retourne le timestamp de la dernière mise à jour de l'équipement"""
-        if self.check_robot_eqp(robot_name, eqp_name):
-            return self.robots[robot_name].get_last_updt_eqp()
-
-    def get_robot_last_updt_pos(self, robot_name):
-        """Retourne le timestamp de la dernière mise à jour de positions"""
-        if self.check_robot(robot_name):
-            return self.robots[robot_name].get_last_updt_pos()
-
-    def robot_create_eqp(self, robot_name, eqp_name, eqp_type, *args):
-        """Crée un nouvel équipement sur un robot
-
-        Entrée:
-            - rid (str)
-            - eqp_name (str)
-            - eqp_type (str): le type d'équipement,
-            à choisir en inscrivant la chaine de caractère du nom de classe associé:
-                'Equipement' / 'Actionneur' / 'Binaire' / 'Capteur'
-            - args (Any): tous les autres arguments liés à la création des eqps
-                si actionneur: (min, max, step (, unit))
-                si capteur: (unit)
-        """
-        eqp = None
-        if eqp_type == "Equipement":
-            eqp = Equipement(eqp_name)
-        elif eqp_type == "Actionneur":
-            min_v = args[0]
-            max_v = args[1]
-            step = args[2]
-            if len(args) == 4:
-                unit = args[3]
-            else:
-                unit = None
-            eqp = Actionneur(eqp_name, min_v, max_v, step, unit)
-        elif eqp_type == "Binaire":
-            eqp = Binaire(eqp_name)
-        elif eqp_type == "Capteur":
-            unit = args[0]
-            eqp = Capteur(eqp_name, unite=unit)
-
-        if self.check_robot(robot_name) and eqp is not None:
-            self.robots[robot_name].updt_eqp(eqp)
 
 #TODO: ajouter plus de features recommandées
