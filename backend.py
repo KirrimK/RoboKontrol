@@ -1,7 +1,6 @@
 """Module backend.py - Gestion jointe de l'annuaire et de la communication par ivy"""
 
 from time import sleep
-import _thread
 import annuaire
 import ivy_radio as rd
 
