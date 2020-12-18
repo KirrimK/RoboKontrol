@@ -15,23 +15,40 @@ class Backend:
         - flag (bool, default = False)
     """
 
-    def __init__(self, annu=None, radio=None, flag=False):
+    def __init__(self, annu=None, radio=None, print_flag=False):
+        self.runs = False
+        self.print_flag = print_flag
+        self.runned_time = 0
         if radio is not None:
             self.attach_radio(radio)
         if annu is not None:
-            self.attach_annu(annu, flag)
+            self.attach_annu(annu)
 
-    def run_print_console(self):
-        """une fonction qui va continuellement afficher l'annuaire dans la console
-        très laide du pdv code, ne pas utiliser sur le long terme"""
-        runned_time = 0
-        while True:
-            sleep(0.05)
-            print(str(runned_time)[:6]+'s')
-            print(self.annu)
-            runned_time += 0.05
+    def __enter__(self):
+        self.runs = True
+        return self
 
-    def attach_annu(self, annu, flag):
+    def __exit__(self, t, value, traceback):
+        self.radio.stop()
+        print("\nBackend Arrêté. Temps d'exécution: "+str(self.runned_time)[:6]+"s.")
+
+    def run(self):
+        """Connecte le backend à Ivy et débute la récupération des données"""
+        if self.radio and self.annu:
+            self.radio.start()
+            while self.runs:
+                if self.print_flag:
+                    print(str(self.runned_time)[:6]+'s')
+                    print(self.annu)
+                try:
+                    sleep(0.05)
+                except KeyboardInterrupt:
+                    self.runs = False
+                self.runned_time += 0.05
+        else:
+            print("Il faut connecter une radio ET un annuaire pour faire marcher le backend.")
+
+    def attach_annu(self, annu):
         """Attache l'annuaire 'annu' au backend
 
         Entrée:
@@ -40,8 +57,6 @@ class Backend:
         """
         if isinstance(annu, annuaire.Annuaire):
             self.annu = annu
-            if flag:
-                _thread.start_new_thread(self.run_print_console())
 
     def attach_radio(self, radio):
         """Attache la radio 'radio' au backend
@@ -52,7 +67,6 @@ class Backend:
         if isinstance(radio, rd.Radio):
             self.radio = radio
             self.radio.backend = self
-            self.radio.start()
 
     def track_robot(self, robot_name):
         """Invoqué lors de la demande de tracking d'un robot via l'interface graphique,
@@ -162,4 +176,5 @@ class Backend:
         return eqp_type, eqp_state, eqp_last_updt, eqp_last_cmd
 
 if __name__ == '__main__':
-    backend = Backend(annuaire.Annuaire(), rd.Radio(), True)
+    with Backend(annuaire.Annuaire(), rd.Radio(), True) as backend:
+        backend.run()
