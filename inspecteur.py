@@ -2,6 +2,7 @@
 
 from PyQt5 import QtWidgets, QtCore
 import json
+import annuaire
 
 ACTIONNEURS_CAPTEURS_FILES = "actionneurs_capteurs.json"
 
@@ -23,10 +24,6 @@ class BoiteRobot:
         self.groupBox_robot.setChecked(False)
 
         self.layout_box_robot = QtWidgets.QVBoxLayout(self.groupBox_robot)
-
-
-
-
 
         self.parent_layout.addWidget(self.groupBox_robot, 0, QtCore.Qt.AlignTop)
 
@@ -89,8 +86,6 @@ class BoiteRobot:
 
         self.layout_box_capteurs = QtWidgets.QVBoxLayout(self.groupBox_sensors)
 
-
-
     def add_actuators(self, actionneurs):
         "Initialise l'ajout des actionneurs à la boite robot sous forme d'un QGridLayout dans une QGroupBox"
 
@@ -98,11 +93,10 @@ class BoiteRobot:
         n = 0
         for dic in data:
 
-            actuator_name = dic['nom']
+            actionneur = annuaire.Actionneur(dic['nom'], dic['min_value'], dic['max_value'], unite=dic['unite'])
+
             actuator_type = dic['type']
             actuator_value = dic['valeur']
-            actuator_min = dic['min_value']
-            actuator_max = dic['max_value']
             actuator_info = dic["info"].strip('][').split(', ')
             # list_robot = dic['robot'].strip('][').split(', ')
 
@@ -110,12 +104,13 @@ class BoiteRobot:
                 spacerItem_actuators = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
                                                              QtWidgets.QSizePolicy.Fixed)
                 self.layout_box_actuators.addItem(spacerItem_actuators)
-            n+=1
+            n += 1
 
             self.gridLayout_actuator = QtWidgets.QGridLayout()
 
             self.label_name_actuator = QtWidgets.QLabel(self.groupBox_actuator)
-            self.label_name_actuator.setText(actuator_name)
+            if actionneur.unite != "":
+                self.label_name_actuator.setText("{0} ({1})".format(actionneur.nom, actionneur.unite))
             self.gridLayout_actuator.addWidget(self.label_name_actuator, 0, 0, 1, 1)
 
             self.label_command_actuator = QtWidgets.QLabel(self.groupBox_actuator)
@@ -131,7 +126,7 @@ class BoiteRobot:
                 self.add_actuator_binaire()
 
             if actuator_type == "DISCRET":
-                self.add_actuator_discret(actuator_value, actuator_min, actuator_max)
+                self.add_actuator_discret(actuator_value, actionneur.min_val, actionneur.max_val)
 
             if actuator_type == "MULTIPLE":
                 self.add_actuator_multiple(actuator_info, actuator_value)
@@ -176,28 +171,26 @@ class BoiteRobot:
         self.pushButton_actuator.setText(info[0])
         self.gridLayout_actuator.addWidget(self.pushButton_actuator, 0, 1, 1, 1)
 
-
-    def add_capteurs(self,capteurs):
+    def add_capteurs(self, capteurs):
 
         data = capteurs.copy()
-        n=0
-        for dic in data:
+        n = 0
+        for d in data:
 
-            nom = dic['nom']
-            valeur = dic['valeur']
-            unite = dic['unite']
-            if n!=0:
+            capteur = annuaire.Capteur(d['nom'], d['valeur'], d['unite'])
+
+            if n != 0:
                 spacerItem_actuators = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
                                                              QtWidgets.QSizePolicy.Fixed)
                 self.layout_box_capteurs.addItem(spacerItem_actuators)
-            n+=1
+            n += 1
 
             self.gridLayout_capteur = QtWidgets.QGridLayout()
 
             self.label_nom_capteur = QtWidgets.QLabel(self.groupBox_sensors)
             self.label_nom_capteur.setMinimumSize(QtCore.QSize(0, 30))
             self.label_nom_capteur.setMaximumSize(QtCore.QSize(100, 30))
-            self.label_nom_capteur.setText('{0} ({1}):'.format(nom, unite))
+            self.label_nom_capteur.setText('{0} ({1}):'.format(capteur.nom, capteur.unite))
             self.gridLayout_capteur.addWidget(self.label_nom_capteur, 0, 0, 1, 1)
 
             self.label_message_capteur = QtWidgets.QLabel(self.groupBox_sensors)
@@ -206,12 +199,12 @@ class BoiteRobot:
 
             self.lcdNumber_message_capteur = QtWidgets.QLCDNumber(self.groupBox_sensors)
             self.lcdNumber_message_capteur.setMaximumSize(QtCore.QSize(50, 25))
-            self.gridLayout_capteur.addWidget(self.lcdNumber_message_capteur,1,1,1,1)
+            self.gridLayout_capteur.addWidget(self.lcdNumber_message_capteur, 1, 1, 1, 1)
 
-            if nom == "Batterie":
+            if capteur.nom == "Batterie":
 
                 self.progressBar = QtWidgets.QProgressBar(self.groupBox_sensors)
-                self.progressBar.setProperty(str(valeur), 24)
+                self.progressBar.setProperty(str(capteur.valeur), 24)
                 self.gridLayout_capteur.addWidget(self.progressBar, 0, 1, 1, 1)
 
             else:
@@ -224,13 +217,9 @@ class BoiteRobot:
         """Permet l'ajout d'une boite robot"""
 
         self.create_position()
-
         self.create_grid_actionneurs()
-
         self.add_actuators(actionneurs)
-
         self.create_grid_capteurs()
-
         self.add_capteurs(capteurs)
 
         self.layout_box_robot.addWidget(self.groupBox_sensors, 0, QtCore.Qt.AlignTop)
@@ -242,8 +231,6 @@ class BoiteRobot:
     def remove_box_robot(self, number_delete):
         """Permet la suppression de la boite robot dont le numéro est placé en paramètre"""
         self.boites[number_delete][0].hide()
-
-
 
 
 def load_fichier(fichier):
@@ -258,7 +245,7 @@ def load_fichier(fichier):
         sous la forme d'une liste de dictionnaires"""
 
     actionneurs, capteurs = [], []
-    with open(fichier) as f:
+    with open(fichier, encoding='utf-8') as f:
         data = json.load(f)
     for dic in data["Actionneur"]:
         actionneurs.append(dic)
