@@ -8,8 +8,8 @@ IVYAPPNAME = 'Radio'
 	#Informations
 """Le premier groupe de capture est le nom du robot"""
 #DESCR_REG = 'Description (.+) (.*)'
-SENS_DECL = "SensorDecl (.+) (.+) (.*)"
-ACTU_DECL = 'ActuatorDecl (.*) (.*) (.*) (.*) (.*)'
+CAPT_DECL = "CaptDecl (.+) (.+) (.*)"
+ACTU_DECL = 'ActuatorDecl (.*) (.*) (.*) (.*) (.*) (.*)'
 POS_REG = 'PosReport (.+) (.+);(.+);(.+)'
 CAPT_REG = 'CaptReport (.+) (.+) (.+)'
 
@@ -56,7 +56,7 @@ class Radio :
         IvyBindMsg (self.on_captreg, CAPT_REG)
         #IvyBindMsg (self.on_descrreg, DESCR_REG)
         IvyBindMsg (self.on_actudecl, ACTU_DECL)
-        IvyBindMsg (self.on_sensdecl, SENS_DECL)
+        IvyBindMsg (self.on_captdecl, CAPT_DECL)
 
     #ENREGISTREMENT
 
@@ -124,19 +124,20 @@ class Radio :
             
 
     def on_captreg (self, sender, rid, sid, valeur):
+        print ('CaptReg reconnue')
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
-            if not self.backend.annu.find (rid).check_eqp ():
+            if not self.backend.annu.find (rid).check_eqp (sid):
                 self.backend.annu.find (rid).create_eqp (sid, "Capteur", None)
             self.backend.annu.find (rid,sid).set_state (float (valeur))
             
 
-    def on_sensdecl (self, sender, rid, sid):
+    def on_captdecl (self, sender, rid, sid, unit= None):
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
-            self.backend.annu.find (rid).create_eqp (sid, "Capteur")
+            self.backend.annu.find (rid).create_eqp (sid, "Capteur", unit)
             
         
     def on_descrreg (self, sender, *args):
@@ -167,14 +168,6 @@ if __name__ == '__main__' :
     Radio1 = Radio ()
     Radio1.start()
     #Actual tests :
-    Radio1.register_start ('all')
-    sleep (1)
-    Radio1.send_cmd ("PosCmd test 0,1000")
-    sleep (5)
-    Radio1.send_cmd ("PosCmd test 1000,1500")
-    sleep (5)
-    Radio1.send_cmd ("PosCmd test 1500,1000")
-    sleep (5)
-    Radio1.register_stop (True, True, 'all')
-    Radio1.stop ()
+    
     #End tests
+    Radio1.stop ()
