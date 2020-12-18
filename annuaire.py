@@ -273,7 +273,7 @@ class Robot:
     def set_state_eqp(self, eqp_name, valeur):
         """Change la valeur d'un équipement
 
-        Entrée: 
+        Entrée:
             - eqp_name (str): nom de l'équipement
             - valeur (variable): dépend du type de l'équipement portant le nom eqp_name
             > Equipement:
@@ -285,7 +285,7 @@ class Robot:
         """
         if self.check_eqp(eqp_name):
             self.equipements[eqp_name].set_state(valeur)
-    
+
     def set_cmd_eqp(self, eqp_name):
         """Met à jour le fait qu'un équipement à recu une commande
         (Ne fonctionne qu'avec les Actionneur et dérivés)
@@ -441,10 +441,10 @@ class Annuaire:
         """
         if self.check_robot(rid):
             self.robots[rid].set_state_eqp(eqp_name, valeur)
-    
+
     def set_robot_eqp_cmd(self, rid, eqp_name):
         """Actualise le timestamp de la dernière commande envoyée à l'actionneur
-        
+
         Entrée:
             - rid (str)
             - eqp_name (str)
@@ -521,5 +521,39 @@ class Annuaire:
         """Retourne le timestamp de la dernière mise à jour de positions"""
         if self.check_robot(robot_name):
             return self.robots[robot_name].get_last_updt_pos()
+
+    def robot_create_eqp(self, robot_name, eqp_name, eqp_type, *args):
+        """Crée un nouvel équipement sur un robot
+
+        Entrée:
+            - rid (str)
+            - eqp_name (str)
+            - eqp_type (str): le type d'équipement,
+            à choisir en inscrivant la chaine de caractère du nom de classe associé:
+                'Equipement' / 'Actionneur' / 'Binaire' / 'Capteur'
+            - args (Any): tous les autres arguments liés à la création des eqps
+                si actionneur: (min, max, step (, unit))
+                si capteur: (unit)
+        """
+        eqp = None
+        if eqp_type == "Equipement":
+            eqp = Equipement(eqp_name)
+        elif eqp_type == "Actionneur":
+            min_v = args[0]
+            max_v = args[1]
+            step = args[2]
+            if len(args) == 4:
+                unit = args[3]
+            else:
+                unit = None
+            eqp = Actionneur(eqp_name, min_v, max_v, step, unit)
+        elif eqp_type == "Binaire":
+            eqp = Binaire(eqp_name)
+        elif eqp_type == "Capteur":
+            unit = args[0]
+            eqp = Capteur(eqp_name, unite=unit)
+
+        if self.check_robot(robot_name) and eqp is not None:
+            self.robots[robot_name].updt_eqp(eqp)
 
 #TODO: ajouter plus de features recommandées
