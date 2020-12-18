@@ -41,7 +41,7 @@ class Backend:
         """
         if isinstance(annu, annuaire.Annuaire):
             self.annu = annu
-            _thread.start_new_thread(self.run_print_console(60))
+            _thread.start_new_thread(self.run_print_console())
 
     def attach_radio(self, radio):
         """Attache la radio 'radio' au backend
