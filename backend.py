@@ -124,7 +124,7 @@ class Backend:
         """
         if self.annu.find(robot_name) and self.annu.find(robot_name, eqp_name):
             self.annu.find(robot_name, eqp_name).updt_cmd()
-            #rajouter l'envoi du message ici (utilise state)
+            self.radio.send_cmd (rd.ACTUATOR_CMD.format (robot_name, eqp_name, state))
 
     def get_all_robots(self):
         """Retourne la liste de tous les noms des robots
