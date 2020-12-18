@@ -1,6 +1,6 @@
 """Module ivy_radio.py - module de gestion des communications via Ivy-python"""
 
-from time import sleep, time, gmtime, struct_time
+from time import sleep, time, gmtime
 from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
 
 IVYAPPNAME = 'Radio'
@@ -8,9 +8,10 @@ IVYAPPNAME = 'Radio'
 	#Informations
 """Le premier groupe de capture est le nom du robot"""
 #DESCR_REG = 'Description (.+) (.*)'
+SENS_DECL = "SensorDecl (.+) (.+) (.*)"
 ACTU_DECL = 'ActuatorDecl (.*) (.*) (.*) (.*) (.*)'
 POS_REG = 'PosReport (.+) (.+);(.+);(.+)'
-CAPT_REG = 'CaptReport (.+) (.*)'
+CAPT_REG = 'CaptReport (.+) (.+) (.+)'
 
 	#Commands
 """Le premier argument sera le nom du robot"""
@@ -28,7 +29,7 @@ def temps (t):
 
     Output : a formated string that gives a more explicit time than t"""
     i = gmtime(t)
-    return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (i.tm_year, i.tm_mon, i.tm_mday, i.tm_hour, i.tm_min, i.tm_sec)+'{:.3}'.format (t%1)[1:]
+    return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (i.tm_year, i.tm_mon, i.tm_mday, i.tm_hour+1, i.tm_min, i.tm_sec)+'{:.3}'.format (t%1)[1:]
 
 class Radio :
     """Classe de l'objet qui est connecté au channel Ivy
@@ -55,6 +56,7 @@ class Radio :
         IvyBindMsg (self.on_captreg, CAPT_REG)
         #IvyBindMsg (self.on_descrreg, DESCR_REG)
         IvyBindMsg (self.on_actudecl, ACTU_DECL)
+        IvyBindMsg (self.on_sensdecl, SENS_DECL)
 
     #ENREGISTREMENT
 
@@ -73,10 +75,7 @@ class Radio :
         Stocke les messages sous forme de tupple dans msgsBuffer si le booléen self.record_msgs est True
         Vérifie si l'expéditeur est enregistré et l'enregistre si ce n'est pas fait."""
         if self.record_msgs :
-            self.msgsBuffer.append ((time(),sender, message))
-        nom_robot = sender.split ('@')[0]
-        if not self.backend.annuaire.check_robot (nom_robot):
-            self.backend.track_robot (nom_robot)
+            self.msgsBuffer.append ((time(),str(sender), message))
 
     def register_stop (self, save = True, del_buffers = True, *args):
         """Arrête un enregistrement, supprime optionellemnt le tampon, et le sauvegarde vers un document .txt
@@ -111,15 +110,35 @@ class Radio :
     def on_posreg (self, sender, rid, x, y, theta):
         """Input fait par IvyBindMsg
         Transmet les valeurs envoyées par le robot vers l'annuaire"""
-        self.backend.annuaire.set_robot_pos (rid, float (x), float(y), float(theta))
+        if self.backend is not None:
+            if not self.backend.annu.check_robot (rid):
+                self.backend.track_robot (rid)
+            self.backend.annu.find (rid).set_pos (float (x), float(y), float(theta))
+            
+                
+    def on_actudecl (self, sender, rid, aid, minV, maxV, step = 1, unit = None):
+        if self.backend is not None:
+            if not self.backend.annu.check_robot (rid):
+                self.backend.track_robot (rid)
+            self.backend.annu.find (rid).create_eqp (aid, "Actionneur", float(minV), float(maxV), float(step), unit)
+            
 
-    def on_actudecl (self, sender, *args):
-        pass
+    def on_captreg (self, sender, rid, sid, valeur):
+        if self.backend is not None:
+            if not self.backend.annu.check_robot (rid):
+                self.backend.track_robot (rid)
+            if not self.backend.annu.find (rid).check_eqp ():
+                self.backend.annu.find (rid).create_eqp (sid, "Capteur", None)
+            self.backend.annu.find (rid,sid).set_state (float (valeur))
+            
 
-    def on_captreg (self, sender, *args):
-        #A modifier avec l'appel à une méthode qui change l'affichage des données
-        pass
-
+    def on_sensdecl (self, sender, rid, sid):
+        if self.backend is not None:
+            if not self.backend.annu.check_robot (rid):
+                self.backend.track_robot (rid)
+            self.backend.annu.find (rid).create_eqp (sid, "Capteur")
+            
+        
     def on_descrreg (self, sender, *args):
         #A modifier avec l'appel à une méthode qui enregistre le robot dans l'annuaire
         pass
@@ -139,7 +158,7 @@ class Radio :
         """Démare la radio"""
         IvyStart (self.bus)
 
-    def __exit__(self, *args):
+    def stop (self, *args):
         """Appelé automatiquement à l'arrêt du programme. Enlève la radio du bus Ivy."""
         IvyStop()
 
@@ -156,5 +175,6 @@ if __name__ == '__main__' :
     sleep (5)
     Radio1.send_cmd ("PosCmd test 1500,1000")
     sleep (5)
-    Radio1.register_stop (True, 'all')
+    Radio1.register_stop (True, True, 'all')
+    Radio1.stop ()
     #End tests

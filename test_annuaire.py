@@ -36,6 +36,14 @@ def test_actionneur():
     act_c.set_state(1)
     assert act_c.get_state() == (1, 0, 0, 0)
     assert act_c.get_unit() == 'volts'
+    assert act_c.updt_cmd() is None
+    assert act_c.get_last_cmd()
+
+def test_binaire():
+    """Tests de la clase Binaire"""
+    bin_a = annuaire.Binaire('bin_a')
+    assert bin_a.get_state() == (None, 0, 1, 1)
+    assert bin_a.get_unit() is None
 
 def test_robot():
     """Tests de la classe Robot"""
@@ -44,33 +52,43 @@ def test_robot():
     assert robot_a.y == robot_a.get_pos()[1] == 1000
     assert robot_a.theta == robot_a.get_pos()[2] == 0
     assert robot_a.get_all_eqp() == ['cpt']
+    assert robot_a.check_eqp('cpt')
 
     robot_a.set_pos(0, 0, 0)
     assert robot_a.x == robot_a.get_pos()[0] == 0
     assert robot_a.y == robot_a.get_pos()[1] == 0
     assert robot_a.theta == robot_a.get_pos()[2] == 0
 
-    act_a = annuaire.Actionneur('act_a', 0, 0, 1, "-")
-    robot_a.updt_eqp(act_a)
+    robot_a.create_eqp('act_a', 'Actionneur', 0, 0, 1, '-')
+    #act_a = annuaire.Actionneur('act_a', 0, 0, 1, "-")
+    #robot_a.updt_eqp(act_a)
     assert robot_a.get_all_eqp() == ['cpt', "act_a"]
-    assert robot_a.get_state_eqp('act_a') == (None, 0, 0, 1)
-    assert robot_a.get_unit_eqp("act_a") == "-"
-    assert robot_a.get_type_eqp('nope') is None
+    eqp = robot_a.find('act_a')
+    assert eqp.get_state() == (None, 0, 0, 1)
+    assert eqp.get_unit() == "-"
+    assert eqp.get_type() is annuaire.Actionneur
 
     act_a2 = annuaire.Actionneur('act_a', 0, 0, 2, '(nope)')
     robot_a.updt_eqp(act_a2)
-    assert robot_a.get_state_eqp('act_a') == (None, 0, 0, 2)
+    assert robot_a.find('act_a').get_state() == (None, 0, 0, 2)
 
-    robot_a.set_state_eqp('act_a', 1)
-    assert robot_a.get_state_eqp('act_a') == (1, 0, 0, 2)
-    assert robot_a.get_type_eqp('act_a') == annuaire.Actionneur
-    assert robot_a.get_type_eqp('cpt') == annuaire.Capteur
+    robot_a.find('act_a').set_state(1)
+    assert robot_a.find('act_a').get_state() == (1, 0, 0, 2)
+    assert robot_a.find('act_a').get_type() == annuaire.Actionneur
+    assert robot_a.find('cpt').get_type() == annuaire.Capteur
 
     robot_a.remove_eqp('act_a')
     robot_str = "Robot [robot_a]\n| Position: x:0 y:0 theta:0\n| Capteur [cpt] Val.:1 (%)\n"
     assert robot_a.__str__() == robot_str
     robot_a.remove_eqp('cpt')
     assert robot_a.get_all_eqp() == []
+    robot_a.create_eqp('eqp', 'Equipement')
+    robot_a.create_eqp('bin', 'Binaire')
+    robot_a.create_eqp('cpt', 'Capteur')
+    robot_a.create_eqp('act', 'Actionneur', 0, 1, 1)
+    robot_a.create_eqp('cpt2', 'Capteur', 'stonks')
+    assert robot_a.get_all_eqp() == ['eqp', 'bin', 'cpt', 'act', 'cpt2']
+    assert robot_a.find('osef') is None
 
 def test_annuaire():
     """Tests de la classe Annuaire"""
@@ -89,30 +107,27 @@ def test_annuaire():
     assert annu.__str__() == annu_str
 
     act_b = annuaire.Actionneur('act_b', 1, 0, 1, "(nope)")
-    annu.updt_robot_eqp('robot_a', act_b)
-    assert annu.get_robot_all_eqp('robot_a') == ['act_a', 'act_b']
+    annu.find('robot_a').updt_eqp(act_b)
+    assert annu.find('robot_a').get_all_eqp() == ['act_a', 'act_b']
 
-    annu.remove_robot_eqp('robot_a', 'act_b')
-    assert annu.get_robot_all_eqp('robot_a') == ['act_a']
+    annu.find('robot_a').remove_eqp('act_b')
+    assert annu.find('robot_a').get_all_eqp() == ['act_a']
 
-    assert annu.get_robot_eqp_type('robot_a', 'act_a') == annuaire.Actionneur
+    assert annu.find('robot_a', 'act_a').get_type() == annuaire.Actionneur
 
-    assert annu.get_robot_eqp_state('robot_a', 'act_a') == (None, 0, 1, 1)
+    assert annu.find('robot_a', 'act_a').get_state() == (None, 0, 1, 1)
 
-    assert annu.get_robot_pos('robot_a') == (1500, 1000, 0)
+    assert annu.find('robot_a').get_pos() == (1500, 1000, 0)
 
-    annu.set_robot_pos('robot_a', 0, 0, 0)
-    assert annu.get_robot_pos('robot_a') == (0, 0, 0)
+    annu.find('robot_a').set_pos(0, 0, 0)
+    assert annu.find('robot_a').get_pos() == (0, 0, 0)
 
     assert not annu.check_robot('robot_b')
 
-    assert annu.set_robot_eqp_state('robot_a', 'act_a', 1) is None
-    assert annu.get_robot_eqp_unit('robot_a', 'act_a') == 'rien'
+    assert annu.find('robot_a', 'act_a').set_state(1) is None
+    assert annu.find('robot_a', 'act_a').get_unit()== 'rien'
 
     annu.remove_robot('robot_a')
     assert not annu.check_robot('robot_a')
     assert annu.get_all_robots() == []
-    assert annu.get_robot_pos("osef") is None
-    assert annu.get_robot_eqp_state("osef", "osef") is None
-    assert annu.get_robot_eqp_type("osef", "osef") is None
-    assert annu.get_robot_eqp_unit('osef', 'osef') is None
+    assert annu.find("osef") is None
