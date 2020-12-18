@@ -8,9 +8,10 @@ IVYAPPNAME = 'Radio'
 	#Informations
 """Le premier groupe de capture est le nom du robot"""
 #DESCR_REG = 'Description (.+) (.*)'
+SENS_DECL = "SensorDecl (.+) (.+)"
 ACTU_DECL = 'ActuatorDecl (.*) (.*) (.*) (.*) (.*)'
 POS_REG = 'PosReport (.+) (.+);(.+);(.+)'
-CAPT_REG = 'CaptReport (.+) (.*)'
+CAPT_REG = 'CaptReport (.+) (.+) (.+)'
 
 	#Commands
 """Le premier argument sera le nom du robot"""
@@ -55,6 +56,7 @@ class Radio :
         IvyBindMsg (self.on_captreg, CAPT_REG)
         #IvyBindMsg (self.on_descrreg, DESCR_REG)
         IvyBindMsg (self.on_actudecl, ACTU_DECL)
+        IvyBindMsg (self.on_sensdecl, SENS_DECL)
 
     #ENREGISTREMENT
 
@@ -116,10 +118,17 @@ class Radio :
     def on_actudecl (self, sender, *args):
         pass
 
-    def on_captreg (self, sender, *args):
-        #A modifier avec l'appel à une méthode qui change l'affichage des données
-        pass
+    def on_captreg (self, sender, rid, sid, valeur):
+        if self.backend is not None:
+            if self.backend.annu.check_robot_eqp (rid, sid):
+                self.backend.annu[rid].set_state_eqp (sid, valeur)
+            elif self.backend.annu.check_robot (rid):
+                self.on_sensdecl (self, sender, rid, sid)
 
+    def on_sensdecl (self, sender, rid, sid):
+        if self.backend is not None:
+            self.backend.annu.robot_create_eqp (rid, sid, 'Capteur')
+        
     def on_descrreg (self, sender, *args):
         #A modifier avec l'appel à une méthode qui enregistre le robot dans l'annuaire
         pass
