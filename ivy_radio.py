@@ -73,9 +73,9 @@ class Radio :
         Stocke les messages sous forme de tupple dans msgsBuffer si le booléen self.record_msgs est True
         Vérifie si l'expéditeur est enregistré et l'enregistre si ce n'est pas fait."""
         if self.record_msgs :
-            self.msgsBuffer.append ((time(),sender, message))
-        nom_robot = sender.split ('@')[0]
-        if not self.backend.annuaire.check_robot (nom_robot):
+            self.msgsBuffer.append ((time(),str(sender), message))
+        nom_robot = str(sender).split ('@')[0]
+        if not self.backend.annu.check_robot (nom_robot):
             self.backend.track_robot (nom_robot)
 
     def register_stop (self, save = True, del_buffers = True, *args):
@@ -111,7 +111,7 @@ class Radio :
     def on_posreg (self, sender, rid, x, y, theta):
         """Input fait par IvyBindMsg
         Transmet les valeurs envoyées par le robot vers l'annuaire"""
-        self.backend.annuaire.set_robot_pos (rid, float (x), float(y), float(theta))
+        self.backend.annu.set_robot_pos (rid, float (x), float(y), float(theta))
 
     def on_actudecl (self, sender, *args):
         pass

@@ -15,21 +15,23 @@ class Backend:
         print(self.radio)
         if self.radio is not None:
             print("should start")
+            self.radio.backend = self
             self.radio.start()
         if self.annu is not None:
             print("should print")
             #self.run_print_moche(60)
-            _thread.start_new_thread(self.run_print_console(60))
+            _thread.start_new_thread(self.run_print_console())
             #attention, bloque le thread si utilisé dans boucle principale
 
-    def run_print_console(self, time):
+    def run_print_console(self):
         """une fonction qui va continuellement afficher l'annuaire dans la console
         très laide du pdv code, ne pas utiliser sur le long terme"""
         runned_time = 0
-        while runned_time <= time:
-            sleep(0.2)
+        while True:
+            sleep(0.05)
+            print(str(runned_time)[:4]+'s')
             print(self.annu)
-            runned_time += 0.2
+            runned_time += 0.05
 
     def attach_annu(self, annu):
         """Attache l'annuaire 'annu' au backend
