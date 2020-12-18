@@ -327,6 +327,14 @@ class Robot:
             - last_updt_pos (float)
         """
         return self.equipements[eqp_name].get_last_updt()
+    
+    def get_last_cmd_eqp(self, eqp_name):
+        """Retourne la dernière mise à jour de la commande
+
+        Sortie:
+            - last_updt_cmd (float)
+        """
+        return self.equipements[eqp_name].get_last_cmd()
 
 class Annuaire:
     """Classe définissant un espace ou toutes les informations sur les robots trackés
@@ -451,6 +459,18 @@ class Annuaire:
         """
         if self.check_robot(rid):
             self.robots[rid].set_cmd_eqp(eqp_name)
+    
+    def get_robot_eqp_cmd(self, rid, eqp_name):
+        """Retourne le timestamp de la derniere commande envoyée à l'actionneur
+        
+        Entrée:
+            - rid (str)
+            - eqp_name (str)
+        Sortie:
+            - float
+        """
+        if self.check_robot(rid):
+            self.robots[rid].get_last_cmd_eqp(eqp_name)
 
     def get_robot_eqp_type(self, rid, eqp_name):
         """Retourne la variété d'un équipement monté sur un robot

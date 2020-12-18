@@ -105,6 +105,14 @@ class Backend:
             self.annu.set_robot_eqp_cmd(robot_name, eqp_name)
             #rajouter l'envoi du message ici (utilise state)
 
+    def get_all_robots(self):
+        """Retourne la liste de tous les noms des robots
+        
+        Sortie:
+            - list of (str): les noms des robots
+        """
+        return self.annu.get_all_robots()
+
     def getdata_robot(self, robot_name):
         """Renvoie toutes les informations connues sur le robot
 
@@ -132,12 +140,16 @@ class Backend:
             - eqp_type (type): le type de l'équipement
             - eqp_state (variable): l'état actuel de l'équipement
                 (se référer à l'équipement en question)
-            - eqp_state (variable): l'état actuel de l'équipement
+            - eqp_last_updt (variable): l'état actuel de l'équipement
                 (se référer à l'équipement en question)
         """
         eqp_type = self.annu.get_robot_eqp_type(robot_name, eqp_name)
         eqp_state = self.annu.get_robot_eqp_state(robot_name, eqp_name)
         eqp_last_updt = self.annu.get_robot_eqp_last_updt(robot_name, eqp_name)
-        return eqp_type, eqp_state, eqp_last_updt
+        if eqp_type == annuaire.Actionneur or eqp_type == annuaire.Binaire:
+            eqp_last_cmd = self.annu.get_robot_eqp_cmd(robot_name, eqp_name)
+        else:
+            eqp_last_cmd = None
+        return eqp_type, eqp_state, eqp_last_updt, eqp_last_cmd
 
 back = Backend(annuaire.Annuaire(), rd.Radio())
