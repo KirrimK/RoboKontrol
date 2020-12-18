@@ -59,7 +59,7 @@ class Radio :
     #ENREGISTREMENT
 
     def register_start (self, *args):
-        """Change l'attribut record_msgs et/ou record_cmds vers True"""
+        """Change l'attribut record_msgs et/ou record_cmds vers True
         Input : 'all', 'msgs' et/ou 'cmds' (strings)"""
         if 'all' in args :
             args += ('msgs','cmds')
@@ -74,7 +74,7 @@ class Radio :
         Vérifie si l'expéditeur est enregistré et l'enregistre si ce n'est pas fait."""
         if self.record_msgs :
             self.msgsBuffer.append ((time(),sender, message))
-        nom_robot = str(sender).split ('@')[0]
+        nom_robot = sender.split ('@')[0]
         if not self.backend.annuaire.check_robot (nom_robot):
             self.backend.track_robot (nom_robot)
 
@@ -93,7 +93,7 @@ class Radio :
                 with open (path,'a') as fichier :
                     fichier.write ('Jour\t\tHeure\t\tExpediteur\t\tMessage\n\n')
                     for ligne in self.msgsBuffer :
-                        fichier.write (temps (ligne[0])+'\t'+str (ligne[1])+'\t'+ligne[2]+'\n')
+                        fichier.write (temps (ligne[0])+'\t'+ligne[1]+'\t'+ligne[2]+'\n')
             if del_buffers :
                 self.msgsBuffer = []
         if 'cmds' in args :
@@ -103,7 +103,7 @@ class Radio :
                 with open (path,'a') as fichier :
                     fichier.write ('Jour\t\tHeure\t\tCommande\n\n')
                     for ligne in self.cmdsBuffer :
-                        fichier.write (temps (ligne[0])+'\t'+str (ligne[1])+'\n')
+                        fichier.write (temps (ligne[0])+'\t'+ligne[1]+'\n')
             if del_buffers :
                 self.cmdsBuffer = []
      #REACTIONS AUX REGEXPS
