@@ -8,7 +8,7 @@ IVYAPPNAME = 'Radio'
 	#Informations
 """Le premier groupe de capture est le nom du robot"""
 #DESCR_REG = 'Description (.+) (.*)'
-SENS_DECL = "SensorDecl (.+) (.+)"
+SENS_DECL = "SensorDecl (.+) (.+) (.*)"
 ACTU_DECL = 'ActuatorDecl (.*) (.*) (.*) (.*) (.*)'
 POS_REG = 'PosReport (.+) (.+);(.+);(.+)'
 CAPT_REG = 'CaptReport (.+) (.+) (.+)'
@@ -116,20 +116,20 @@ class Radio :
             self.backend.annu.find (rid).set_pos (float (x), float(y), float(theta))
             
                 
-    def on_actudecl (self, sender, rid, aid, minV, maxV, unit = None):
+    def on_actudecl (self, sender, rid, aid, minV, maxV, step = 1, unit = None):
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
-            self.backend.annu.find (rid).create_eqp (aid, "Actionneur", minV, maxV, unit)
+            self.backend.annu.find (rid).create_eqp (aid, "Actionneur", float(minV), float(maxV), float(step), unit)
             
 
     def on_captreg (self, sender, rid, sid, valeur):
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
-            if not self.backend.annu.find (rid).check_eqp():
-                self.backend.annu.find (rid).create_eqp (sid, "Capteur")
-            self.backend.annu.find(rid,sid).set_state (valeur)
+            if not self.backend.annu.find (rid).check_eqp ():
+                self.backend.annu.find (rid).create_eqp (sid, "Capteur", None)
+            self.backend.annu.find (rid,sid).set_state (float (valeur))
             
 
     def on_sensdecl (self, sender, rid, sid):
