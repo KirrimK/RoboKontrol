@@ -263,7 +263,10 @@ class Robot:
         elif eqp_type == "Binaire":
             eqp = Binaire(eqp_name)
         elif eqp_type == "Capteur":
-            unit = args[0]
+            if len(args) == 1:
+                unit = args[0]
+            else:
+                unit = None
             eqp = Capteur(eqp_name, unite=unit)
 
         if eqp is not None:

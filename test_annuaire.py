@@ -36,6 +36,14 @@ def test_actionneur():
     act_c.set_state(1)
     assert act_c.get_state() == (1, 0, 0, 0)
     assert act_c.get_unit() == 'volts'
+    assert act_c.updt_cmd() is None
+    assert act_c.get_last_cmd()
+
+def test_binaire():
+    """Tests de la clase Binaire"""
+    bin_a = annuaire.Binaire('bin_a')
+    assert bin_a.get_state() == (None, 0, 1, 1)
+    assert bin_a.get_unit() is None
 
 def test_robot():
     """Tests de la classe Robot"""
@@ -44,14 +52,16 @@ def test_robot():
     assert robot_a.y == robot_a.get_pos()[1] == 1000
     assert robot_a.theta == robot_a.get_pos()[2] == 0
     assert robot_a.get_all_eqp() == ['cpt']
+    assert robot_a.check_eqp('cpt')
 
     robot_a.set_pos(0, 0, 0)
     assert robot_a.x == robot_a.get_pos()[0] == 0
     assert robot_a.y == robot_a.get_pos()[1] == 0
     assert robot_a.theta == robot_a.get_pos()[2] == 0
 
-    act_a = annuaire.Actionneur('act_a', 0, 0, 1, "-")
-    robot_a.updt_eqp(act_a)
+    robot_a.create_eqp('act_a', 'Actionneur', 0, 0, 1, '-')
+    #act_a = annuaire.Actionneur('act_a', 0, 0, 1, "-")
+    #robot_a.updt_eqp(act_a)
     assert robot_a.get_all_eqp() == ['cpt', "act_a"]
     eqp = robot_a.find('act_a')
     assert eqp.get_state() == (None, 0, 0, 1)
@@ -72,6 +82,13 @@ def test_robot():
     assert robot_a.__str__() == robot_str
     robot_a.remove_eqp('cpt')
     assert robot_a.get_all_eqp() == []
+    robot_a.create_eqp('eqp', 'Equipement')
+    robot_a.create_eqp('bin', 'Binaire')
+    robot_a.create_eqp('cpt', 'Capteur')
+    robot_a.create_eqp('act', 'Actionneur', 0, 1, 1)
+    robot_a.create_eqp('cpt2', 'Capteur', 'stonks')
+    assert robot_a.get_all_eqp() == ['eqp', 'bin', 'cpt', 'act', 'cpt2']
+    assert robot_a.find('osef') is None
 
 def test_annuaire():
     """Tests de la classe Annuaire"""
@@ -113,3 +130,4 @@ def test_annuaire():
     annu.remove_robot('robot_a')
     assert not annu.check_robot('robot_a')
     assert annu.get_all_robots() == []
+    assert annu.find("osef") is None
