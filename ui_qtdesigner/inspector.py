@@ -1,6 +1,8 @@
 from PyQt5 import QtWidgets
 import json
 
+from ui_qtdesigner import actuator
+
 ACTUATORS_FILES = "actuator.json"
 
 
@@ -113,14 +115,6 @@ class Box_robot:
         self.boxes[number_delete][0].hide()
 
 
-def int_in_list(n, l):
-    """Teste si l'entier n (type str) est compris dans la liste"""
-    for i in l:
-        if int(i) == n:
-            return True
-        else:
-            pass
-
 
 def load_actuators(fichier):
     """Retourne les actionneurs placés dans un fichier .json de la forme:
@@ -138,4 +132,4 @@ def load_actuators(fichier):
     return l
 
 
-list_dic_actuators = load_actuators(ACTUATORS_FILES)
+list_actionneurs = actuator.load_actuators(ACTUATORS_FILES)
