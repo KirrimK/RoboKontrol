@@ -7,13 +7,19 @@ import ivy_radio as rd
 
 class Backend:
     """Un objet faisant le lien entre un Annuaire (module annuaire)
-    et une Radio (module ivy_radio)"""
+    et une Radio (module ivy_radio)
 
-    def __init__(self, annu=None, radio=None):
+    Entrée:
+        - annu (annuaire.Annuaire)
+        - radio (rd.Radio)
+        - flag (bool, default = False)
+    """
+
+    def __init__(self, annu=None, radio=None, flag=False):
         if radio is not None:
             self.attach_radio(radio)
         if annu is not None:
-            self.attach_annu(annu)
+            self.attach_annu(annu, flag)
 
     def run_print_console(self):
         """une fonction qui va continuellement afficher l'annuaire dans la console
@@ -21,19 +27,21 @@ class Backend:
         runned_time = 0
         while True:
             sleep(0.05)
-            print(str(runned_time)[:4]+'s')
+            print(str(runned_time)[:6]+'s')
             print(self.annu)
             runned_time += 0.05
 
-    def attach_annu(self, annu):
+    def attach_annu(self, annu, flag):
         """Attache l'annuaire 'annu' au backend
 
         Entrée:
             - annu (Annuaire): l'annuaire à attacher
+            - flag (bool): lancement de self.run_print_console si true
         """
         if isinstance(annu, annuaire.Annuaire):
             self.annu = annu
-            _thread.start_new_thread(self.run_print_console())
+            if flag:
+                _thread.start_new_thread(self.run_print_console())
 
     def attach_radio(self, radio):
         """Attache la radio 'radio' au backend
@@ -153,4 +161,5 @@ class Backend:
             eqp_last_cmd = None
         return eqp_type, eqp_state, eqp_last_updt, eqp_last_cmd
 
-back = Backend(annuaire.Annuaire(), rd.Radio())
+if __name__ == '__main__':
+    backend = Backend(annuaire.Annuaire(), rd.Radio(), True)
