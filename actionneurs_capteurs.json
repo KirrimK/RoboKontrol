@@ -1,5 +1,5 @@
 {
-  "Actionneur": [
+  "Actionneurs": [
     {
       "type": "BINAIRE",
       "nom": "Pompe",
@@ -7,7 +7,8 @@
       "min_value": 0,
       "max_value": 1,
       "info": "",
-      "robot": "[0, 1, 2, 5, 6]"
+      "unite": "",
+      "robot": "[0, 1, 2]"
 
     },
     {
@@ -17,7 +18,8 @@
       "min_value": 0,
       "max_value": 90,
       "info": "",
-      "robot": "[0, 2, 3, 4, 6, 7]"
+      "unite": "°",
+      "robot": "[0, 2, 3, 4]"
     },
     {
       "type": "MULTIPLE",
@@ -25,39 +27,34 @@
       "valeur": 2,
       "min_value": 0,
       "max_value": 4,
-      "info": "[\"etat1\", \"etat2\", \"etat3\", \"etat4\", \"etat5\"]",
-      "robot": "[0,3, 4, 5]"
+      "info": "[\"état1\", \"état2\", \"état3\", \"état4\", \"état5\"]",
+      "unite": "",
+      "robot": "[0, 3, 4]"
     },
     {
       "type": "COMPLEXE",
-      "nom": "Actionneur4",
+      "nom": "LED",
       "valeur": 0,
       "min_value": 0,
       "max_value": 1,
-      "info": "colorchooser.py",
-      "robot": "[0,3, 4, 5, 1 , 4]"
+      "info": "colorchooser",
+      "unite": "",
+      "robot": "[0,3, 4, 1 , 4]"
     }
   ],
-  "Capteur": [
+  "Capteurs": [
     {
       "nom": "Batterie",
       "valeur": 12,
       "unite": "V",
-      "robot": "[0, 1, 2, 5, 6]"
+      "robot": "[0, 1, 2]"
 
     },
     {
       "nom": "Capteur 2",
       "valeur": 20,
       "unite": "unité",
-      "robot": "[0, 2, 3, 4, 6, 7]"
-    },
-    {
-      "nom": "Capteur 3",
-      "valeur": 0,
-      "unite": "unité",
-      "robot": "[0,3, 4, 5]"
-
+      "robot": "[0, 2, 3, 4]"
     }
   ]
 }
