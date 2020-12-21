@@ -6,9 +6,9 @@
       "valeur": 0,
       "min_value": 0,
       "max_value": 1,
-      "info": "",
-      "unite": "",
-      "robot": "[0, 1, 2]"
+      "choix": null,
+      "unite": null,
+      "robot": "[Robot0, Robot1, Robot2]"
 
     },
     {
@@ -17,9 +17,9 @@
       "valeur": 45,
       "min_value": 0,
       "max_value": 90,
-      "info": "",
+      "choix": null,
       "unite": "°",
-      "robot": "[0, 2, 3, 4]"
+      "robot": "[Robot0, Robot2, Robot3]"
     },
     {
       "type": "MULTIPLE",
@@ -27,9 +27,9 @@
       "valeur": 2,
       "min_value": 0,
       "max_value": 4,
-      "info": "[\"état1\", \"état2\", \"état3\", \"état4\", \"état5\"]",
-      "unite": "",
-      "robot": "[0, 3, 4]"
+      "choix": "[\"état1\", \"état2\", \"état3\", \"état4\", \"état5\"]",
+      "unite": null,
+      "robot": "[Robot0, Robot3, Robot4]"
     },
     {
       "type": "COMPLEXE",
@@ -37,24 +37,24 @@
       "valeur": 0,
       "min_value": 0,
       "max_value": 1,
-      "info": "colorchooser",
-      "unite": "",
-      "robot": "[0,3, 4, 1 , 4]"
+      "choix": null,
+      "unite": null,
+      "robot": "[Robot0, Robot3, Robot1 , Robot0]"
     }
   ],
   "Capteurs": [
     {
       "nom": "Batterie",
-      "valeur": 12,
+      "valeur": 11.34,
       "unite": "V",
-      "robot": "[0, 1, 2]"
+      "robot": "[Robot0, Robot1, Robot2]"
 
     },
     {
       "nom": "Capteur 2",
       "valeur": 20,
       "unite": "unité",
-      "robot": "[0, 2, 3, 4]"
+      "robot": "[Robot0, Robot2, Robot3]"
     }
   ]
 }

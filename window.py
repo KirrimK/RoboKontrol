@@ -3,14 +3,17 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 
+import boite_robot
 import inspecteur
 
+LIST_ROBOTS = ['Robot0', 'Robot1', 'Robot2']
 
-class Ui_window(object):
-    def __init__(self, main_window, number_robots=0):
+class Window(object):
+    def __init__(self, main_window, number_robots=2):
         main_window.setObjectName("main_window")
         main_window.resize(1091, 782)
         main_window.setWindowTitle("Form")
+        self.main_window = main_window
         self.number_robots = number_robots
 
         self.layout_window = QtWidgets.QVBoxLayout(main_window)
@@ -44,7 +47,11 @@ class Ui_window(object):
 
         self.create_inspecteur_scrollbar(main_window)
 
-        self.add_robot()
+        self.inspecteur = inspecteur.Inspecteur(self.inspector_scroll_area, self.layout_inspector, self.main_window)
+
+        for i in range(self.number_robots):
+            self.nom_robot = "Robot {}".format(str(i))
+            self.inspecteur.add_robot(self.nom_robot)                # TODO: modifier par self.inspecteur.update_robot()
 
         self.inspector_scroll_area.setWidget(self.scrollArea)
         self.layout_map_inspector.addWidget(self.inspector_scroll_area)
@@ -55,8 +62,8 @@ class Ui_window(object):
         self.button_help.clicked.connect(lambda: show_help(main_window))
 
     def add_robot(self):
-        self.boite_robot = inspecteur.BoiteRobot(self.scrollArea, self.layout_inspector, self.number_robots)
-        self.boite_robot.add_box_robot()
+        self.boite_robot = boite_robot.BoiteRobot(self.scrollArea, self.layout_inspector, self.nom_robot, self.inspecteur)
+        self.boite_robot.create_boite_robot()
         self.number_robots += 1
 
     def create_inspecteur_scrollbar(self, main_window):
@@ -95,7 +102,7 @@ def main():
     import sys
     app = QtWidgets.QApplication(sys.argv)
     main_window = QtWidgets.QWidget()
-    Ui_window(main_window)
+    Window(main_window)
     main_window.show()
     sys.exit(app.exec_())
 

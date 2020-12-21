@@ -1,239 +1,60 @@
-"""Ajoute une boite robot dans le layout parent situé dans le layout widget"""
-
+import backend
+import boite_robot
 from PyQt5 import QtWidgets, QtCore
-import json
-import annuaire
-
-ACTIONNEURS_CAPTEURS_FILES = "actionneurs_capteurs.json"
 
 
-class BoiteRobot:
-    def __init__(self, parent_widget, parent_layout, robot_number):
-        """Crée la boite robot dans le parent_layout situé dans un parent_widget et lui associe le numéro robot_number"""
-        self.parent_widget = parent_widget
-        self.parent_layout = parent_layout
-        self.robot_number = robot_number
+class Inspecteur(QtWidgets.QWidget):
+    """Définit l'objet inspecteur qui comport les boites robots et qui les relie à backend avec des signaux"""
 
-        self.groupBox_robot = QtWidgets.QGroupBox(self.parent_widget)
-        self.layout_box_robot = QtWidgets.QVBoxLayout(self.groupBox_robot)
-        self.parent_layout.addWidget(self.groupBox_robot, 0, QtCore.Qt.AlignTop)
+    # Création d'un signal qui sera émit lorsque la liste des robots à changé
+    robot_list_updated_signal = QtCore.pyqtSlot(list)
 
-        self.boites = {}
+    # actionneur_list_changed_signal = QtCore.pyqtSignal(list)
+    # capteur_list_changed_signal = QtCore.pyqtSignal(list)
 
-    def create_position(self):
-        """Crée l'entête de la boite robot où l'on retrouve son nom, le bouton supprimer et ses coordonnées)"""
+    def __init__(self, parent_widget, parent_layout, main_window):
+        super(Inspecteur, self).__init__()
+        self.main_window = main_window
+        self.widget_parent = parent_widget
+        self.layout_parent = parent_layout
 
-        self.layout_name_delete = QtWidgets.QHBoxLayout()
-        self.layout_name_delete.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        # Dictionnaire des robots présents (k=nom, v=boite robot)
+        self.current_robots_dic = {}
+        # Création de l'objet Backend
+        self.backend = backend.Backend()
+        # Création et récupération de la liste actuelle des noms des robots présents
+        # self.current_robots_list = self.backend.get_all_robots()                                  #TODO: backend.get_all_robots() renvoie "AttributeError: 'Backend' object has no attribute 'annu'"
 
-        self.label_name = QtWidgets.QLabel(self.groupBox_robot)
-        self.label_name.setMinimumSize(QtCore.QSize(0, 30))
-        self.label_name.setMaximumSize(QtCore.QSize(100, 30))
-        self.label_name.setText("Nom du robot 1")
-        self.layout_name_delete.addWidget(self.label_name)
+        # Connexion du signal mise à jour des robots avec la comande pour mettre à jour l'affichage des robots
+        # self.backend.new_message_signal.connect(self.update_robot)                                       # TODO: ajouter un signal de mise à jour des info robots dans blackend
 
-        self.button_delete = QtWidgets.QPushButton(self.groupBox_robot)
-        self.button_delete.setMaximumSize(QtCore.QSize(150, 30))
-        self.button_delete.setText("Supprimer")
-        self.layout_name_delete.addWidget(self.button_delete)
+    @QtCore.pyqtSlot()
+    def update_robot(self):
+        """Met à jour la liste des robots présents et envoie un signal de mise à jour des robots (cf appliaction airport PSI)"""
 
-        self.layout_box_robot.addLayout(self.layout_name_delete)
+        new_robots = self.backend.get_all_robots()
+        # Ajoute les nouveaux robots
+        for robot in set(new_robots) - set(self.current_robots_list):
+            print(type(robot))
+            self.add_robot(robot)
+        # Supprime les robots qui ne sont plus présents
+        for robot in set(self.current_robots_list) - set(new_robots):
+            self.remove_robot(robot)
+        self.current_robots_list = new_robots
+        # Actualise la position des robots (k=nom robot, v = boite robot)
+        for k, v in self.current_robots_dic.items():
+            v.update_position(k)
 
-        self.create_coordonnees("X", "mm")
-        self.create_coordonnees("Y", "mm")
-        self.create_coordonnees("Orientation", "degré")
+        # Emet un signal de mise à jour de la liste des robots
+        # self.boite_robot.robot_list_updated_signal.emit(self.current_robots_list)
 
-    def create_coordonnees(self, coord: str, unite: str):
-        """Crée une ligne coordonnée"""
-        self.layout = QtWidgets.QHBoxLayout()
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.label = QtWidgets.QLabel(self.groupBox_robot)
-        self.label.setMaximumSize(QtCore.QSize(100, 30))
-        self.label.setText('{0} ({1}):'.format(coord, unite))
-        #self.label.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.layout.addWidget(self.label)
-        self.lcdNumber = QtWidgets.QLCDNumber(self.groupBox_robot)
-        self.lcdNumber.setMaximumSize(QtCore.QSize(50, 25))
-        self.layout.addWidget(self.lcdNumber)
-        self.layout_box_robot.addLayout(self.layout)
+    @QtCore.pyqtSlot(str)
+    def add_robot(self, nom_robot):
+        self.boite_robot = boite_robot.BoiteRobot(self.widget_parent, self.layout_parent, str(nom_robot), self)
+        self.boite_robot.create_boite_robot()
+        self.current_robots_dic[self.boite_robot.rid] = self.boite_robot
 
-    def create_grid_actionneurs(self):
-        self.groupBox_actuator = QtWidgets.QGroupBox(self.groupBox_robot)
-        #self.groupBox_actuator.setAlignment(QtCore.Qt.AlignCenter)
-        self.groupBox_actuator.setTitle("Actionneurs")
-        self.layout_box_actuators = QtWidgets.QVBoxLayout(self.groupBox_actuator)
-
-    def create_grid_capteurs(self):
-        self.groupBox_sensors = QtWidgets.QGroupBox(self.groupBox_robot)
-        #self.groupBox_sensors.setAlignment(QtCore.Qt.AlignCenter)
-        self.groupBox_sensors.setTitle("Capteurs:")
-        self.layout_box_capteurs = QtWidgets.QVBoxLayout(self.groupBox_sensors)
-
-    def add_actuators(self, actionneurs):
-        """Ajoute les actionneurs (QGridLayout) dans la boite actionneurs (QGroupBox)"""
-
-        data = actionneurs.copy()
-        n = 0
-        for dic in data:
-
-            actionneur = annuaire.Actionneur(dic['nom'], dic['min_value'], dic['max_value'], unite=dic['unite'])
-
-            actuator_type = dic['type']               #TODO : utiliser annuaire
-            actuator_value = dic['valeur']
-            actuator_info = dic["info"].strip('][').split(', ')
-            # list_robot = dic['robot'].strip('][').split(', ')
-
-            if n != 0:
-                spacerItem_actuators = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
-                                                             QtWidgets.QSizePolicy.Fixed)
-                self.layout_box_actuators.addItem(spacerItem_actuators)
-            n += 1
-
-            self.gridLayout_actuator = QtWidgets.QGridLayout()
-
-            self.label_name_actuator = QtWidgets.QLabel(self.groupBox_actuator)
-            if actionneur.unite != "":
-                self.label_name_actuator.setText("{0} ({1})".format(actionneur.nom, actionneur.unite))
-            self.gridLayout_actuator.addWidget(self.label_name_actuator, 0, 0, 1, 1)
-
-            self.label_command_actuator = QtWidgets.QLabel(self.groupBox_actuator)
-            self.label_command_actuator.setText("Dernière commande")
-            self.gridLayout_actuator.addWidget(self.label_command_actuator, 1, 0, 1, 1)
-            self.textBrowser_actuator = QtWidgets.QTextBrowser(self.groupBox_actuator)
-            self.textBrowser_actuator.setMaximumSize(QtCore.QSize(16777215, 25))
-            self.gridLayout_actuator.addWidget(self.textBrowser_actuator, 1, 1, 1, 1)
-            self.layout_box_actuators.addLayout(self.gridLayout_actuator)
-            self.layout_box_robot.addWidget(self.groupBox_actuator, 0, QtCore.Qt.AlignTop)
-
-            if actuator_type == "BINAIRE":
-                self.add_actuator_binaire()
-
-            if actuator_type == "DISCRET":
-                self.add_actuator_discret(actuator_value, actionneur.min_val, actionneur.max_val)
-
-            if actuator_type == "MULTIPLE":
-                self.add_actuator_multiple(actuator_info, actuator_value)
-
-            if actuator_type == "COMPLEXE":
-                self.add_actuator_complexe(actuator_info)
-
-    def add_actuator_binaire(self):
-        "Crée et ajoute les actionneurs types binaires"
-
-        self.checkBox_actuator = QtWidgets.QCheckBox(self.groupBox_actuator)
-        self.checkBox_actuator.setText("")
-        self.gridLayout_actuator.addWidget(self.checkBox_actuator, 0, 1, 1, 1,
-                                           QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-
-    def add_actuator_discret(self, value: int, min_value, max_value):
-        "Crée et ajoute les actionneurs types discrets"
-
-        self.doubleSpinBox_actuator = QtWidgets.QDoubleSpinBox(self.groupBox_actuator)
-        self.doubleSpinBox_actuator.setMinimumSize(QtCore.QSize(0, 30))
-        self.doubleSpinBox_actuator.setMaximum(max_value)
-        self.doubleSpinBox_actuator.setMinimum(min_value)
-        self.doubleSpinBox_actuator.setValue(value)
-        self.gridLayout_actuator.addWidget(self.doubleSpinBox_actuator, 0, 1, 1, 1)
-
-    def add_actuator_multiple(self, list_options, value):
-        "Crée et ajoute les actionneurs types multiples"
-
-        self.comboBox_actuator = QtWidgets.QComboBox(self.groupBox_actuator)
-
-        self.comboBox_actuator.addItem(list_options[value].strip('"'))
-        for i in range(len(list_options)):
-            if i != value:
-                self.comboBox_actuator.addItem(list_options[i].strip('"'))
-
-        self.gridLayout_actuator.addWidget(self.comboBox_actuator, 0, 1, 1, 1)
-
-    def add_actuator_complexe(self, info):
-        """Crée et ajoute les actionneurs types complexes : il s'agit d'un bouton qui peut ouvrir un menu plus détaillée de l'actionneur"""
-
-        self.pushButton_actuator = QtWidgets.QPushButton(self.groupBox_actuator)
-        self.pushButton_actuator.setText(info[0])
-        self.gridLayout_actuator.addWidget(self.pushButton_actuator, 0, 1, 1, 1)
-
-    def add_capteurs(self, capteurs):
-        capteurs = capteurs.copy()
-        n = 0
-        for d in capteurs:
-
-            capteur = annuaire.Capteur(d['nom'], d['valeur'], d['unite'])
-
-            if n != 0:
-                spacerItem_actuators = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum,
-                                                             QtWidgets.QSizePolicy.Fixed)
-                self.layout_box_capteurs.addItem(spacerItem_actuators)
-            n += 1
-
-            self.gridLayout_capteur = QtWidgets.QGridLayout()
-
-            self.label_nom_capteur = QtWidgets.QLabel(self.groupBox_sensors)
-            self.label_nom_capteur.setMinimumSize(QtCore.QSize(0, 30))
-            self.label_nom_capteur.setMaximumSize(QtCore.QSize(100, 30))
-            self.label_nom_capteur.setText('{0} ({1}):'.format(capteur.nom, capteur.unite))
-            self.gridLayout_capteur.addWidget(self.label_nom_capteur, 0, 0, 1, 1)
-
-            self.label_message_capteur = QtWidgets.QLabel(self.groupBox_sensors)
-            self.label_message_capteur.setText("Dernier message (ms)")
-            self.gridLayout_capteur.addWidget(self.label_message_capteur, 1, 0, 1, 1)
-
-            self.lcdNumber_message_capteur = QtWidgets.QLCDNumber(self.groupBox_sensors)
-            self.lcdNumber_message_capteur.setMaximumSize(QtCore.QSize(50, 25))
-            self.gridLayout_capteur.addWidget(self.lcdNumber_message_capteur, 1, 1, 1, 1)
-
-            if capteur.nom == "Batterie":
-
-                self.progressBar = QtWidgets.QProgressBar(self.groupBox_sensors)
-                self.progressBar.setProperty(str(capteur.valeur), 24)
-                self.gridLayout_capteur.addWidget(self.progressBar, 0, 1, 1, 1)
-
-            else:
-                self.lcdNumber_capteur = QtWidgets.QLCDNumber(self.groupBox_sensors)
-                self.lcdNumber_capteur.setMinimumSize(QtCore.QSize(160, 25))
-                self.gridLayout_capteur.addWidget(self.lcdNumber_capteur, 0, 1, 1, 1)
-            self.layout_box_capteurs.addLayout(self.gridLayout_capteur)
-
-    def add_box_robot(self):
-        """Permet l'ajout d'une boite robot"""
-
-        self.create_position()
-        self.create_grid_actionneurs()
-        self.create_grid_capteurs()
-        self.add_actuators(actionneurs)
-        self.add_capteurs(capteurs)
-
-        self.layout_box_robot.addWidget(self.groupBox_sensors, 0, QtCore.Qt.AlignTop)
-
-        n = self.robot_number
-        self.boites[n] = [self.groupBox_robot, self.button_delete]
-        self.boites[n][1].clicked.connect(lambda: self.remove_box_robot(n))
-
-    def remove_box_robot(self, number_delete):
-        """Permet la suppression de la boite robot dont le numéro est placé en paramètre"""
-        self.boites[number_delete][0].hide()
-
-
-def load_fichier(fichier):
-    """Retourne les actionneurs placés dans un fichier .json de la forme:
-            - type : binaire, discret, multiple ou plus complexe
-            - nom
-            -  valeur : valeur initiale
-            - min_value : valeur minimale prise par l'actionneur
-            - max_value : valeur maximale prse par l'actionneur
-            - info : information supplémentaire sur lactionneur comme la liste des états possible ou le nom d'un fichier à lancer"
-            - robot : liste des robots concernées par l'actionneur
-        sous la forme d'une liste de dictionnaires"""
-
-    actionneurs, capteurs = [], []
-    with open(fichier, encoding='utf-8') as f:
-        data = json.load(f)
-    for dic in data["Actionneurs"]:
-        actionneurs.append(dic)
-    for dic in data["Capteurs"]:
-        capteurs.append(dic)
-    return actionneurs, capteurs
-
-
-actionneurs, capteurs = load_fichier(ACTIONNEURS_CAPTEURS_FILES)
+    @QtCore.pyqtSlot(str)
+    def remove_robot(self, nom_robot):
+        deleted_robot = self.current_robots_dic.pop(nom_robot)
+        deleted_robot.remove_box_robot()
