@@ -305,6 +305,11 @@ class Capteur(annuaire.Actionneur):
             self.progressBar.setRange(MIN_BATTERIE*n, MAX_BATTERIE*n)
             self.progressBar.setValue(self.valeur*n)
             self.progressBar.setFormat(str(self.valeur))
+            self.progressBar.setStyleSheet("QProgressBar"
+                          "{"
+                          "background-color : grey;"
+                          "border : 1px"
+                          "}")
             self.progressBar.setAlignment(QtCore.Qt.AlignCenter)
             self.gridLayout_capteur.addWidget(self.progressBar, 0, 1, 1, 1)
 
