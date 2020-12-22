@@ -167,6 +167,15 @@ class Capteur(Equipement):
         self.valeur = valeur
         self.updt()
 
+class Batterie(Capteur):
+    """Une classe dérivée de Capteur, permettant de faire la distinction
+    entre les capteurs "normaux" et la charge de la batterie au niveau de
+    l'interface graphique."""
+    def __init__(self, nom):
+        super().__init__(nom, 0, "%")
+        #TODO: demander à Victor d'implémenter dans ivy_radio une distinction lors de CaptReport?
+        # par exemple Capt[Report/Decl] <robot> battery 100 => assignation automatique batterie
+
 class Robot:
     """Classe définissant un robot avec les attributs suivants:
 

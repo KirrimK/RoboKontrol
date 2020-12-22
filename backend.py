@@ -183,8 +183,10 @@ class Backend:
             - eqp_type (type): le type de l'équipement
             - eqp_state (variable): l'état actuel de l'équipement
                 (se référer à l'équipement en question)
-            - eqp_last_updt (variable): l'état actuel de l'équipement
+            - eqp_last_updt (float): le timestamp de la dernière info reçue
                 (se référer à l'équipement en question)
+            - eqp_last_cmd (float | None): si l'eqp est un actionneur,
+                le timestamp de la dernière commande envoyée par l'user
         """
         eqp = self.annu.find(robot_name, eqp_name)
         eqp_type = eqp.get_type()
