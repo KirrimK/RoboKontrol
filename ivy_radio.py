@@ -124,7 +124,6 @@ class Radio :
             
 
     def on_captreg (self, sender, rid, sid, valeur):
-        print ('CaptReg reconnue')
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
@@ -137,7 +136,8 @@ class Radio :
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
-            self.backend.annu.find (rid).create_eqp (sid, "Capteur", unit)
+            if not self.backend.annu.find (rid).check_eqp (sid):
+                self.backend.annu.find (rid).create_eqp (sid, "Capteur", unit)
             
         
     def on_descrreg (self, sender, *args):
