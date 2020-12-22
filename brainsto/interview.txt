@@ -1,0 +1,43 @@
+Questions à poser à Guilhem:
+
+Que penses-tu de l'intérêt des fonctions:
+- pouvoir reconfigurer la carte pendant l'exécution
+- pouvoir modifier la conf des inspecteurs de robots pendant l'éxécution
+- autres fonctions
+Est-ce que selon toi il manque quelque chose?
+Est-ce que tu trouves la disposition facile à utiliser?
+
+Interview:
+mettre en avant les boutons les + utilisés
+attention labels utilité
+intéressant d'avoir le ping des robots,
+mais aussi d'avoir le ping de chaque catégorie de message
+mettre image de la table en fond vs mettre formes (problème de scale à être attentif)
+l'échelle est importante
+ajout automatique robot / pop-up (plus compliqué à faire?)
+
+Un truc qui manquerait d'après Fab et Guilhem:
+- (très important) les capteurs: trucs qui récupèrent des infos
+    (par exemple: le niveau de la batterie)
+- souvent, pas qu'actionneur ou capteur: ex: bras avec actionneur et capteur:
+    (afficher la dernière commande envoyée, et l'état en cours (pour vérifier si foiré))
+    (à voir comment présenter)
+- actionneurs avec plusieurs modes de commande (par exemple états continus (flottants))
+    (choisir angle avec combobox)
+- revoir définition types actionneurs/capteurs (on off, plusieurs choix, valeurs(continus))
+    (dans le fichier, pouvoir modifier unités des actionneurs/capteurs)
+- au final, capteurs retournent tjrs une valeur et actionneurs toujours en valeurs (0-255, 0-1024)
+    (fabriquer des actionneurs et capteurs de base avec des valeurs)
+- mais qu'on puisse construire des actionneurs plus complexes
+    (genre la led avec la pastille de couleur au lieu du code RGB)
+    (idem pompe remplacée par checkbox)
+    (led, pouvoir cliquer sur pastille de couleur et remplacer couleur dans color chooser)
+    (type de capteur spécial batterie avec barre de chargement)
+    (mais en arrière plan, on ne traite toujours que des valeurs numériques (plus simple))
+- position prend bcp de place sur l'écran, car on verra sur la carte en plus
+- voir simulateur pour que le robot puisse déclarer sa configuration / ou fichier de config
+- bouton supprimer (peut faire aussi reset)
+
+- à la fin du projet, peut être bien de faire un bouton record qui enregistrerait avec timestamp tous les messages ivy pour les rejouer ensuite
+    et réafficher tout le déroulé
+- à la fin du projet, encore plus terrible: pouvoir enregistrer les commandes avec du temps (sortes de macro)

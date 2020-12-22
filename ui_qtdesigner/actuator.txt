@@ -1,3 +1,0 @@
-Bras Rétracté Déployé
-Pompe Active Déployé
-Vitesse 0 5 10 20

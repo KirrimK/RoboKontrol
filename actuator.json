@@ -1,0 +1,28 @@
+{
+  "Actionneur": [
+    {
+      "nom": "Pompe",
+      "choix": "[\"Activé\", \"Desactive\"]",
+      "choix_initial": 1,
+      "robot": "[0, 1, 2, 5, 6]"
+    },
+    {
+      "nom": "Bras",
+      "choix": "[\"Retracte\", \"Deploye\"]",
+      "choix_initial": 0,
+      "robot": "[0, 2, 3, 4, 6, 7]"
+    },
+    {
+      "nom": "actionneur3",
+      "choix": "[\"2\", \"7\", \"10\", \"4\", \"2\"]",
+      "choix_initial": 2,
+      "robot": "[3, 4, 5]"
+    },
+    {
+      "nom": "actionneur4",
+      "choix": "[\"Un peu\", \"Enormement\", \"Beaucoup\", \"A la folie\"]]",
+      "choix_initial": 3,
+      "robot": "[3, 4, 5, 1 , 4]"
+    }
+  ]
+}
