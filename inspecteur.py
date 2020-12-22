@@ -1,6 +1,7 @@
 import backend
 import boite_robot
 from PyQt5 import QtWidgets, QtCore
+import time
 
 
 class Inspecteur(QtWidgets.QWidget):
@@ -12,8 +13,9 @@ class Inspecteur(QtWidgets.QWidget):
     # actionneur_list_changed_signal = QtCore.pyqtSignal(list)
     # capteur_list_changed_signal = QtCore.pyqtSignal(list)
 
-    def __init__(self, parent_widget, parent_layout, main_window):
+    def __init__(self, parent_widget, parent_layout, main_window, backend):
         super(Inspecteur, self).__init__()
+        self.backend = backend
         self.main_window = main_window
         self.widget_parent = parent_widget
         self.layout_parent = parent_layout
@@ -21,12 +23,12 @@ class Inspecteur(QtWidgets.QWidget):
         # Dictionnaire des robots présents (k=nom, v=boite robot)
         self.current_robots_dic = {}
         # Création de l'objet Backend
-        self.backend = backend.Backend()
         # Création et récupération de la liste actuelle des noms des robots présents
-        # self.current_robots_list = self.backend.get_all_robots()                                  #TODO: backend.get_all_robots() renvoie "AttributeError: 'Backend' object has no attribute 'annu'"
+        self.current_robots_list = self.backend.get_all_robots()
 
         # Connexion du signal mise à jour des robots avec la comande pour mettre à jour l'affichage des robots
-        # self.backend.new_message_signal.connect(self.update_robot)                                       # TODO: ajouter un signal de mise à jour des info robots dans blackend
+
+
 
     @QtCore.pyqtSlot()
     def update_robot(self):

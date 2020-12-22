@@ -9,12 +9,13 @@ import inspecteur
 LIST_ROBOTS = ['Robot0', 'Robot1', 'Robot2']
 
 class Window(object):
-    def __init__(self, main_window, number_robots=2):
+    def __init__(self, main_window, backend):
         main_window.setObjectName("main_window")
         main_window.resize(1091, 782)
         main_window.setWindowTitle("Form")
         self.main_window = main_window
-        self.number_robots = number_robots
+        self.number_robots = 2
+        self.backend = backend
 
         self.layout_window = QtWidgets.QVBoxLayout(main_window)
 
@@ -41,13 +42,28 @@ class Window(object):
         self.layout_window.addWidget(self.menu_area)
 
         self.layout_map_inspector = QtWidgets.QHBoxLayout()
+
+
+
+
+
+
+
         self.map_view = QtWidgets.QGraphicsView(main_window)     #TODO: intégrer la map de Jacques
         self.map_view.setMinimumSize(QtCore.QSize(0, 250))
+
+
+
+
+
+
+
+
         self.layout_map_inspector.addWidget(self.map_view)
 
         self.create_inspecteur_scrollbar(main_window)
 
-        self.inspecteur = inspecteur.Inspecteur(self.inspector_scroll_area, self.layout_inspector, self.main_window)
+        self.inspecteur = inspecteur.Inspecteur(self.inspector_scroll_area, self.layout_inspector, self.main_window, self.backend)
 
         for i in range(self.number_robots):
             self.nom_robot = "Robot {}".format(str(i))
@@ -70,8 +86,8 @@ class Window(object):
         """Crée  la QScrollBar qui contient un QPushButton 'Ajouter' et auquel on ajoutera les boites (QGroupBox) robots """
         self.inspector_scroll_area = QtWidgets.QScrollArea(main_window)
         # self.inspector_scroll_area.setStyleSheet("background-color: deepskyblue")  #customisation de la boite robot(couleur fond)
-        self.inspector_scroll_area.setMinimumSize(QtCore.QSize(350, 0))
-        self.inspector_scroll_area.setMaximumSize(QtCore.QSize(350, 16777215))
+        #self.inspector_scroll_area.setMinimumSize(QtCore.QSize(350, 0))
+        #self.inspector_scroll_area.setMaximumSize(QtCore.QSize(350, 16777215))
         self.inspector_scroll_area.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.inspector_scroll_area.setWidgetResizable(True)
         self.scrollArea = QtWidgets.QWidget()
@@ -98,11 +114,11 @@ def show_help(main_window):
     aide.exec_()
 
 
-def main():
+def main(backend):
     import sys
     app = QtWidgets.QApplication(sys.argv)
     main_window = QtWidgets.QWidget()
-    Window(main_window)
+    Window(main_window, backend)
     main_window.show()
     sys.exit(app.exec_())
 
