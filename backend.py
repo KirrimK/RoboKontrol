@@ -45,6 +45,7 @@ class Backend:
 
     def __exit__(self, t, value, traceback):
         self.runned_time = time() - self.start_time
+        self.runs = False
         if self.radio_started:
             self.radio.stop()
             if self.print_flag != -1:
