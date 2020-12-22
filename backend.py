@@ -38,7 +38,7 @@ class Backend:
             self.runs = True
             self.radio_started = True
             if self.print_flag != -1:
-                print("Backend Lancé.")
+                print("Backend Lancé. Ctrl+C pour arrêter.")
         else:
             raise Exception("Connectez une radio ET un annuaire avant de lancer le backend.")
         return self
