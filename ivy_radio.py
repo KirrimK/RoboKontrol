@@ -2,6 +2,7 @@
 
 from time import sleep, time, gmtime
 from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
+import annuaire
 
 IVYAPPNAME = 'Radio'
 
@@ -136,7 +137,12 @@ class Radio :
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
+            add = False
             if not self.backend.annu.find (rid).check_eqp (sid):
+                add = True
+            elif self.backend.annu.find (rid,sid).get_type () is not annuaire.Actionneur :
+                add = True
+            if add:
                 self.backend.annu.find (rid).create_eqp (sid, "Capteur", unit)
             
         
