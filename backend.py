@@ -1,6 +1,7 @@
 """Module backend.py - Gestion jointe de l'annuaire et de la communication par ivy"""
 
-from time import sleep
+import sys
+from time import sleep, time
 import annuaire
 import ivy_radio as rd
 
@@ -11,12 +12,19 @@ class Backend:
     Entrée:
         - annu (annuaire.Annuaire)
         - radio (rd.Radio)
-        - flag (bool, default = False)
+        - flag (int, default = 0)
+            - -1: vraiment aucune impression console
+            -  0: pas d'impression console à part le message de lancement et celui d'arrêt
+            -  1: impression basique toutes les 0.05s de l'annuaire associé dans la console
+                (efface très vite toutes les autres entrées dans la console)
+            -  2: impression "statique" de l'annuaire dans la console
     """
 
-    def __init__(self, annu=None, radio=None, print_flag=False):
+    def __init__(self, annu=None, radio=None, print_flag=0):
         self.runs = False
+        self.radio_started = False
         self.print_flag = print_flag
+        self.start_time = 0
         self.runned_time = 0
         if radio is not None:
             self.attach_radio(radio)
@@ -24,28 +32,42 @@ class Backend:
             self.attach_annu(annu)
 
     def __enter__(self):
-        self.runs = True
+        self.start_time = time()
+        if self.radio and self.annu:
+            self.radio.start()
+            self.runs = True
+            self.radio_started = True
+            if self.print_flag != -1:
+                print("Backend Lancé.")
+        else:
+            raise Exception("Connectez une radio ET un annuaire avant de lancer le backend.")
         return self
 
     def __exit__(self, t, value, traceback):
-        self.radio.stop()
-        print("\nBackend Arrêté. Temps d'exécution: "+str(self.runned_time)[:6]+"s.")
+        if self.radio_started:
+            self.radio.stop()
+            if self.print_flag != -1:
+                print("\nBackend Arrêté. Temps d'exécution: "+str(self.runned_time)[:6]+"s.")
 
-    def run(self):
-        """Connecte le backend à Ivy et débute la récupération des données"""
-        if self.radio and self.annu:
-            self.radio.start()
-            while self.runs:
-                if self.print_flag:
-                    print(str(self.runned_time)[:6]+'s')
-                    print(self.annu)
-                try:
-                    sleep(0.05)
-                except KeyboardInterrupt:
-                    self.runs = False
-                self.runned_time += 0.05
-        else:
-            print("Il faut connecter une radio ET un annuaire pour faire marcher le backend.")
+    def run_as_loop(self):
+        """Met en place une boucle infinie permettant une exécution sans interface"""
+        while self.runs:
+            if self.print_flag == 1: #--spam-print
+                print(str(self.runned_time)[:6]+'s')
+                print(self.annu)
+            if self.print_flag == 2: #--erase-print
+                annu_str = self.annu.__str__()
+                number_lines = 1 + annu_str.count("\n")
+                print(('\n' + 50 * " ") * number_lines)
+                print((number_lines + 1) * "\033[F")
+                print(str(self.runned_time)[:6]+'s')
+                print(annu_str)
+                print((number_lines + 3) * "\033[F")
+            try:
+                sleep(0.05)
+                self.runned_time = time() - self.start_time
+            except KeyboardInterrupt:
+                self.runs = False
 
     def attach_annu(self, annu):
         """Attache l'annuaire 'annu' au backend
@@ -175,5 +197,12 @@ class Backend:
         return eqp_type, eqp_state, eqp_last_updt, eqp_last_cmd
 
 if __name__ == '__main__':
-    with Backend(annuaire.Annuaire(), rd.Radio(), True) as backend:
-        backend.run()
+    PRINT_FL = 0
+    if len(sys.argv) == 2 and sys.argv[1] == "--no-print":
+        PRINT_FL = -1
+    if len(sys.argv) == 2 and sys.argv[1] == "--spam-print":
+        PRINT_FL = 1
+    if len(sys.argv) == 2 and sys.argv[1] == "--erase-print":
+        PRINT_FL = 2
+    with Backend(annuaire.Annuaire(), rd.Radio(), PRINT_FL) as backend:
+        backend.run_as_loop()
