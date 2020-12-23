@@ -118,13 +118,38 @@ class Radio :
             
                 
     def on_actudecl (self, sender, rid, aid, minV, maxV, step = 1, unit = None):
+        """Fonction appelée automatiquement par IvyBind. Ajoute l'actionnneur aid sur le robot rid.
+        Si le robot rid n'est pas connu, il est ajouté.
+        Si aid est le nom d'un capteur déjà présent sur le robot, la valeur est gardée.
+        Arguments :
+            _ sender (Ivy_client)
+            _ rid (str) : Nom du robot
+            _ aid (str) : Nom de l'actionneur
+            _ minV (str) : Valeur minimale que l'actionneur peut prendre.
+            _ maxV (str) : Valeur maximale que l'actionneur peut prendre
+            _step (str) : Pas de déplacement de l'actionneur.
+            _ unit (str) : Unité de la valeur."""
         if self.backend is not None:
+            Val = False
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
+            elif self.backend.annu.find (rid,aid) is not None :
+                Val = True
+                valeur = self.backend.annu.find (rid,aid).get_state () [0]
             self.backend.annu.find (rid).create_eqp (aid, "Actionneur", float(minV), float(maxV), float(step), unit)
+            if Val:
+                valeur = self.backend.annu.find (rid,aid).set_state (valeur)
             
 
     def on_captreg (self, sender, rid, sid, valeur):
+        """Fonction appelée automatiquement par IvyBind. Change la valeur du capteur sid sur le robot rid.
+        Si aucun robot rid n'est connu, le robot est ajouté.
+        Si le robot rid n'a pas de capteur sid, le capteur est ajouté.
+        Arguments :
+            _ sender (Ivy_client)
+            _ rid (str) : Nom du robot
+            _ sid (str) : Nom du capteur
+            _ valeur (str) : Valeur transmise par le capteur."""
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
@@ -134,6 +159,14 @@ class Radio :
             
 
     def on_captdecl (self, sender, rid, sid, unit= None):
+        """Fonction appellée automatiquement par IvyBind. Place le capteur sid sur le robot rid dans l'annuaire.
+        Si le robot rid n'est pas connu, il est ajouté.
+        Si le robot a déjà un capteur qui a le nom sid, la valeur est gardée.
+        Si le robot a déjà un actionneur nommé sid, la fonction ne fait rien.
+        Arguments : _ sender (Ivy_client)
+                               _ rid (str) : Nom du robot
+                               _ sid (str) : Nom du capteur
+                               _ unit (str) : unité du capteur"""
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
