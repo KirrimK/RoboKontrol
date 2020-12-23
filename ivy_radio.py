@@ -138,7 +138,7 @@ class Radio :
                 valeur = self.backend.annu.find (rid,aid).get_state () [0]
             self.backend.annu.find (rid).create_eqp (aid, "Actionneur", float(minV), float(maxV), float(step), unit)
             if Val:
-                valeur = self.backend.annu.find (rid,aid).set_state (valeur)
+                self.backend.annu.find (rid,aid).set_state (valeur)
             
 
     def on_captreg (self, sender, rid, sid, valeur):
