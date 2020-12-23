@@ -140,10 +140,13 @@ class Radio :
             add = False
             if not self.backend.annu.find (rid).check_eqp (sid):
                 add = True
-            elif self.backend.annu.find (rid,sid).get_type () is not annuaire.Actionneur :
+                val = None
+            elif self.backend.annu.find (rid, sid).get_type () is not annuaire.Actionneur :
                 add = True
+                val = self.backend.annu.find (rid, sid).get_state() [0]
             if add:
                 self.backend.annu.find (rid).create_eqp (sid, "Capteur", unit)
+                self.backend.annu.find (rid).set_state (val)
             
         
     def on_descrreg (self, sender, *args):
