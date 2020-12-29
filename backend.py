@@ -172,7 +172,7 @@ class Backend:
         rbt = self.annu.find(robot_name)
         pos = rbt.get_pos()
         eqps = rbt.get_all_eqp()
-        return pos, eqps, rbt.last_updt_pos
+        return (pos, eqps, rbt.last_updt_pos)
 
     def getdata_eqp(self, robot_name, eqp_name):
         """Renvoie toutes les informations sur un équipement
@@ -189,6 +189,7 @@ class Backend:
                 (se référer à l'équipement en question)
             - eqp_last_cmd (float | None): si l'eqp est un actionneur,
                 le timestamp de la dernière commande envoyée par l'user
+            - eqp_unit (str): le type de l'équipement
         """
         eqp = self.annu.find(robot_name, eqp_name)
         eqp_type = eqp.get_type()
@@ -198,7 +199,8 @@ class Backend:
             eqp_last_cmd = eqp.get_last_cmd()
         else:
             eqp_last_cmd = None
-        return eqp_type, eqp_state, eqp_last_updt, eqp_last_cmd
+        eqp_unit = eqp.get_unit()
+        return (eqp_type, eqp_state, eqp_last_updt, eqp_last_cmd, eqp_unit)
 
 if __name__ == '__main__':
     PRINT_FL = 0
