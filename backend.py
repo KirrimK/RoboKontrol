@@ -165,9 +165,10 @@ class Backend:
             - robot_name (str): nom du robot
 
         Sortie:
-            - pos (float, float, float): le "vecteur" position du robot
-            - eqps (list of str): liste des noms des équipements attachés au robot
-            - last_updt_pos (float): le timestamp de dernière mise à jour de la position
+            - tuple (tuple, list, float)
+                - [0] pos (float, float, float): le "vecteur" position du robot
+                - [1] eqps (list of str): liste des noms des équipements attachés au robot
+                - [2] last_updt_pos (float): le timestamp de dernière mise à jour de la position
         """
         rbt = self.annu.find(robot_name)
         pos = rbt.get_pos()
@@ -182,14 +183,15 @@ class Backend:
             - eqp_name (str): nom de l'équipement
 
         Sortie:
-            - eqp_type (type): le type de l'équipement
-            - eqp_state (variable): l'état actuel de l'équipement
-                (se référer à l'équipement en question)
-            - eqp_last_updt (float): le timestamp de la dernière info reçue
-                (se référer à l'équipement en question)
-            - eqp_last_cmd (float | None): si l'eqp est un actionneur,
-                le timestamp de la dernière commande envoyée par l'user
-            - eqp_unit (str): le type de l'équipement
+            - tuple (type, any, float, float | None)
+                - [0] eqp_type (type): le type de l'équipement
+                - [1] eqp_state (any): l'état actuel de l'équipement
+                    (se référer à l'équipement en question)
+                - [2] eqp_last_updt (float): le timestamp de la dernière info reçue
+                    (se référer à l'équipement en question)
+                - [3] eqp_last_cmd (float | None): si l'eqp est un actionneur,
+                    le timestamp de la dernière commande envoyée par l'user
+                - [4] eqp_unit (str): le type de l'équipement
         """
         eqp = self.annu.find(robot_name, eqp_name)
         eqp_type = eqp.get_type()
