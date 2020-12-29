@@ -1,0 +1,65 @@
+-- TEST: annuaire_equipement.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: annuaire_capteur.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: annuaire_actionneur.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: annuaire_binaire.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: annuaire_led.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: annuaire_batterie.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: annuaire_robot.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: annuaire_annuaire.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: backend_agressif.txt --
+Captured stdout:
+Backend Lancé. Ctrl+C pour arrêter.
+0.1512s
+Annuaire:
+
+0.2020s
+Annuaire:
+
+0.2524s
+Annuaire:
+
+0.3026s
+Annuaire:
+ True
+0.3528s
+Annuaire:
+ True
+0.4031s
+Annuaire:
+ True
+
+Captured Warnings:
+{message : DeprecationWarning('isAlive() is deprecated, use is_alive() instead'), category : 'DeprecationWarning', filename : '/home/remyb/.local/lib/python3.8/site-packages/ivy/ivy.py', lineno : 918, line : None}
+
