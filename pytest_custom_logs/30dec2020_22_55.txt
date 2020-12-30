@@ -38,25 +38,53 @@ Captured stdout:
 
 Captured Warnings:
 
+-- TEST: backend_basic --
+Captured stdout:
+Backend Lancé. Ctrl+C pour arrêter.
+0s
+Annuaire:
+Robot [test]
+| Position: x:1500 y:1000 theta:0
+
+
+                                                  
+                                                  
+                                                  
+                                                  
+[F[F[F[F[F
+0s
+Annuaire:
+Robot [test]
+| Position: x:1500 y:1000 theta:0
+
+[F[F[F[F[F[F[F
+
+
+Backend Arrêté. Temps d'exécution: 0.0003s.
+
+Captured Warnings:
+{message : DeprecationWarning('isAlive() is deprecated, use is_alive() instead'), category : 'DeprecationWarning', filename : '/home/remyb/.local/lib/python3.8/site-packages/ivy/ivy.py', lineno : 918, line : None}
+{message : ResourceWarning("unclosed <socket.socket fd=22, family=AddressFamily.AF_INET, type=SocketKind.SOCK_DGRAM, proto=0, laddr=('0.0.0.0', 2010)>"), category : 'ResourceWarning', filename : '/home/remyb/.local/lib/python3.8/site-packages/ivy/ivy.py', lineno : 860, line : None}
+
 -- TEST: backend_agressif.txt --
 Captured stdout:
 Backend Lancé. Ctrl+C pour arrêter.
-0.1512s
+0.1509s
 Annuaire:
 
-0.2019s
+0.2011s
 Annuaire:
 
-0.2523s
+0.2514s
 Annuaire:
 
-0.3025s
+0.3017s
 Annuaire:
  True
-0.3529s
+0.3520s
 Annuaire:
  True
-0.4032s
+0.4022s
 Annuaire:
  True
 

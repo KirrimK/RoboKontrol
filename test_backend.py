@@ -1,11 +1,12 @@
 """Module test_backend.py - module de tests du module backend"""
 
-import os
+import subprocess
 import time
 import pytest
 import backend as bkd
 import annuaire as anr
 import ivy_radio as rdo
+from utilitaire_test import read_ivytest_file, results_to_file
 
 RADIO = rdo.Radio()
 # Il a été nécessaire de créer une Radio en commun car sinon, il était
@@ -13,21 +14,23 @@ RADIO = rdo.Radio()
 # Il persiste d'ailleurs des alertes indiquant que les sockets ne sont pas fermés
 # TODO: investiguer le problème de sockets
 
-def results_to_file(test_name, warn_res, std_res, test_time=int(time.time())):
-    """Fonction qui enregistre les résultats d'un test dans un fichier"""
-    filepath = "pytest_custom_logs/{}".format(test_time)
-    dirpath = "pytest_custom_logs"
-    os.makedirs(dirpath, exist_ok=True)
-    with open(filepath, "a") as file:
-        file.write("-- TEST: {} --\n".format(test_name))
-        file.write("Captured stdout:\n")
-        file.write(std_res.readouterr().out)
-        file.write("\nCaptured Warnings:\n")
-        for elt in warn_res:
-            file.write(str(elt)+"\n")
-        file.write("\n")
+def test_backend_send_cmds(recwarn, capsys):
+    """Test des envoi de commandes de la classe Backend"""
+    #lancer l'enregistreur de messages
+    subprocess.Popen(['python', 'utilitaire_test.py', 'backend_send_cmds'])#, '0.5'])
+    with bkd.Backend(anr.Annuaire(), RADIO) as backend:
+        #backend.sendeqpcmd('test', 'act', 0) #ne marcheront pas si pas robot ni eqp correspondant
+        #backend.sendeqpcmd('nope', 'act', 1)
+        backend.radio.send_cmd("StopIvyTest") #TODO: semble ne rien faire
 
-def test_backend_normal(recwarn, capsys):
+    #vérification de l'envoi des messages
+    time.sleep(0.1)
+    ivy_test_list = read_ivytest_file('backend_send_cmds')
+    assert ('Radio@localhost', 'StopIvyTest') in ivy_test_list
+
+    results_to_file("backend_send_cmds", recwarn, capsys)
+
+def test_backend_basic(recwarn, capsys):
     """Tests de la classe Backend, avec un fonctionnement "normal" """
     with bkd.Backend(anr.Annuaire(), RADIO) as backend:
         backend.track_robot("test")
@@ -50,12 +53,10 @@ def test_backend_normal(recwarn, capsys):
         assert backend.getdata_eqp("test", 'act')[1] == (None, 0, 1, 1)
         assert backend.getdata_eqp("test", 'act')[3] is None
         assert backend.getdata_eqp("test", 'act')[4] == 'deg'
-        backend.sendeqpcmd('test', 'act', 0)
-        backend.sendeqpcmd('nope', 'act', 1)
-        backend.sendposcmd_robot('test', (1500, 1000, 0)) #TODO: ne fonctionne pas
+        #backend.sendposcmd_robot('test', (1500, 1000, 0)) #TODO: ne fonctionne pas
         backend.forget_robot("test")
 
-    results_to_file("backend_normal", recwarn, capsys)
+    results_to_file("backend_basic", recwarn, capsys)
 
 def test_backend_agressif(recwarn, capsys):
     """Première batterie de tests de la classe Backend

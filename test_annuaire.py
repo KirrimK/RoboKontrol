@@ -1,22 +1,7 @@
 """Module test_annuaire.py - module de tests du module annuaire"""
 
-import os
-import time
 import annuaire
-
-def results_to_file(test_name, warn_res, std_res, test_time=int(time.time())):
-    """Fonction qui enregistre les résultats d'un test dans un fichier"""
-    filepath = "pytest_custom_logs/{}".format(test_time)
-    dirpath = "pytest_custom_logs"
-    os.makedirs(dirpath, exist_ok=True)
-    with open(filepath, "a") as file:
-        file.write("-- TEST: {} --\n".format(test_name))
-        file.write("Captured stdout:\n")
-        file.write(std_res.readouterr().out)
-        file.write("\nCaptured Warnings:\n")
-        for elt in warn_res:
-            file.write(str(elt)+"\n")
-        file.write("\n")
+from utilitaire_test import results_to_file
 
 def test_equipement(recwarn, capsys):
     """Tests de la classe Equipement"""
