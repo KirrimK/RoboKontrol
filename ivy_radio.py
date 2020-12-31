@@ -2,7 +2,7 @@
 
 from time import sleep, time, gmtime
 from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
-import annuaire
+from annuaire import Actionneur
 
 IVYAPPNAME = 'Radio'
 
@@ -174,7 +174,7 @@ class Radio :
             if not self.backend.annu.find (rid).check_eqp (sid):
                 add = True
                 val = None
-            elif self.backend.annu.find (rid, sid).get_type () is not annuaire.Actionneur :
+            elif self.backend.annu.find (rid, sid).get_type () is not Actionneur :
                 add = True
                 val = self.backend.annu.find (rid, sid).get_state() [0]
             if add:
@@ -210,6 +210,6 @@ if __name__ == '__main__' :
     Radio1 = Radio ()
     Radio1.start()
     #Actual tests :
-    
+    Radio1.send_cmd("test")
     #End tests
     Radio1.stop ()

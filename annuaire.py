@@ -133,7 +133,7 @@ class Binaire(Actionneur):
     def __str__(self):
         nom = self.nom
         val = self.valeur
-        return "Binaire [{}] Val.: {} ".format(nom, val)
+        return "Binaire [{}] Val.: {}".format(nom, val)
 
 class LED(Actionneur):
     """Une class définissant une LED, dont les commandes se font sur 3x 255 valeurs"""
@@ -143,7 +143,7 @@ class LED(Actionneur):
     def __str__(self):
         nom = self.nom
         val = self.valeur
-        return "LED [{}] RGB: {} ".format(nom, val)
+        return "LED [{}] RGB: {}".format(nom, val)
 
     def get_state(self):
         """Retourne les trois valeurs RGB de la LED (si elles sont connues)
@@ -162,8 +162,9 @@ class LED(Actionneur):
         Entrée:
         - valeur tuple (int, int, int) (chaque int entre 0 et 255)
         """
-        self.valeur = valeur
-        self.updt()
+        if isinstance(valeur, tuple) and len(valeur) == 3:
+            self.valeur = valeur
+            self.updt()
 
 class Capteur(Equipement):
     """Définit un capteur avec un nom, une valeur et une unité

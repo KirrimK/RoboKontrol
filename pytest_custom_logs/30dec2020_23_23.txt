@@ -1,0 +1,97 @@
+-- TEST: annuaire_equipement.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: annuaire_capteur.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: annuaire_actionneur.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: annuaire_binaire.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: annuaire_led.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: annuaire_batterie.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: annuaire_robot.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: annuaire_annuaire.txt --
+Captured stdout:
+
+Captured Warnings:
+
+-- TEST: backend_basic --
+Captured stdout:
+Backend Lancé. Ctrl+C pour arrêter.
+0s
+Annuaire:
+Robot [test]
+| Position: x:1500 y:1000 theta:0
+
+
+                                                  
+                                                  
+                                                  
+                                                  
+[F[F[F[F[F
+0s
+Annuaire:
+Robot [test]
+| Position: x:1500 y:1000 theta:0
+
+[F[F[F[F[F[F[F
+
+
+Backend Arrêté. Temps d'exécution: 0.0003s.
+
+Captured Warnings:
+{message : DeprecationWarning('isAlive() is deprecated, use is_alive() instead'), category : 'DeprecationWarning', filename : '/home/remyb/.local/lib/python3.8/site-packages/ivy/ivy.py', lineno : 918, line : None}
+
+-- TEST: backend_agressif.txt --
+Captured stdout:
+Backend Lancé. Ctrl+C pour arrêter.
+0.1509s
+Annuaire:
+
+0.2012s
+Annuaire:
+
+0.2515s
+Annuaire:
+
+0.3018s
+Annuaire:
+ True
+0.3521s
+Annuaire:
+ True
+0.4026s
+Annuaire:
+ True
+
+Captured Warnings:
+{message : DeprecationWarning('isAlive() is deprecated, use is_alive() instead'), category : 'DeprecationWarning', filename : '/home/remyb/.local/lib/python3.8/site-packages/ivy/ivy.py', lineno : 918, line : None}
+
+-- TEST: radio_basic --
+Captured stdout:
+
+Captured Warnings:
+
