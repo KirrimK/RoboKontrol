@@ -209,7 +209,9 @@ if __name__ == '__main__' :
     #Tests du programme
     Radio1 = Radio ()
     Radio1.start()
+    sleep (0.5) #/!\ Très important, la ligne précédente s'execute lentement
     #Actual tests :
-    Radio1.send_cmd("test")
+    
     #End tests
+    sleep (1)
     Radio1.stop ()
