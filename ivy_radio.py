@@ -131,12 +131,18 @@ class Radio :
             _ unit (str) : Unité de la valeur."""
         if self.backend is not None:
             Val = False
+            Binaire = False
+            if float (minV) + float (step) >= float (maxV) :
+                Binaire = True
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
             elif self.backend.annu.find (rid,aid) is not None :
                 Val = True
                 valeur = self.backend.annu.find (rid,aid).get_state () [0]
-            self.backend.annu.find (rid).create_eqp (aid, "Actionneur", float(minV), float(maxV), float(step), unit)
+            if Binaire :
+                self.backend.annu.find (rid).create_eqp (aid, "Binaire")
+            else :
+                self.backend.annu.find (rid).create_eqp (aid, "Actionneur", float(minV), float(maxV), float(step), unit)
             if Val:
                 self.backend.annu.find (rid,aid).set_state (valeur)
             
@@ -211,7 +217,7 @@ if __name__ == '__main__' :
     Radio1.start()
     sleep (0.5) #/!\ Très important, la ligne précédente s'execute lentement
     #Actual tests :
-    
+    Radio1.send_cmd (".die pyivyprobe")
     #End tests
     sleep (1)
     Radio1.stop ()
