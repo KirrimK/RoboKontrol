@@ -2,7 +2,6 @@
 (enregistre tous les messages passés sur Ivy, et les enregistre dans un fichier)"""
 
 import os
-import subprocess
 import time
 import sys
 from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg
@@ -13,17 +12,20 @@ STOPMSG = "StopIvyTest"
 
 def results_to_file(test_name, warn_res, std_res, test_time=int(time.time())):
     """Fonction qui enregistre les résultats d'un test dans un fichier"""
-    filepath = "pytest_custom_logs/{}".format(test_time)
+    filepath = "pytest_custom_logs/{}.txt".format(test_time)
     dirpath = "pytest_custom_logs"
     os.makedirs(dirpath, exist_ok=True)
     with open(filepath, "a") as file:
         file.write("-- TEST: {} --\n".format(test_name))
-        file.write("Captured stdout:\n")
-        file.write(std_res.readouterr().out)
-        file.write("\nCaptured Warnings:\n")
-        for elt in warn_res:
-            file.write(str(elt)+"\n")
-        file.write("\n")
+        std_out = std_res.readouterr().out
+        if std_out != "":
+            file.write("Captured stdout:\n")
+            file.write(std_out)
+        if len(warn_res) > 0:
+            file.write("\nCaptured Warnings:\n")
+            for elt in warn_res:
+                file.write(str(elt)+"\n")
+            file.write("\n")
 
 def read_ivytest_file(test_name):
     """Lit les messages enregistrés par l'utilitaire_ivytest"""
@@ -41,32 +43,20 @@ class TestRadio:
     pour déclencher l'arrêt automatique après un certain temps
     (afin d'éviter les threads qui continuent à tourner en arrière plan)
     """
-    def __init__(self, test_name, countdown=None):
+    def __init__(self, test_name):
         IvyInit (IVYAPPNAME,IVYAPPNAME+" is ready!")
         self.bus = "127.255.255.255:2010"
         self.nom = IVYAPPNAME
         IvyBindMsg (self.on_msg, MSG)
         IvyBindMsg (self.on_stopmsg, STOPMSG)
         self.file_name = "{}.txt".format(test_name)
-        self.countdown = countdown
-        if self.countdown is not None:
-            pass
-            #subprocess.Popen(self.countdown_loop()) #TODO: trouver un moyen de terminer surement le scanneur
         with open(self.file_name, "w") as file:
-            file.write("Ivy Logs for test:\n")
+            file.write("")
 
     def on_msg(self, sender, message):
         """Enregistre chaque message reçu sur Ivy"""
         with open(self.file_name, "a") as file:
             file.write("{}#{}\n".format(str(sender), str(message)))
-
-    def countdown_loop(self):
-        """Attends la fin du compte à rebours pour couper automatiquement le scanneur
-        (permet d'éviter les fiascos si la radio n'émet pas le message de fin de test)"""
-        start_time = time.time()
-        while time.time() < start_time + self.countdown:
-            time.sleep(0.01)
-        self.stop()
 
     def on_stopmsg(self, *args):
         """Exécuté quand la commande d'arrêt du test est enregistrée"""
@@ -84,11 +74,6 @@ if __name__ == '__main__':
     if len(sys.argv) == 2:
         test_nm = sys.argv[1]
         test_radio = TestRadio(test_nm)
-        test_radio.start()
-    elif len(sys.argv) == 3:
-        test_nm = sys.argv[1]
-        countdown = float(sys.argv[2])
-        test_radio = TestRadio(test_nm, countdown)
         test_radio.start()
     else:
         print("Arguments invalides")
