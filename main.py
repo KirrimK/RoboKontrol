@@ -1,5 +1,6 @@
 """main.py"""
 # origine mise en bas à gauche x vers la droite, y vers le haut, theta= 0 dans axe x sens trigo
+# la radio a besoin de 0.5secondes pour se lancer.
 import window
 import backend as ben
 import annuaire as an
