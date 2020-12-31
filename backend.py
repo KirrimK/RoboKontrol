@@ -57,7 +57,7 @@ class Backend:
             raise Exception("Connectez une radio ET un annuaire avant de lancer le backend.")
         return self
 
-    def __exit__(self, t, value, traceback):
+    def __exit__(self, excp_type, value, traceback):
         self.runned_time = time() - self.start_time
         self.runs = False
         self.stop_radio()

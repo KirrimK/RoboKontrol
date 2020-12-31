@@ -179,7 +179,7 @@ class Radio :
                 val = self.backend.annu.find (rid, sid).get_state() [0]
             if add:
                 self.backend.annu.find (rid).create_eqp (sid, "Capteur", unit)
-                self.backend.annu.find (rid).set_state (val)
+                self.backend.annu.find (rid, sid).set_state (val)
             
         
     def on_descrreg (self, sender, *args):

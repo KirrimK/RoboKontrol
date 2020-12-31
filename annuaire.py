@@ -425,5 +425,3 @@ class Annuaire:
         - list of (str)
         """
         return list(self.robots.keys())
-
-#TODO: ajouter plus de features recommandées

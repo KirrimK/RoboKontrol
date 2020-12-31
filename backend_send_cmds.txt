@@ -1,2 +1,3 @@
 Radio@localhost#Radio is ready!
+Radio@localhost#ActuatorCmd test act 0
 Radio@localhost#StopIvyTest
