@@ -1,9 +1,7 @@
 """Module ui_window.py - Crée la fenêtre comportant l'inspecteur, la carte et d'autres fonctionnalités"""
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-
-import boite_robot
 import inspecteur
 
 QPUSHBUTTON = "background-color: grey; border 2px solid rgb(113, 113, 113);border-width: 2px; " \
@@ -98,10 +96,6 @@ def show_help(main_window):
             list_aide.append(line)
     aide.setText("".join(list_aide))
     aide.exec_()
-
-
-def set_style_window(main_window: QtWidgets):
-    main_window.setStyleSheet(QPUSHBUTTON + QLCD_STYLE + QPROGRESSBAR)
 
 
 def main(backend):

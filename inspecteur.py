@@ -50,7 +50,6 @@ class Inspecteur(QtWidgets.QWidget):
     def add_robot(self, nom_robot):
         """ Ajoute le robot dont le nom est placé en paramètre sous forme d'une boite robot dans la zone inspecteur """
         self.boite_robot = boite_robot.BoiteRobot(self.widget_parent, self.layout_parent, str(nom_robot), self)
-        self.boite_robot.create_boite_robot()
         self.current_robots_dic[self.boite_robot.rid] = self.boite_robot
 
     def remove_robot(self, nom_robot):
