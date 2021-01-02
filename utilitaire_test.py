@@ -28,13 +28,16 @@ def results_to_file(test_name, warn_res, std_res, test_time=int(time.time())):
             file.write("\n")
 
 def read_ivytest_file(test_name):
-    """Lit les messages enregistrés par l'utilitaire_ivytest"""
+    """Lit les messages enregistrés par l'utilitaire_ivytest,
+    puis supprime le fichier temporaire"""
     file_name = "{}.txt".format(test_name)
     msg_list = []
     with open(file_name, 'r') as file:
         for line in file:
             line_split = line.strip().split("#")
             msg_list.append((line_split[0], line_split[1]))
+    if os.path.isfile(file_name):
+        os.remove(file_name)
     return msg_list
 
 class TestRadio:
