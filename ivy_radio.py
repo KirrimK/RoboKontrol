@@ -8,7 +8,6 @@ IVYAPPNAME = 'Radio'
 
 	#Informations
 """Le premier groupe de capture est le nom du robot"""
-#DESCR_REG = 'Description (.+) (.*)'
 CAPT_DECL = "CaptDecl (.+) (.+) (.*)"
 ACTU_DECL = 'ActuatorDecl (.*) (.*) (.*) (.*) (.*) (.*)'
 POS_REG = 'PosReport (.+) (.+);(.+);(.+)'
@@ -16,7 +15,6 @@ CAPT_REG = 'CaptReport (.+) (.+) (.+)'
 
 	#Commands
 """Le premier argument sera le nom du robot"""
-#DESCR_CMD = "DescrCmd {}"
 SPEED_CMD = "SpeedCmd {} {},{},{}"
 POS_CMD =  "PosCmd {} {},{}"
 POS_ORIENT_CMD = "PosCmdOrient {} {},{},{}"
@@ -57,7 +55,6 @@ class Radio :
         IvyBindMsg (self.on_posreg, POS_REG)
         IvyBindMsg (self.on_msg, MSG)
         IvyBindMsg (self.on_captreg, CAPT_REG)
-        #IvyBindMsg (self.on_descrreg, DESCR_REG)
         IvyBindMsg (self.on_actudecl, ACTU_DECL)
         IvyBindMsg (self.on_captdecl, CAPT_DECL)
 
@@ -188,11 +185,6 @@ class Radio :
             if add:
                 self.backend.annu.find (rid).create_eqp (sid, "Capteur", unit)
                 self.backend.annu.find (rid, sid).set_state (val)
-            
-        
-    def on_descrreg (self, sender, *args):
-        #A modifier avec l'appel à une méthode qui enregistre le robot dans l'annuaire
-        pass
 
     def send_cmd (self,cmd):
         """Envoie du texte vers le bus Ivy et le stocke optionnellement sur les tampons
@@ -219,7 +211,7 @@ if __name__ == '__main__' :
     Radio1.start()
     sleep (0.5) #/!\ Très important, la ligne précédente s'execute lentement
     #Actual tests :
-    Radio1.send_cmd (".die pyivyprobe")
+    Radio1.send_cmd (POS_CMD.format ('test', 2000,0))
     #End tests
     sleep (1)
     Radio1.stop ()
