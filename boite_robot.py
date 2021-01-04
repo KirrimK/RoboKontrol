@@ -185,7 +185,7 @@ class BoiteRobot:
                 sensor.add_capteur()
 
         # Supprime les équipements qui ne sont plus présents
-        for name in set(self.current_sensors_list) - set(equipements_list):
+        for name in set(self.current_equipement_list) - set(equipements_list):
             equipement = self.current_equipement_dic.pop(name)
             if type(equipement) == Actuator:
                 actuator = equipements[name]
@@ -193,6 +193,11 @@ class BoiteRobot:
             if type(equipement) == Sensor:
                 sensor = equipements[name]
                 sensor.remove_capteur()
+
+        #Change les capteurs en actionneurs si neccessaire.
+        for name in current_sensors_list :
+            if type (equipements [name]) == Actuator :
+                actuator = equipments [name]
 
         # Met à jour la liste des capteurs présents
         self.current_equipement_list = equipements_list
