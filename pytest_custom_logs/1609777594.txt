@@ -1,4 +1,5 @@
 -- TEST: annuaire_equipement.txt --
+-- TEST: annuaire_capteur.txt --
 -- TEST: annuaire_actionneur.txt --
 -- TEST: annuaire_binaire.txt --
 -- TEST: annuaire_led.txt --
@@ -9,10 +10,10 @@
 Captured stdout:
 Backend Lancé. Ctrl+C pour arrêter.
 
-Backend Arrêté. Temps d'exécution: 0.5010s.
+Backend Arrêté. Temps d'exécution: 0.5026s.
 
 Captured Warnings:
-{message : ResourceWarning('subprocess 13275 is still running'), category : 'ResourceWarning', filename : '/usr/lib/python3.9/subprocess.py', lineno : 1048, line : None}
+{message : ResourceWarning('subprocess 21545 is still running'), category : 'ResourceWarning', filename : '/usr/lib/python3.9/subprocess.py', lineno : 1048, line : None}
 {message : ResourceWarning("unclosed <socket.socket fd=22, family=AddressFamily.AF_INET, type=SocketKind.SOCK_DGRAM, proto=0, laddr=('0.0.0.0', 2010)>"), category : 'ResourceWarning', filename : '/home/remyb/.local/lib/python3.9/site-packages/ivy/ivy.py', lineno : 860, line : None}
 
 -- TEST: backend_basic --
@@ -37,7 +38,7 @@ Robot [test]
 [F[F[F[F[F[F[F
 
 
-Backend Arrêté. Temps d'exécution: 0.0022s.
+Backend Arrêté. Temps d'exécution: 0.0010s.
 
 Captured Warnings:
 {message : ResourceWarning("unclosed <socket.socket fd=22, family=AddressFamily.AF_INET, type=SocketKind.SOCK_DGRAM, proto=0, laddr=('0.0.0.0', 2010)>"), category : 'ResourceWarning', filename : '/home/remyb/.local/lib/python3.9/site-packages/ivy/ivy.py', lineno : 860, line : None}
@@ -45,26 +46,32 @@ Captured Warnings:
 -- TEST: backend_agressif.txt --
 Captured stdout:
 Backend Lancé. Ctrl+C pour arrêter.
-0.1521s
+0.1518s
 Annuaire:
 
-0.2023s
+0.2020s
 Annuaire:
 
-0.2525s
+0.2522s
 Annuaire:
 
-0.3027s
+0.3024s
 Annuaire:
  True
-0.3529s
+0.3527s
 Annuaire:
  True
-0.4032s
+0.4028s
 Annuaire:
  True
 
 Captured Warnings:
+{message : ResourceWarning("unclosed <socket.socket fd=23, family=AddressFamily.AF_INET, type=SocketKind.SOCK_DGRAM, proto=0, laddr=('0.0.0.0', 2010)>"), category : 'ResourceWarning', filename : '/home/remyb/.local/lib/python3.9/site-packages/ivy/ivy.py', lineno : 860, line : None}
 {message : ResourceWarning("unclosed <socket.socket fd=22, family=AddressFamily.AF_INET, type=SocketKind.SOCK_DGRAM, proto=0, laddr=('0.0.0.0', 2010)>"), category : 'ResourceWarning', filename : '/home/remyb/.local/lib/python3.9/site-packages/ivy/ivy.py', lineno : 860, line : None}
 
 -- TEST: radio_no_recep.txt --
+-- TEST: radio_recep --
+
+Captured Warnings:
+{message : ResourceWarning('subprocess 21562 is still running'), category : 'ResourceWarning', filename : '/usr/lib/python3.9/subprocess.py', lineno : 1048, line : None}
+

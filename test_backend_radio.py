@@ -17,7 +17,7 @@ TEST_TIME = int(time.time())
 def test_backend_send_cmds(recwarn, capsys):
     """Test des envoi de commandes de la classe Backend"""
     #lancer l'enregistreur de messages
-    subprocess.Popen(['python', 'utilitaire_test.py', 'backend_send_cmds'])#, '0.5'])
+    subprocess.Popen(['python', 'utilitaire_test.py', 'backend_send_cmds'])
     with bkd.Backend(anr.Annuaire(), RADIO) as backend:
         time.sleep(0.5) # la radio a besoin de 0.5secondes pour se lancer à chaque fois.
         backend.track_robot('test')
@@ -112,5 +112,17 @@ def test_radio_no_recep(recwarn, capsys):
 
 def test_radio_recep(recwarn, capsys):
     """Tests de réception de messages"""
-    #RADIO.start()
-    #time.sleep(0.1)
+    RADIO.start()
+    RADIO.register_start('all')
+    subprocess.Popen(['python', 'utilitaire_test.py', 'backend_send_cmds', "TestCmd"])
+    time.sleep(0.8)
+    RADIO.register_stop(False, False, 'all')
+    RADIO.send_cmd("StopIvyTest")
+    RADIO.stop()
+    buffer = RADIO.msgsBuffer[1:]
+    assert buffer[0][1:] == ("IvyTest@localhost", "TestCmd")
+
+    ivy_test_list = read_ivytest_file('backend_send_cmds')
+    assert ('Radio@localhost', 'StopIvyTest') in ivy_test_list
+
+    results_to_file("radio_recep", recwarn, capsys, TEST_TIME)

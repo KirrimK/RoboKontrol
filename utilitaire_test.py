@@ -84,7 +84,7 @@ if __name__ == '__main__':
         test_radio.start()
         if len(sys.argv) > 2:
             time.sleep(0.5)
-            for msg in sys.argv[1:]:
+            for msg in sys.argv[2:]:
                 test_radio.send_cmd(msg)
     else:
         print("Arguments invalides")
