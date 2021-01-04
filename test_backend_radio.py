@@ -2,6 +2,7 @@
 
 import subprocess
 import time
+import ivy
 import pytest
 import backend as bkd
 import annuaire as anr
@@ -23,7 +24,10 @@ def test_backend_send_cmds(recwarn, capsys):
         backend.track_robot('test')
         backend.annu.find('test').create_eqp('act', 'Actionneur', 0, 1, 1, None)
         backend.sendeqpcmd('test', 'act', 0) #ne marchera pas si pas robot ni eqp correspondant
-
+        backend.sendeqpcmd('nope', 'act', 0)
+        backend.sendposcmd_robot('test', (0, 0, None))
+        backend.sendposcmd_robot('test', (0, 0, 0))
+        backend.sendposcmd_robot('nope', (0, 0, 0))
         #signal émis pour arrêt de l'utilitaire de test
         backend.radio.send_cmd("StopIvyTest")
 
@@ -32,6 +36,8 @@ def test_backend_send_cmds(recwarn, capsys):
     ivy_test_list = read_ivytest_file('backend_send_cmds')
     assert ('Radio@localhost', 'StopIvyTest') in ivy_test_list
     assert ('Radio@localhost', 'ActuatorCmd test act 0') in ivy_test_list
+    assert ('Radio@localhost', 'PosCmd test 0,0') in ivy_test_list
+    assert ('Radio@localhost', 'PosCmdOrient test 0,0,0')
     results_to_file("backend_send_cmds", recwarn, capsys, TEST_TIME)
 
 def test_backend_basic(recwarn, capsys):
@@ -97,3 +103,10 @@ def test_backend_agressif(recwarn, capsys):
 
     # enregistrement des alertes et des sorties console
     results_to_file("backend_agressif.txt", recwarn, capsys, TEST_TIME)
+
+def test_radio_no_recep(recwarn, capsys):
+    """Tests de la radio sans réception de messages"""
+    assert rdo.temps(0.0) == '1970/01/01\t01:00:00.0'
+
+    # enregistrement des alertes et des sorties console
+    results_to_file("radio_no_recep.txt", recwarn, capsys, TEST_TIME)
