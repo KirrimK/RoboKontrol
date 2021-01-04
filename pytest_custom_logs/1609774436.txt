@@ -1,0 +1,71 @@
+-- TEST: annuaire_equipement.txt --
+-- TEST: annuaire_capteur.txt --
+-- TEST: annuaire_actionneur.txt --
+-- TEST: annuaire_binaire.txt --
+-- TEST: annuaire_led.txt --
+-- TEST: annuaire_batterie.txt --
+-- TEST: annuaire_robot.txt --
+-- TEST: annuaire_annuaire.txt --
+-- TEST: backend_send_cmds --
+Captured stdout:
+Backend Lancé. Ctrl+C pour arrêter.
+
+Backend Arrêté. Temps d'exécution: 0.5022s.
+
+Captured Warnings:
+{message : ResourceWarning('subprocess 13365 is still running'), category : 'ResourceWarning', filename : '/usr/lib/python3.9/subprocess.py', lineno : 1048, line : None}
+{message : ResourceWarning("unclosed <socket.socket fd=22, family=AddressFamily.AF_INET, type=SocketKind.SOCK_DGRAM, proto=0, laddr=('0.0.0.0', 2010)>"), category : 'ResourceWarning', filename : '/home/remyb/.local/lib/python3.9/site-packages/ivy/ivy.py', lineno : 860, line : None}
+
+-- TEST: backend_basic --
+Captured stdout:
+Backend Lancé. Ctrl+C pour arrêter.
+0s
+Annuaire:
+Robot [test]
+| Position: x:1500 y:1000 theta:0
+
+
+                                                  
+                                                  
+                                                  
+                                                  
+[F[F[F[F[F
+0s
+Annuaire:
+Robot [test]
+| Position: x:1500 y:1000 theta:0
+
+[F[F[F[F[F[F[F
+
+
+Backend Arrêté. Temps d'exécution: 0.0010s.
+
+Captured Warnings:
+{message : ResourceWarning("unclosed <socket.socket fd=22, family=AddressFamily.AF_INET, type=SocketKind.SOCK_DGRAM, proto=0, laddr=('0.0.0.0', 2010)>"), category : 'ResourceWarning', filename : '/home/remyb/.local/lib/python3.9/site-packages/ivy/ivy.py', lineno : 860, line : None}
+
+-- TEST: backend_agressif.txt --
+Captured stdout:
+Backend Lancé. Ctrl+C pour arrêter.
+0.1518s
+Annuaire:
+
+0.2021s
+Annuaire:
+
+0.2524s
+Annuaire:
+
+0.3026s
+Annuaire:
+ True
+0.3528s
+Annuaire:
+ True
+0.4030s
+Annuaire:
+ True
+
+Captured Warnings:
+{message : ResourceWarning("unclosed <socket.socket fd=22, family=AddressFamily.AF_INET, type=SocketKind.SOCK_DGRAM, proto=0, laddr=('0.0.0.0', 2010)>"), category : 'ResourceWarning', filename : '/home/remyb/.local/lib/python3.9/site-packages/ivy/ivy.py', lineno : 860, line : None}
+
+-- TEST: radio_no_recep.txt --

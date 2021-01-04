@@ -54,7 +54,7 @@ def test_backend_basic(recwarn, capsys):
         backend.annu.find("test").create_eqp('cpt', 'Capteur', "deg")
         assert backend.getdata_robot('test')[1] == ['cpt']
         assert backend.getdata_eqp("test", 'cpt')[0] == anr.Capteur
-        assert backend.getdata_eqp("test", 'cpt')[1] == 0
+        assert backend.getdata_eqp("test", 'cpt')[1] == (0,)
         assert backend.getdata_eqp("test", 'cpt')[3] is None
         assert backend.getdata_eqp("test", 'cpt')[4] == 'deg'
         backend.annu.find("test").create_eqp('act', 'Actionneur', 0, 1, 1, "deg")
