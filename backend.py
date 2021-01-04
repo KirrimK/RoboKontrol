@@ -234,13 +234,13 @@ class Backend:
         eqp_unit = eqp.get_unit()
         return (eqp_type, eqp_state, eqp_last_updt, eqp_last_cmd, eqp_unit)
 
-if __name__ == '__main__':
-    PRINT_FL = 0
-    if len(sys.argv) == 2 and sys.argv[1] == "--no-print":
-        PRINT_FL = -1
-    if len(sys.argv) == 2 and sys.argv[1] == "--spam-print":
-        PRINT_FL = 1
-    if len(sys.argv) == 2 and sys.argv[1] == "--erase-print":
-        PRINT_FL = 2
-    with Backend(annuaire.Annuaire(), rd.Radio(), PRINT_FL) as backend:
-        backend.run_as_loop()
+#if __name__ == '__main__':
+#    PRINT_FL = 0
+#    if len(sys.argv) == 2 and sys.argv[1] == "--no-print":
+#        PRINT_FL = -1
+#    if len(sys.argv) == 2 and sys.argv[1] == "--spam-print":
+#        PRINT_FL = 1
+#    if len(sys.argv) == 2 and sys.argv[1] == "--erase-print":
+#        PRINT_FL = 2
+#    with Backend(annuaire.Annuaire(), rd.Radio(), PRINT_FL) as backend:
+#        backend.run_as_loop()

@@ -18,9 +18,9 @@ def test_capteur(recwarn, capsys):
     """Tests de la classe Capteur"""
     cpt_a = annuaire.Capteur('cpt_a', 0, "V")
     assert cpt_a.get_unit() == "V"
-    assert cpt_a.get_state() == 0
+    assert cpt_a.get_state() == (0,)
     cpt_a.set_state(10)
-    assert cpt_a.get_state() == 10
+    assert cpt_a.get_state() == (10,)
     assert cpt_a.__str__() == "Capteur [cpt_a] Val.:10 (V)"
 
     # enregistrement des alertes et des sorties console
