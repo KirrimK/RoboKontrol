@@ -4,7 +4,7 @@
 import os
 import time
 import sys
-from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg
+from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
 
 IVYAPPNAME = "IvyTest"
 MSG = "(.*)"
@@ -61,6 +61,10 @@ class TestRadio:
         with open(self.file_name, "a") as file:
             file.write("{}#{}\n".format(str(sender), str(message)))
 
+    def send_cmd(self, cmd):
+        """Envoie un message sur le bus Ivy"""
+        IvySendMsg(cmd)
+
     def on_stopmsg(self, *args):
         """Exécuté quand la commande d'arrêt du test est enregistrée"""
         self.stop()
@@ -74,9 +78,13 @@ class TestRadio:
         IvyStop()
 
 if __name__ == '__main__':
-    if len(sys.argv) == 2:
+    if len(sys.argv) >= 2:
         test_nm = sys.argv[1]
         test_radio = TestRadio(test_nm)
         test_radio.start()
+        if len(sys.argv) > 2:
+            time.sleep(0.5)
+            for msg in sys.argv[1:]:
+                test_radio.send_cmd(msg)
     else:
         print("Arguments invalides")

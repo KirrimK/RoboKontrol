@@ -2,7 +2,6 @@
 
 import subprocess
 import time
-import ivy
 import pytest
 import backend as bkd
 import annuaire as anr
@@ -37,7 +36,7 @@ def test_backend_send_cmds(recwarn, capsys):
     assert ('Radio@localhost', 'StopIvyTest') in ivy_test_list
     assert ('Radio@localhost', 'ActuatorCmd test act 0') in ivy_test_list
     assert ('Radio@localhost', 'PosCmd test 0,0') in ivy_test_list
-    assert ('Radio@localhost', 'PosCmdOrient test 0,0,0')
+    assert ('Radio@localhost', 'PosCmdOrient test 0,0,0') in ivy_test_list
     results_to_file("backend_send_cmds", recwarn, capsys, TEST_TIME)
 
 def test_backend_basic(recwarn, capsys):
@@ -110,3 +109,8 @@ def test_radio_no_recep(recwarn, capsys):
 
     # enregistrement des alertes et des sorties console
     results_to_file("radio_no_recep.txt", recwarn, capsys, TEST_TIME)
+
+def test_radio_recep(recwarn, capsys):
+    """Tests de réception de messages"""
+    #RADIO.start()
+    #time.sleep(0.1)
