@@ -84,7 +84,7 @@ class Radio :
         """Arrête un enregistrement, supprime optionellemnt le tampon, et le sauvegarde vers un document .txt
         Input : 
             _ save (bool) : condition d'enregistrement dans un document texte (True par défaut)
-            _ del_buffers : condition d'effacement du tampon (True par défaut)
+            _ del_buffers (bool) : condition d'effacement du tampon (True par défaut)
             _ args : autres arguments entrés ('all', 'msgs' et/ou 'cmds' (strings)) considérés comme un tupple"""
         if 'all' in args :
             args += ('msgs','cmds')
