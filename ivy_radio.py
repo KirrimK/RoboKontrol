@@ -28,7 +28,9 @@ MSG = '(.*)'
 def temps (t):
     """Input : t (float) : value given by time()
 
-    Output : a formated string that gives a more explicit time than t"""
+    Output : a formated string that gives a more explicit time than t
+
+    /!\ Cette fonction est à l'heure d'hiver."""
     i = gmtime(t)
     return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (i.tm_year, i.tm_mon, i.tm_mday, i.tm_hour+1, i.tm_min, i.tm_sec)+'{:.3}'.format (t%1)[1:]
 
