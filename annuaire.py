@@ -193,7 +193,7 @@ class Capteur(Equipement):
 
         Sortie:
         - valeur (int)"""
-        return self.valeur
+        return (self.valeur,)
 
     def set_state(self, valeur):
         """Change la valeur du capteur
