@@ -149,7 +149,7 @@ class LED(Actionneur):
         """Retourne les trois valeurs RGB de la LED (si elles sont connues)
 
         Sortie:
-        - state (int, int, int) | None
+        - valeur (int, int, int) | None
             - [0]: rouge
             - [1]: vert
             - [2]: bleu

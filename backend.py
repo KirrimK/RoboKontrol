@@ -226,6 +226,8 @@ class Backend:
         eqp = self.annu.find(robot_name, eqp_name)
         eqp_type = eqp.get_type()
         eqp_state = eqp.get_state()
+        if len(eqp_state) == 1:
+            eqp_state = eqp_state[0]
         eqp_last_updt = eqp.get_last_updt()
         if eqp_type == annuaire.Actionneur or eqp_type == annuaire.Binaire:
             eqp_last_cmd = eqp.get_last_cmd()
