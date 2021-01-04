@@ -1,8 +1,9 @@
 """Module test_annuaire.py - module de tests du module annuaire"""
 
 import annuaire
+from utilitaire_test import results_to_file
 
-def test_equipement():
+def test_equipement(recwarn, capsys):
     """Tests de la classe Equipement"""
     eqp_a = annuaire.Equipement('eqp_a')
     assert isinstance(eqp_a.get_last_updt(), float)
@@ -10,7 +11,10 @@ def test_equipement():
     assert eqp_a.get_state() is None
     assert eqp_a.set_state(None) is None
 
-def test_capteur():
+    # enregistrement des alertes et des sorties console
+    results_to_file("annuaire_equipement.txt", recwarn, capsys)
+
+def test_capteur(recwarn, capsys):
     """Tests de la classe Capteur"""
     cpt_a = annuaire.Capteur('cpt_a', 0, "V")
     assert cpt_a.get_unit() == "V"
@@ -19,7 +23,10 @@ def test_capteur():
     assert cpt_a.get_state() == 10
     assert cpt_a.__str__() == "Capteur [cpt_a] Val.:10 (V)"
 
-def test_actionneur():
+    # enregistrement des alertes et des sorties console
+    results_to_file("annuaire_capteur.txt", recwarn, capsys)
+
+def test_actionneur(recwarn, capsys):
     """Tests de la classe Actionneur"""
     act_a = annuaire.Actionneur('act_a', 0, 1, 1, "pascal")
     assert act_a.get_state() == (None, 0, 1, 1)
@@ -39,13 +46,41 @@ def test_actionneur():
     assert act_c.updt_cmd() is None
     assert act_c.get_last_cmd()
 
-def test_binaire():
-    """Tests de la clase Binaire"""
+    # enregistrement des alertes et des sorties console
+    results_to_file("annuaire_actionneur.txt", recwarn, capsys)
+
+def test_binaire(recwarn, capsys):
+    """Tests de la classe Binaire"""
     bin_a = annuaire.Binaire('bin_a')
     assert bin_a.get_state() == (None, 0, 1, 1)
     assert bin_a.get_unit() is None
+    assert bin_a.__str__() == "Binaire [bin_a] Val.: None"
 
-def test_robot():
+    # enregistrement des alertes et des sorties console
+    results_to_file("annuaire_binaire.txt", recwarn, capsys)
+
+def test_led(recwarn, capsys):
+    """Tests de la classe LED"""
+    led_a = annuaire.LED('led_a')
+    assert led_a.__str__() == "LED [led_a] RGB: None"
+    assert led_a.get_state() is None
+    led_a.set_state((255, 255, 255))
+    assert led_a.get_state() == (255, 255, 255)
+    led_a.set_state(25)
+    assert led_a.get_state() == (255, 255, 255)
+
+    # enregistrement des alertes et des sorties console
+    results_to_file("annuaire_led.txt", recwarn, capsys)
+
+def test_batterie(recwarn, capsys):
+    """Tests de la classe Batterie"""
+    bat_a = annuaire.Batterie("bat_a")
+    assert bat_a.__str__() == "Batterie [bat_a] Val.:0 (%)"
+
+    # enregistrement des alertes et des sorties console
+    results_to_file("annuaire_batterie.txt", recwarn, capsys)
+
+def test_robot(recwarn, capsys):
     """Tests de la classe Robot"""
     robot_a = annuaire.Robot('robot_a', equipements=[annuaire.Capteur("cpt", 1, "%")])
     assert robot_a.x == robot_a.get_pos()[0] == 1500
@@ -87,10 +122,14 @@ def test_robot():
     robot_a.create_eqp('cpt', 'Capteur')
     robot_a.create_eqp('act', 'Actionneur', 0, 1, 1)
     robot_a.create_eqp('cpt2', 'Capteur', 'stonks')
+    robot_a.create_eqp('faux_eqp', "rien_du_tout")
     assert robot_a.get_all_eqp() == ['eqp', 'bin', 'cpt', 'act', 'cpt2']
     assert robot_a.find('osef') is None
 
-def test_annuaire():
+    # enregistrement des alertes et des sorties console
+    results_to_file("annuaire_robot.txt", recwarn, capsys)
+
+def test_annuaire(recwarn, capsys):
     """Tests de la classe Annuaire"""
     annu = annuaire.Annuaire()
     assert annu.get_all_robots() == []
@@ -131,3 +170,6 @@ def test_annuaire():
     assert not annu.check_robot('robot_a')
     assert annu.get_all_robots() == []
     assert annu.find("osef") is None
+
+    # enregistrement des alertes et des sorties console
+    results_to_file("annuaire_annuaire.txt", recwarn, capsys)

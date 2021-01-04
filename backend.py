@@ -26,67 +26,96 @@ class Backend:
         self.print_flag = print_flag
         self.start_time = 0
         self.runned_time = 0
-        if radio is not None:
+        self.radio = None
+        self.annu = None
+        if isinstance(radio, rd.Radio):
             self.attach_radio(radio)
-        if annu is not None:
+        if isinstance(annu, annuaire.Annuaire):
             self.attach_annu(annu)
 
+    def __str__(self, erase_flag=False):
+        if not erase_flag:
+            self_str = str(self.runned_time)[:6]+'s\n'
+            self_str += self.annu.__str__()
+        else:
+            number_lines = 1 + self.annu.__str__().count("\n")
+            self_str = ('\n' + 50 * " ") * number_lines
+            self_str += '\n' + (number_lines + 1) * "\033[F"
+            self_str += '\n' +str(self.runned_time)[:6]+'s'
+            self_str += '\n' + self.annu.__str__()
+            self_str += '\n' + (number_lines + 3) * "\033[F" + "\n"
+        return self_str
+
     def __enter__(self):
-        self.start_time = time()
         if self.radio and self.annu:
-            self.radio.start()
+            self.start_time = time()
             self.runs = True
-            self.radio_started = True
+            self.start_radio()
             if self.print_flag != -1:
                 print("Backend Lancé. Ctrl+C pour arrêter.")
         else:
             raise Exception("Connectez une radio ET un annuaire avant de lancer le backend.")
         return self
 
-    def __exit__(self, t, value, traceback):
+    def __exit__(self, excp_type, value, traceback):
         self.runned_time = time() - self.start_time
+        self.runs = False
+        self.stop_radio()
+        if self.print_flag != -1:
+            print("\nBackend Arrêté. Temps d'exécution: "+str(self.runned_time)[:6]+"s.")
+
+    def stop_radio(self):
+        """Arrête la Radio connectée au Backend"""
         if self.radio_started:
             self.radio.stop()
-            if self.print_flag != -1:
-                print("\nBackend Arrêté. Temps d'exécution: "+str(self.runned_time)[:6]+"s.")
+            self.radio_started = False
 
-    def run_as_loop(self):
-        """Met en place une boucle infinie permettant une exécution sans interface"""
-        while self.runs:
+    def start_radio(self):
+        """Met la Radio connectée au Backend en marche"""
+        if self.radio and not self.radio_started:
+            self.radio.start()
+            self.radio_started = True
+
+    def run_as_loop(self, run_time=None):
+        """Met en place une boucle infinie permettant un déboguage dans la console
+        Pour les tests, un temps de fonctionnement peut être inscrit
+        afin de ne pas rester dans une boucle infinie"""
+        limited_time = False
+        timer = 0
+        if run_time is not None:
+            limited_time = True
+            timer = run_time
+        while (self.runs and not limited_time) or (self.runs and limited_time and timer) >= 0:
             if self.print_flag == 1: #--spam-print
-                print(str(self.runned_time)[:6]+'s')
-                print(self.annu)
+                print(self)
             if self.print_flag == 2: #--erase-print
-                annu_str = self.annu.__str__()
-                number_lines = 1 + annu_str.count("\n")
-                print(('\n' + 50 * " ") * number_lines)
-                print((number_lines + 1) * "\033[F")
-                print(str(self.runned_time)[:6]+'s')
-                print(annu_str)
-                print((number_lines + 3) * "\033[F")
+                print(self, True)
             try:
                 sleep(0.05)
                 self.runned_time = time() - self.start_time
             except KeyboardInterrupt:
                 self.runs = False
+            if limited_time:
+                timer -= 0.05
 
     def attach_annu(self, annu):
         """Attache l'annuaire 'annu' au backend
+        (et remplace l'annu existant si il y en a un)
 
         Entrée:
             - annu (Annuaire): l'annuaire à attacher
-            - flag (bool): lancement de self.run_print_console si true
         """
         if isinstance(annu, annuaire.Annuaire):
             self.annu = annu
 
     def attach_radio(self, radio):
         """Attache la radio 'radio' au backend
+        (si il n'y en a pas déjà une)
 
         Entrée:
             - radio (radio): la radio à attacher
         """
-        if isinstance(radio, rd.Radio):
+        if isinstance(radio, rd.Radio) and self.radio is None:
             self.radio = radio
             self.radio.backend = self
 
@@ -100,17 +129,19 @@ class Backend:
             - robot_name (str): nom du robot à tracker
         """
         self.annu.add_robot(annuaire.Robot(robot_name))
-        #self.radio.send_cmd (rd.DESCR_CMD.format (robot_name))
+        #self.radio.send_cmd (rd.DESCR_CMD.format (robot_name)) dépréciée
 
     def stopandforget_robot(self, robot_name):
-        """Permet d'arrêter le robot en question (via un message Shutdown ivy)
+        """Permet d'arrêter le robot en question
+        (via un message Shutdown ivy, si la radio est activée)
         et de le supprimer de l'annuaire
 
         Entrée:
             - robot_name (str): nom du robot à stopper/oublier
         """
         self.annu.remove_robot(robot_name)
-        self.radio.send_cmd (rd.KILL_CMD.format (robot_name))
+        if self.radio_started:
+            self.radio.send_cmd (rd.KILL_CMD.format (robot_name))
 
     def forget_robot(self, robot_name):
         """Oublie toutes les informations connues sur le robot en question.
@@ -130,11 +161,11 @@ class Backend:
                 - [1]: y
                 - [2]: theta (si non spécifié, mettre à None)
         """
-        if self.annu.check_robot(robot_name):
+        if self.annu.check_robot(robot_name) and self.radio_started:
             if pos[2] is None:
-                self.radio.send_cmd (rd.POS_CMD.format (pos[0], pos[1]))
+                self.radio.send_cmd (rd.POS_CMD.format (robot_name, pos[0], pos[1]))
             else:
-                self.radio.send_cmd (rd.POS_ORIENT_CMD.format (pos[0], pos[1], pos[2]))
+                self.radio.send_cmd (rd.POS_ORIENT_CMD.format (robot_name, pos[0], pos[1], pos[2]))
 
     def sendeqpcmd(self, robot_name, eqp_name, state):
         """Envoie une commande d'état à un équipement (qui recoit des commandes)
@@ -164,14 +195,15 @@ class Backend:
             - robot_name (str): nom du robot
 
         Sortie:
-            - pos (float, float, float): le "vecteur" position du robot
-            - eqps (list of str): liste des noms des équipements attachés au robot
-            - last_updt_pos (float): le timestamp de dernière mise à jour de la position
+            - tuple (tuple, list, float)
+                - [0] pos (float, float, float): le "vecteur" position du robot
+                - [1] eqps (list of str): liste des noms des équipements attachés au robot
+                - [2] last_updt_pos (float): le timestamp de dernière mise à jour de la position
         """
         rbt = self.annu.find(robot_name)
         pos = rbt.get_pos()
         eqps = rbt.get_all_eqp()
-        return pos, eqps, rbt.last_updt_pos
+        return (pos, eqps, rbt.last_updt_pos)
 
     def getdata_eqp(self, robot_name, eqp_name):
         """Renvoie toutes les informations sur un équipement
@@ -181,13 +213,15 @@ class Backend:
             - eqp_name (str): nom de l'équipement
 
         Sortie:
-            - eqp_type (type): le type de l'équipement
-            - eqp_state (variable): l'état actuel de l'équipement
-                (se référer à l'équipement en question)
-            - eqp_last_updt (float): le timestamp de la dernière info reçue
-                (se référer à l'équipement en question)
-            - eqp_last_cmd (float | None): si l'eqp est un actionneur,
-                le timestamp de la dernière commande envoyée par l'user
+            - tuple (type, any, float, float | None)
+                - [0] eqp_type (type): le type de l'équipement
+                - [1] eqp_state (any): l'état actuel de l'équipement
+                    (se référer à l'équipement en question)
+                - [2] eqp_last_updt (float): le timestamp de la dernière info reçue
+                    (se référer à l'équipement en question)
+                - [3] eqp_last_cmd (float | None): si l'eqp est un actionneur,
+                    le timestamp de la dernière commande envoyée par l'user
+                - [4] eqp_unit (str): le type de l'équipement
         """
         eqp = self.annu.find(robot_name, eqp_name)
         eqp_type = eqp.get_type()
@@ -197,7 +231,8 @@ class Backend:
             eqp_last_cmd = eqp.get_last_cmd()
         else:
             eqp_last_cmd = None
-        return eqp_type, eqp_state, eqp_last_updt, eqp_last_cmd
+        eqp_unit = eqp.get_unit()
+        return (eqp_type, eqp_state, eqp_last_updt, eqp_last_cmd, eqp_unit)
 
 if __name__ == '__main__':
     PRINT_FL = 0

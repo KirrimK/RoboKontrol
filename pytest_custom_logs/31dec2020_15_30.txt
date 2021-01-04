@@ -1,0 +1,74 @@
+-- TEST: annuaire_equipement.txt --
+-- TEST: annuaire_capteur.txt --
+-- TEST: annuaire_actionneur.txt --
+-- TEST: annuaire_binaire.txt --
+-- TEST: annuaire_led.txt --
+-- TEST: annuaire_batterie.txt --
+-- TEST: annuaire_robot.txt --
+-- TEST: annuaire_annuaire.txt --
+-- TEST: backend_send_cmds --
+Captured stdout:
+Backend Lancé. Ctrl+C pour arrêter.
+StopIvyTest
+
+Backend Arrêté. Temps d'exécution: 0.5014s.
+
+Captured Warnings:
+{message : ResourceWarning('subprocess 12651 is still running'), category : 'ResourceWarning', filename : '/usr/lib/python3.8/subprocess.py', lineno : 942, line : None}
+{message : DeprecationWarning('isAlive() is deprecated, use is_alive() instead'), category : 'DeprecationWarning', filename : '/home/remyb/.local/lib/python3.8/site-packages/ivy/ivy.py', lineno : 918, line : None}
+{message : ResourceWarning("unclosed <socket.socket fd=22, family=AddressFamily.AF_INET, type=SocketKind.SOCK_DGRAM, proto=0, laddr=('0.0.0.0', 2010)>"), category : 'ResourceWarning', filename : '/home/remyb/.local/lib/python3.8/site-packages/ivy/ivy.py', lineno : 860, line : None}
+
+-- TEST: backend_basic --
+Captured stdout:
+Backend Lancé. Ctrl+C pour arrêter.
+0s
+Annuaire:
+Robot [test]
+| Position: x:1500 y:1000 theta:0
+
+
+                                                  
+                                                  
+                                                  
+                                                  
+[F[F[F[F[F
+0s
+Annuaire:
+Robot [test]
+| Position: x:1500 y:1000 theta:0
+
+[F[F[F[F[F[F[F
+
+
+Backend Arrêté. Temps d'exécution: 0.0013s.
+
+Captured Warnings:
+{message : DeprecationWarning('isAlive() is deprecated, use is_alive() instead'), category : 'DeprecationWarning', filename : '/home/remyb/.local/lib/python3.8/site-packages/ivy/ivy.py', lineno : 918, line : None}
+{message : ResourceWarning("unclosed <socket.socket fd=22, family=AddressFamily.AF_INET, type=SocketKind.SOCK_DGRAM, proto=0, laddr=('0.0.0.0', 2010)>"), category : 'ResourceWarning', filename : '/home/remyb/.local/lib/python3.8/site-packages/ivy/ivy.py', lineno : 860, line : None}
+
+-- TEST: backend_agressif.txt --
+Captured stdout:
+Backend Lancé. Ctrl+C pour arrêter.
+Shutdown test
+0.1528s
+Annuaire:
+
+0.2031s
+Annuaire:
+
+0.2533s
+Annuaire:
+
+0.3035s
+Annuaire:
+ True
+0.3537s
+Annuaire:
+ True
+0.4039s
+Annuaire:
+ True
+
+Captured Warnings:
+{message : DeprecationWarning('isAlive() is deprecated, use is_alive() instead'), category : 'DeprecationWarning', filename : '/home/remyb/.local/lib/python3.8/site-packages/ivy/ivy.py', lineno : 918, line : None}
+

@@ -130,6 +130,42 @@ class Binaire(Actionneur):
     def __init__(self, nom):
         super().__init__(nom, 0, 1)
 
+    def __str__(self):
+        nom = self.nom
+        val = self.valeur
+        return "Binaire [{}] Val.: {}".format(nom, val)
+
+class LED(Actionneur):
+    """Une class définissant une LED, dont les commandes se font sur 3x 255 valeurs"""
+    def __init__(self, nom):
+        super().__init__(nom, 0, 255, 1, None)
+
+    def __str__(self):
+        nom = self.nom
+        val = self.valeur
+        return "LED [{}] RGB: {}".format(nom, val)
+
+    def get_state(self):
+        """Retourne les trois valeurs RGB de la LED (si elles sont connues)
+
+        Sortie:
+        - state (int, int, int) | None
+            - [0]: rouge
+            - [1]: vert
+            - [2]: bleu
+        """
+        return self.valeur
+
+    def set_state(self, valeur):
+        """Change la valeur du retour de led associé (si existe)
+
+        Entrée:
+        - valeur tuple (int, int, int) (chaque int entre 0 et 255)
+        """
+        if isinstance(valeur, tuple) and len(valeur) == 3:
+            self.valeur = valeur
+            self.updt()
+
 class Capteur(Equipement):
     """Définit un capteur avec un nom, une valeur et une unité
 
@@ -175,6 +211,12 @@ class Batterie(Capteur):
         super().__init__(nom, 0, "%")
         #TODO: demander à Victor d'implémenter dans ivy_radio une distinction lors de CaptReport?
         # par exemple Capt[Report/Decl] <robot> battery 100 => assignation automatique batterie
+
+    def __str__(self):
+        nom = self.nom
+        val = self.valeur
+        unite = self.unite
+        return "Batterie [{}] Val.:{} ({})".format(nom, val, unite)
 
 class Robot:
     """Classe définissant un robot avec les attributs suivants:
@@ -383,5 +425,3 @@ class Annuaire:
         - list of (str)
         """
         return list(self.robots.keys())
-
-#TODO: ajouter plus de features recommandées
