@@ -1,4 +1,4 @@
-""" odule inspecteur.py - Récupère les données sur les robots et effectue les mise à jour """
+""" Module inspecteur.py - Récupère les données sur les robots et effectue les mise à jour """
 import boite_robot
 from PyQt5 import QtWidgets, QtCore
 
