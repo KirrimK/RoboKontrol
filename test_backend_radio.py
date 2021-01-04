@@ -114,13 +114,21 @@ def test_radio_recep(recwarn, capsys):
     """Tests de réception de messages"""
     RADIO.start()
     RADIO.register_start('all')
-    subprocess.Popen(['python', 'utilitaire_test.py', 'backend_send_cmds', "TestCmd"])
+    test_util_args = ['python', 'utilitaire_test.py', 'backend_send_cmds']
+    test_util_args.append("TestCmd")
+    test_util_args.append("PosReport test 0;0;0")
+    test_util_args.append("CaptDecl test cpt osef")
+    test_util_args.append("CaptReport test cpt 0")
+    test_util_args.append("ActuatorDecl test cpt 0 1 1 osef")
+    subprocess.Popen(test_util_args)
     time.sleep(0.8)
     RADIO.register_stop(False, False, 'all')
     RADIO.send_cmd("StopIvyTest")
     RADIO.stop()
     buffer = RADIO.msgsBuffer[1:]
     assert buffer[0][1:] == ("IvyTest@localhost", "TestCmd")
+    assert buffer[1][1:] == ("IvyTest@localhost", "PosReport test 0;0;0")
+    assert buffer[2][1:] == ("IvyTest@localhost", "CaptDecl test cpt osef")
 
     ivy_test_list = read_ivytest_file('backend_send_cmds')
     assert ('Radio@localhost', 'StopIvyTest') in ivy_test_list
