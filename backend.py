@@ -1,6 +1,5 @@
 """Module backend.py - Gestion jointe de l'annuaire et de la communication par ivy"""
 
-import sys
 from time import sleep, time
 import annuaire
 import ivy_radio as rd
@@ -238,7 +237,7 @@ class Backend:
 
     def record(self, flag):
         """Permet de déclencher/arrêter l'enregistrement des messages depuis l'interface
-        
+
         Entrées:
             - flag (str): le drapeau correspondant au mode souhaité
                 (la première lettre est B (begin) ou E (end), puis
@@ -248,27 +247,27 @@ class Backend:
                          ECSD: arrêter d'enregistrer les commandes, sauvegarder puis effacer
         """
         if flag[0] == "B": #begin
-            args = []
+            msgs = None
+            cmds = None
             if "M" in flag:
-                args.append("msgs")
+                msgs = "msgs"
             if "C" in flag:
-                args.append("cmds")
-            args = tuple(args)
-            self.radio.register_start(args)
+                cmds = "cmds"
+            self.radio.register_start(msgs, cmds)
         if flag[0] == "E": #end
-            args = []
+            msgs = None
+            cmds = None
             if "M" in flag:
-                args.append("msgs")
+                msgs = "msgs"
             if "C" in flag:
-                args.append("cmds")
-            args = tuple(args)
+                cmds = "cmds"
             save = False
             if "S" in flag:
                 save = True
             delb = False
             if "D" in flag:
                 delb = True
-            self.radio.register_stop(save, delb, args)
+            self.radio.register_stop(save, delb, msgs, cmds)
 
     def record_state(self):
         """Revoie dans quelle mode d'enregistrement la radio se trouve

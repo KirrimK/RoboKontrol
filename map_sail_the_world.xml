@@ -1,5 +1,5 @@
 <!--Les coordonnées de position sont celles du coin inférieur gauche de l'objet-->
-<map>
+<map height="3000" width="2000" margin="200">
     <rect nom="table_de_jeu">
         <color>white</color>
         <order>0</order>

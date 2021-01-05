@@ -8,7 +8,7 @@ QPUSHBUTTON = "background-color: grey; border 2px solid rgb(113, 113, 113);borde
 
 
 class Window(object):
-    """ Définit la fenêtre principale dans laquelle est affiché toute les informations de l'appliaction"""
+    """ Définit la fenêtre principale dans laquelle est affiché toute les informations de l'application"""
 
     def __init__(self, backend):
         """ Création de la fenêtre principale"""
