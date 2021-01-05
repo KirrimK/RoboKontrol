@@ -8,7 +8,7 @@ IVYAPPNAME = 'Radio'
 
 	#Informations
 """Le premier groupe de capture est le nom du robot"""
-CAPT_DECL = "CaptDecl (.+) (.+) (.*)"
+CAPT_DECL = "CaptDecl (.+) (.+) (.*)"#TODO: ajouter min max step aux capteurs
 ACTU_DECL = 'ActuatorDecl (.*) (.*) (.*) (.*) (.*) (.*)'
 POS_REG = 'PosReport (.+) (.+);(.+);(.+)'
 CAPT_REG = 'CaptReport (.+) (.+) (.+)'

@@ -4,6 +4,7 @@ from PyQt5 import QtWidgets, QtCore
 import annuaire
 import time
 
+#TODO: ajouter min max step aux capteurs
 # Définition des mins et maxs de tension pour la batterie (en V)
 MIN_BATTERIE = 9
 MAX_BATTERIE = 12
