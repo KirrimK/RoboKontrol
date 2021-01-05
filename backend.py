@@ -248,32 +248,27 @@ class Backend:
                          ECSD: arrêter d'enregistrer les commandes, sauvegarder puis effacer
         """
         if flag[0] == "B": #begin
-            args = []
+            msgs = None
+            cmds = None
             if "M" in flag:
-                args.append("msgs")
+                msgs = "msgs"
             if "C" in flag:
-                args.append("cmds")
-            args = tuple(args)
-            print(args)
-            self.radio.register_start(args)
+                cmds = "cmds"
+            self.radio.register_start(msgs, cmds)
         if flag[0] == "E": #end
-            args = []
+            msgs = None
+            cmds = None
             if "M" in flag:
-                print("Emsgs")
-                args.append("msgs")
+                msgs = "msgs"
             if "C" in flag:
-                print("Ecmds")
-                args.append("cmds")
-            args = tuple(args)
+                cmds = "cmds"
             save = False
             if "S" in flag:
-                print("Esave")
                 save = True
             delb = False
             if "D" in flag:
-                print("Edel")
                 delb = True
-            self.radio.register_stop(save, delb, args)
+            self.radio.register_stop(save, delb, msgs, cmds)
 
     def record_state(self):
         """Revoie dans quelle mode d'enregistrement la radio se trouve
