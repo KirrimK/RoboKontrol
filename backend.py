@@ -4,7 +4,6 @@ from time import sleep, time
 import annuaire
 import ivy_radio as rd
 
-#TODO: ajouter min max step aux capteurs
 class Backend:
     """Un objet faisant le lien entre un Annuaire (module annuaire)
     et une Radio (module ivy_radio)

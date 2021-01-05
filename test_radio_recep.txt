@@ -1,3 +1,0 @@
-pyivyprobe@localhost#[pyivyprobe is ready]
-Radio@localhost#Radio is ready!
-Radio@localhost#StopIvyTest

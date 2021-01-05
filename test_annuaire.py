@@ -16,12 +16,12 @@ def test_equipement(recwarn, capsys):
 
 def test_capteur(recwarn, capsys):
     """Tests de la classe Capteur"""
-    cpt_a = annuaire.Capteur('cpt_a', 0, "V")
+    cpt_a = annuaire.Capteur('cpt_a', 0, 5, 0.1, "V")
     assert cpt_a.get_unit() == "V"
-    assert cpt_a.get_state() == (0,)
-    cpt_a.set_state(10)
-    assert cpt_a.get_state() == (10,)
-    assert cpt_a.__str__() == "Capteur [cpt_a] Val.:10 (V)"
+    assert cpt_a.get_state() == (0, 0, 5, 0.1)
+    cpt_a.set_state(4.5)
+    assert cpt_a.get_state() == (4.5, 0, 5, 0.1)
+    assert cpt_a.__str__() == "Cpt. [cpt_a] Val.: 4.5 (V) 0 -> 5 (0.1)"
 
     # enregistrement des alertes et des sorties console
     results_to_file("annuaire_capteur.txt", recwarn, capsys)
@@ -72,17 +72,17 @@ def test_led(recwarn, capsys):
     # enregistrement des alertes et des sorties console
     results_to_file("annuaire_led.txt", recwarn, capsys)
 
-def test_batterie(recwarn, capsys):
-    """Tests de la classe Batterie"""
-    bat_a = annuaire.Batterie("bat_a")
-    assert bat_a.__str__() == "Batterie [bat_a] Val.:0 (%)"
-
-    # enregistrement des alertes et des sorties console
-    results_to_file("annuaire_batterie.txt", recwarn, capsys)
+#def test_batterie(recwarn, capsys):
+#    """Tests de la classe Batterie"""
+#    bat_a = annuaire.Batterie("bat_a")
+#    assert bat_a.__str__() == "Batterie [bat_a] Val.:0 (%)"
+#
+#    # enregistrement des alertes et des sorties console
+#    results_to_file("annuaire_batterie.txt", recwarn, capsys)
 
 def test_robot(recwarn, capsys):
     """Tests de la classe Robot"""
-    robot_a = annuaire.Robot('robot_a', equipements=[annuaire.Capteur("cpt", 1, "%")])
+    robot_a = annuaire.Robot('robot_a', equipements=[annuaire.Capteur("cpt", 0, 100, 0.1, "%")])
     assert robot_a.x == robot_a.get_pos()[0] == 1500
     assert robot_a.y == robot_a.get_pos()[1] == 1000
     assert robot_a.theta == robot_a.get_pos()[2] == 0
@@ -113,15 +113,16 @@ def test_robot(recwarn, capsys):
     assert robot_a.find('cpt').get_type() == annuaire.Capteur
 
     robot_a.remove_eqp('act_a')
-    robot_str = "Robot [robot_a]\n| Position: x:0 y:0 theta:0\n| Capteur [cpt] Val.:1 (%)\n"
+    robot_str = "Robot [robot_a]\n"
+    robot_str += "| Position: x:0 y:0 theta:0\n| Cpt. [cpt] Val.: 0 (%) 0 -> 100 (0.1)\n"
     assert robot_a.__str__() == robot_str
     robot_a.remove_eqp('cpt')
     assert robot_a.get_all_eqp() == []
     robot_a.create_eqp('eqp', 'Equipement')
     robot_a.create_eqp('bin', 'Binaire')
-    robot_a.create_eqp('cpt', 'Capteur')
+    robot_a.create_eqp('cpt', 'Capteur', 0, 100, 1)
     robot_a.create_eqp('act', 'Actionneur', 0, 1, 1)
-    robot_a.create_eqp('cpt2', 'Capteur', 'stonks')
+    robot_a.create_eqp('cpt2', 'Capteur', 0, 100, 1, 'stonks')
     robot_a.create_eqp('faux_eqp', "rien_du_tout")
     assert robot_a.get_all_eqp() == ['eqp', 'bin', 'cpt', 'act', 'cpt2']
     assert robot_a.find('osef') is None

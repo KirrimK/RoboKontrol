@@ -37,8 +37,8 @@ def test_backend_send_cmds(recwarn, capsys):
         ivy_test_list = read_ivytest_file('backend_send_cmds')
         assert ('Radio@localhost', 'StopIvyTest') in ivy_test_list
         assert ('Radio@localhost', 'ActuatorCmd test act 0') in ivy_test_list
-        assert ('Radio@localhost', 'PosCmd test 0,0') in ivy_test_list
-        assert ('Radio@localhost', 'PosCmdOrient test 0,0,0') in ivy_test_list
+        assert ('Radio@localhost', 'PosCmd test 0 0') in ivy_test_list
+        assert ('Radio@localhost', 'PosCmdOrient test 0 0 0') in ivy_test_list
 
     finally:
         results_to_file("backend_send_cmds", recwarn, capsys, TEST_TIME)
@@ -55,10 +55,10 @@ def test_backend_basic(recwarn, capsys):
             assert backend.getdata_robot('test')[0] == (1500, 1000, 0)
             assert backend.getdata_robot('test')[1] == []
             assert isinstance(backend.getdata_robot('test')[2], float)
-            backend.annu.find("test").create_eqp('cpt', 'Capteur', "deg")
+            backend.annu.find("test").create_eqp('cpt', 'Capteur', 0, 100, 1, "deg")
             assert backend.getdata_robot('test')[1] == ['cpt']
             assert backend.getdata_eqp("test", 'cpt')[0] == anr.Capteur
-            assert backend.getdata_eqp("test", 'cpt')[1] == 0
+            assert backend.getdata_eqp("test", 'cpt')[1] == (0, 0, 100, 1)
             assert backend.getdata_eqp("test", 'cpt')[3] is None
             assert backend.getdata_eqp("test", 'cpt')[4] == 'deg'
             backend.annu.find("test").create_eqp('act', 'Actionneur', 0, 1, 1, "deg")
