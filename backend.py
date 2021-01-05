@@ -254,19 +254,24 @@ class Backend:
             if "C" in flag:
                 args.append("cmds")
             args = tuple(args)
+            print(args)
             self.radio.register_start(args)
         if flag[0] == "E": #end
             args = []
             if "M" in flag:
+                print("Emsgs")
                 args.append("msgs")
             if "C" in flag:
+                print("Ecmds")
                 args.append("cmds")
             args = tuple(args)
             save = False
             if "S" in flag:
+                print("Esave")
                 save = True
             delb = False
             if "D" in flag:
+                print("Edel")
                 delb = True
             self.radio.register_stop(save, delb, args)
 
