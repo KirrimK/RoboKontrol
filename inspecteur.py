@@ -1,9 +1,9 @@
 """ Module inspecteur.py - Récupère les données sur les robots et effectue les mise à jour """
+
 import boite_robot
 from PyQt5 import QtWidgets, QtCore
 
 
-# noinspection PyArgumentList
 class Inspecteur(QtWidgets.QWidget):
     """ Définit l'objet inspecteur qui comport les boites robots et qui les relie à backend avec des signaux """
 
@@ -24,7 +24,7 @@ class Inspecteur(QtWidgets.QWidget):
         # Connexion de ce timer au slot de mise à jour des robots
         self.timer.timeout.connect(self.update_robot)
         # Définit la période temporelle (en ms) associée a la fréquence de mise à jour du timer
-        self.timer.start(1000)
+        self.timer.start(400)
 
     @QtCore.pyqtSlot()
     def update_robot(self):

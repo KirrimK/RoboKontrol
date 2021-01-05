@@ -1,7 +1,8 @@
-"""Ajoute une boite robot dans le layout parent situé dans le layout widget"""
+""" boite_robot.py - Gère l'affichage d'une boite robot dans le layout parent situé dans le layout widget et effectue les mise à jours liées a ce robot"""
 
 from PyQt5 import QtWidgets, QtCore
 import annuaire
+import time
 
 # Définition des mins et maxs de tension pour la batterie (en V)
 MIN_BATTERIE = 9
@@ -32,6 +33,7 @@ class BoiteRobot:
         self.parent_widget = parent_widget
         self.parent_layout = parent_layout
         self.position = ()
+        self.timestamp = time.time()
 
         self.groupBox_robot = QtWidgets.QGroupBox(self.parent_widget)
         self.layout_box_robot = QtWidgets.QVBoxLayout(self.groupBox_robot)
@@ -65,7 +67,7 @@ class BoiteRobot:
         self.button_delete = QtWidgets.QPushButton(self.groupBox_robot)
         self.button_delete.setMaximumSize(150, 30)
         self.button_delete.setStyleSheet(QPUSHBUTTON)
-        self.button_delete.setText("Supprimer")
+        self.button_delete.setText("Oublier")
         self.button_delete.clicked.connect(lambda: self.remove_box_robot())
         self.layout_name_delete.addWidget(self.button_delete)
 
@@ -75,7 +77,7 @@ class BoiteRobot:
         self.lcdNumber_x = self.create_coord("X", "mm")
         self.lcdNumber_y = self.create_coord("Y", "mm")
         self.lcdNumber_theta = self.create_coord("Orientation", "degré")
-        self.lcdNumber_last_updt_pos = self.create_coord("Dernier message", "ms")
+        self.lcdNumber_ping_pos = self.create_coord("Ping", "s")
 
     def create_coord(self, coord: str, unite: str):
         """Crée une ligne coordonnée (QLabel et QLCDNumber dans un QLayout) et renvoie le QLCDNumber"""
@@ -125,13 +127,16 @@ class BoiteRobot:
         self.position = self.inspecteur.backend.getdata_robot(self.rid)[0]
         # Récupération du timestamp de dernière mise à jour de la position
         self.last_updt_pos = self.inspecteur.backend.getdata_robot(self.rid)[2]  # todo:pb de remise à 0?
-        # print(self.last_updt_pos)
+
+        # Calcul du ping
+        self.timestamp = time.time()
+        self.ping = abs(self.last_updt_pos-self.timestamp)
 
         # Mise à jour des valeurs affichés par les QLCDNUmber
         self.lcdNumber_x.display(self.position[0])
         self.lcdNumber_y.display(self.position[1])
         self.lcdNumber_theta.display(self.position[2])
-        self.lcdNumber_last_updt_pos.display(self.last_updt_pos)
+        self.lcdNumber_ping_pos.display(self.ping)
 
     def load_equipement(self):
         """ Charge la liste des des équipements du robot et charge les informations de chaque équipement présent"""
@@ -180,7 +185,6 @@ class BoiteRobot:
                 actuator = equipements[name]
                 self.current_actuators_list.append (name)
                 actuator.add_actuator()
-                print("actionneur ajouté")
             if type(equipement) == Sensor:
                 self.current_sensors_list.append (name)
                 sensor = equipements[name]
@@ -213,7 +217,7 @@ class BoiteRobot:
         self.current_equipement_dic = equipements
 
         # Initialise la mise à jours des capteurs
-        for equipement in self.current_capteurs_dic.values():
+        for equipement in self.current_equipement_dic.values():
             if type(equipement) == Sensor:
                 equipement.update_capteur()
             if type(equipement) == Actuator:
@@ -248,11 +252,12 @@ class Actuator:
         # TODO : ajouter les actionneurs types multiples
         self.last_commande = ""
         self.last_update = last_update
+        self.timestamp = time.time()
 
         self.gridLayout_actuator = QtWidgets.QGridLayout()
         self.label_name_actuator = QtWidgets.QLabel(self.groupBox_actuator)
         self.label_command_actuator = QtWidgets.QLabel(self.groupBox_actuator)
-        self.textBrowser_actuator = QtWidgets.QTextBrowser(self.groupBox_actuator)
+        self.lcdNumber_ping_actuator = QtWidgets.QLCDNumber(self.groupBox_actuator)
 
     def add_actuator(self):
         """Ajoute un actionneur (QGridLayout) dans la boite actionneurs (QGroupBox)"""
@@ -267,11 +272,11 @@ class Actuator:
 
         self.gridLayout_actuator.addWidget(self.label_name_actuator, 0, 0, 1, 1)
 
-        self.label_command_actuator.setText("Dernière commande")
+        self.label_command_actuator.setText("ping (s)")
         self.label_command_actuator.setMinimumSize(120, 30)
         self.gridLayout_actuator.addWidget(self.label_command_actuator, 1, 0, 1, 1)
-        self.textBrowser_actuator.setMaximumSize(QtCore.QSize(16777215, 25))
-        self.gridLayout_actuator.addWidget(self.textBrowser_actuator, 1, 1, 1, 1)
+        self.lcdNumber_ping_actuator.setMaximumSize(QtCore.QSize(16777215, 25))
+        self.gridLayout_actuator.addWidget(self.lcdNumber_ping_actuator, 1, 1, 1, 1)
         self.layout_box_actuators.addLayout(self.gridLayout_actuator)
 
         if self.type_actionneur == "BINAIRE":
@@ -308,7 +313,7 @@ class Actuator:
         self.gridLayout_actuator.addWidget(self.doubleSpinBox_actuator, 0, 1, 1, 1)
 
     def create_actuator_multiple(self):
-        """""Crée et ajoute un actionneur de type multiple (QComboBox)"""
+        """Crée et ajoute un actionneur de type multiple (QComboBox)"""
         list_options = self.info_actionneur
         self.comboBox_actuator = QtWidgets.QComboBox(self.groupBox_actuator)
 
@@ -320,7 +325,7 @@ class Actuator:
         self.gridLayout_actuator.addWidget(self.comboBox_actuator, 0, 1, 1, 1)
 
     def create_actuator_led(self):
-        # Création d'un actionneur complexe spéciale : la LED
+        """ Création d'un actionneur complexe spéciale : la LED """
         self.pushButton_led = QtWidgets.QPushButton(self.groupBox_actuator)
         self.pushButton_led.setText("Choisir la couleur")
         self.pushButton_led.clicked.connect(lambda: self.open_LED_menu())
@@ -353,10 +358,20 @@ class Actuator:
 
         self.groupBox_actuator.hide()
 
-    def update_actionneur(self):
-        if self.type_actionneur == "DISCRET":
-            self.doubleSpinBox_actuator.setValue(self.value)
+    def update_actuator(self):
+        """ Met à jour l'actionneur """
 
+        # Calcul du ping
+        self.timestamp = time.time()
+        self.ping_actuator = abs(self.timestamp - self.last_update)
+        self.lcdNumber_ping_actuator.display(self.ping_actuator)
+
+        # Mise à jour des informations de l'actionneur suivant son type
+        if self.type_actionneur == "DISCRET":
+            try:
+                self.doubleSpinBox_actuator.setValue(self.value)
+            except TypeError:
+                pass
         if self.type_actionneur == "BINAIRE":
             if self.value == 0:
                 self.checkBox_actuator.setChecked(False)
@@ -380,6 +395,7 @@ class Sensor:
         self.layout_box_capteurs = layout_boite_capteurs
         self.groupBox_sensors = boite_capteurs
         self.last_update = last_update
+        self.timestamp = time.time()
 
         self.gridLayout_capteur = QtWidgets.QGridLayout()
 
@@ -393,17 +409,12 @@ class Sensor:
         self.label_message_capteur.setText("Dernier message (ms)")
         self.gridLayout_capteur.addWidget(self.label_message_capteur, 1, 0, 1, 1)
 
-        self.lcdNumber_message_capteur = QtWidgets.QLCDNumber(self.groupBox_sensors)
-        self.lcdNumber_message_capteur.setMaximumSize(QtCore.QSize(50, 25))
-        self.gridLayout_capteur.addWidget(self.lcdNumber_message_capteur, 1, 1, 1, 1)
+        self.lcdNumber_ping_capteur = QtWidgets.QLCDNumber(self.groupBox_sensors)
+        self.lcdNumber_ping_capteur.setMaximumSize(QtCore.QSize(16777215, 25))
+        self.gridLayout_capteur.addWidget(self.lcdNumber_ping_capteur, 1, 1, 1, 1)
 
     def add_capteur(self):
         """ Ajoute un capteur (QGridLayout) dans la boite capteur (QGroupBox) """
-
-        # Ajoute d'un espace sauf si c'est le premier actionneur placé dans la boite capteur
-        # if True:
-        #    spacerItem_actuators = create_space()
-        #    self.layout_box_capteurs.addItem(spacerItem_actuators)
 
         if self.nom == "Batterie":
             n = 100  # n permet d'afficher les décimales de la tension
@@ -420,6 +431,7 @@ class Sensor:
             self.lcdNumber_capteur = QtWidgets.QLCDNumber(self.groupBox_sensors)
             self.lcdNumber_capteur.setMinimumSize(160, 25)
             self.gridLayout_capteur.addWidget(self.lcdNumber_capteur, 0, 1, 1, 1)
+            self.lcdNumber_capteur.display(self.valeur)
 
         self.layout_box_capteurs.addLayout(self.gridLayout_capteur)
 
@@ -429,8 +441,12 @@ class Sensor:
         self.groupBox_sensors.hide()
 
     def update_capteur(self):
-        self.lcdNumber_message_capteur.display(self.last_update)
-        self.lcdNumber_capteur.display(self.valeur)
+        """ Met à jour le capteur """
 
-    def type(self):
-        return type(self)
+        # Calcul du ping
+        self.timestamp = time.time()
+        self.ping = abs(self.timestamp - self.last_update)
+        self.lcdNumber_ping_capteur.display(self.ping)
+
+        # Met à jour à jour les informations du capteur
+        self.lcdNumber_capteur.display(self.valeur)
