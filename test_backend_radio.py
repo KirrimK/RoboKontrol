@@ -1,5 +1,6 @@
 """Module test_backend_radio.py - module de tests du module backend et du module radio"""
 
+import os
 import subprocess
 import time
 import pytest
@@ -123,8 +124,16 @@ def test_backend_record(recwarn, capsys):
             backend.record("BM")
             backend.record("EDC")
             assert backend.record_state() == (True, False)
-            backend.record("EDMC")
+            backend.record("EDMCS")
             assert backend.record_state() == (False, False)
+            assert os.path.exists("messages.txt")
+            assert os.path.exists("commandes.txt")
+            #la fonction devrait être modifiée pour avoir un chemin demandé
+            #risque d'effacer fichier non lié au test
+            os.remove("messages.txt")
+            os.remove("commandes.txt")
+            backend.record("E")
+
     finally:
         results_to_file("backend_record", recwarn, capsys, TEST_TIME)
 
@@ -142,7 +151,7 @@ def test_radio_recep(recwarn, capsys):
     try:
         RADIO.start()
         RADIO.register_start('all')
-        test_util_args = ['python', 'utilitaire_test.py', 'backend_send_cmds']
+        test_util_args = ['python', 'utilitaire_test.py', 'test_radio_recep']
         test_util_args.append("TestCmd")
         test_util_args.append("PosReport test 0;0;0")
         test_util_args.append("CaptDecl test cpt osef")
@@ -154,12 +163,39 @@ def test_radio_recep(recwarn, capsys):
         RADIO.send_cmd("StopIvyTest")
         RADIO.stop()
         buffer = RADIO.msgsBuffer[1:]
+        print(RADIO.msgsBuffer)
         assert buffer[0][1:] == ("IvyTest@localhost", "TestCmd")
         assert buffer[1][1:] == ("IvyTest@localhost", "PosReport test 0;0;0")
         assert buffer[2][1:] == ("IvyTest@localhost", "CaptDecl test cpt osef")
 
-        ivy_test_list = read_ivytest_file('backend_send_cmds')
+        ivy_test_list = read_ivytest_file('test_radio_recep')
         assert ('Radio@localhost', 'StopIvyTest') in ivy_test_list
 
     finally:
         results_to_file("radio_recep", recwarn, capsys, TEST_TIME)
+
+def test_radio_backend_attached(recwarn, capsys):
+    """Tests des méthodes de Radi necessitant une radio attachée"""
+    RADIO.cmdsBuffer = []
+    RADIO.msgsBuffer = []
+    try:
+        with bkd.Backend(anr.Annuaire(), RADIO) as backend:
+            backend.record("SMC")
+            test_util_args = ['python', 'utilitaire_test.py', 'radio_backend_attached']
+            test_util_args.append("TestCmd")
+            test_util_args.append("PosReport test 0;0;0")
+            test_util_args.append("CaptDecl test cpt osef")
+            test_util_args.append("CaptReport test cpt 0")
+            test_util_args.append("ActuatorDecl test cpt 0 1 1 osef")
+            subprocess.Popen(test_util_args)
+            time.sleep(1)
+            backend.record("ESMCD")
+            assert os.path.exists("messages.txt")
+            assert os.path.exists("commandes.txt") #meme précaution à prendre
+            os.remove("messages.txt")
+            os.remove("commandes.txt")
+            RADIO.send_cmd("StopIvyTest")
+            _ = read_ivytest_file('radio_backend_attached')
+
+    finally:
+        results_to_file("radio_backend_attached", recwarn, capsys, TEST_TIME)

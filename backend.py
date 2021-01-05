@@ -1,6 +1,5 @@
 """Module backend.py - Gestion jointe de l'annuaire et de la communication par ivy"""
 
-import sys
 from time import sleep, time
 import annuaire
 import ivy_radio as rd
@@ -238,7 +237,7 @@ class Backend:
 
     def record(self, flag):
         """Permet de déclencher/arrêter l'enregistrement des messages depuis l'interface
-        
+
         Entrées:
             - flag (str): le drapeau correspondant au mode souhaité
                 (la première lettre est B (begin) ou E (end), puis
