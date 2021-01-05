@@ -128,7 +128,6 @@ class Backend:
             - robot_name (str): nom du robot à tracker
         """
         self.annu.add_robot(annuaire.Robot(robot_name))
-        #self.radio.send_cmd (rd.DESCR_CMD.format (robot_name)) dépréciée
 
     def stopandforget_robot(self, robot_name):
         """Permet d'arrêter le robot en question
@@ -214,7 +213,7 @@ class Backend:
         Sortie:
             - tuple (type, any, float, float | None)
                 - [0] eqp_type (type): le type de l'équipement
-                - [1] eqp_state (any): l'état actuel de l'équipement
+                - [1] eqp_state (tuple): l'état actuel de l'équipement
                     (se référer à l'équipement en question)
                 - [2] eqp_last_updt (float): le timestamp de la dernière info reçue
                     (se référer à l'équipement en question)
@@ -225,8 +224,6 @@ class Backend:
         eqp = self.annu.find(robot_name, eqp_name)
         eqp_type = eqp.get_type()
         eqp_state = eqp.get_state()
-        if len(eqp_state) == 1:
-            eqp_state = eqp_state[0]
         eqp_last_updt = eqp.get_last_updt()
         if eqp_type == annuaire.Actionneur or eqp_type == annuaire.Binaire:
             eqp_last_cmd = eqp.get_last_cmd()
