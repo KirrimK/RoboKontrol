@@ -184,9 +184,10 @@ def test_radio_backend_attached(recwarn, capsys):
             test_util_args = ['python', 'utilitaire_test.py', 'radio_backend_attached']
             test_util_args.append("TestCmd")
             test_util_args.append("PosReport test 0;0;0")
-            test_util_args.append("CaptDecl test cpt osef")
-            test_util_args.append("CaptReport test cpt 0")
-            test_util_args.append("ActuatorDecl test cpt 0 1 1 osef")
+            test_util_args.append("CaptDecl test2 cpt osef")
+            test_util_args.append("CaptReport test3 cpt 0")
+            test_util_args.append("ActuatorDecl test4 cpt 0 1 1 osef")
+            test_util_args.append("ActuatorDecl test3 cpt 0 1 1 osef")
             subprocess.Popen(test_util_args)
             time.sleep(1)
             backend.record("ESMCD")
@@ -196,6 +197,7 @@ def test_radio_backend_attached(recwarn, capsys):
             os.remove("commandes.txt")
             RADIO.send_cmd("StopIvyTest")
             _ = read_ivytest_file('radio_backend_attached')
+            backend.record("EDMC")
 
     finally:
         results_to_file("radio_backend_attached", recwarn, capsys, TEST_TIME)
