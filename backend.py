@@ -236,6 +236,49 @@ class Backend:
         eqp_unit = eqp.get_unit()
         return (eqp_type, eqp_state, eqp_last_updt, eqp_last_cmd, eqp_unit)
 
+    def record(self, flag):
+        """Permet de déclencher/arrêter l'enregistrement des messages depuis l'interface
+        
+        Entrées:
+            - flag (str): le drapeau correspondant au mode souhaité
+                (la première lettre est B (begin) ou E (end), puis
+                M pour messages / C pour commandes /
+                S pour sauvegarder lors arrêt / D pour effacer mémoire interne radio)
+                Exemple: BMC: démarrer enregistrement de tout
+                         ECSD: arrêter d'enregistrer les commandes, sauvegarder puis effacer
+        """
+        if flag[0] == "B": #begin
+            args = []
+            if "M" in flag:
+                args.append("msgs")
+            if "C" in flag:
+                args.append("cmds")
+            args = tuple(args)
+            self.radio.register_start(args)
+        if flag[0] == "E": #end
+            args = []
+            if "M" in flag:
+                args.append("msgs")
+            if "C" in flag:
+                args.append("cmds")
+            args = tuple(args)
+            save = False
+            if "S" in flag:
+                save = True
+            delb = False
+            if "D" in flag:
+                delb = True
+            self.radio.register_stop(save, delb, args)
+
+    def record_state(self):
+        """Revoie dans quelle mode d'enregistrement la radio se trouve
+
+        Sorties:
+            - tuple (bool, bool)
+                - [0]: record_msgs
+                - [1]: record_cmds"""
+        return (self.radio.record_msgs, self.radio.record_cmds)
+
 #if __name__ == '__main__':
 #    PRINT_FL = 0
 #    if len(sys.argv) == 2 and sys.argv[1] == "--no-print":
