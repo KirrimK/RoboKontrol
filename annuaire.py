@@ -166,7 +166,7 @@ class LED(Actionneur):
             self.valeur = valeur
             self.updt()
 
-#TODO: ajouter min max step aux capteurs
+#TODO: ajouter min max step aux capteurs (purement esthétiques)
 class Capteur(Equipement):
     """Définit un capteur avec un nom, une valeur et une unité
 
