@@ -204,6 +204,7 @@ class Capteur(Equipement):
         self.valeur = valeur
         self.updt()
 
+#virer Batterie, car Capteur avec slider? pas grosse différence
 class Batterie(Capteur):
     """Une classe dérivée de Capteur, permettant de faire la distinction
     entre les capteurs "normaux" et la charge de la batterie au niveau de
