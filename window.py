@@ -1,7 +1,6 @@
-"""Module ui_window.py - Crée la fenêtre comportant l'inspecteur, la carte et d'autres fonctionnalités"""
+"""Module ui_window.py - Crée la fenêtre comportant l'inspecteur, la carte et la zone de menu"""
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QMessageBox
 import inspecteur
 
 QPUSHBUTTON = "background-color: grey; border 2px solid rgb(113, 113, 113);border-width: 2px; " \
@@ -9,10 +8,10 @@ QPUSHBUTTON = "background-color: grey; border 2px solid rgb(113, 113, 113);borde
 
 
 class Window(object):
-    """ Définit la fenêtre dans laquelle est affiché toute les informations de l'appliaction"""
+    """ Définit la fenêtre principale dans laquelle est affiché toute les informations de l'appliaction"""
 
     def __init__(self, backend):
-        """ Création de la fenêtre"""
+        """ Création de la fenêtre principale"""
         self.main_window = QtWidgets.QWidget()
         self.main_window.setObjectName("main_window")
         self.main_window.resize(1091, 782)
@@ -21,26 +20,9 @@ class Window(object):
         self.backend = backend
         # Création du layout de la fenêtre
         self.layout_window = QtWidgets.QVBoxLayout(self.main_window)
-        # Création de la zone menu
-        self.menu_area = QtWidgets.QGroupBox(self.main_window)
-        self.layout_menu = QtWidgets.QHBoxLayout(self.menu_area)
-        self.layout_window.addWidget(self.menu_area)
-        # Création du bouton "Configurer la map"
-        self.button_map = QtWidgets.QPushButton(self.menu_area)
-        self.button_map.setMaximumSize(200, 16777215)
-        self.button_map.setText("Configurer la carte")
-        self.layout_menu.addWidget(self.button_map)
-        # Création du bouton "Connecter un robot"
-        self.button_connect_robot = QtWidgets.QPushButton(self.menu_area)
-        self.button_connect_robot.setText("Connecter un robot")
-        self.layout_menu.addWidget(self.button_connect_robot)
 
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.layout_menu.addItem(spacerItem)
-        # Création du bouton aide
-        self.button_help = QtWidgets.QPushButton(self.menu_area)
-        self.button_help.setText("Aide")
-        self.layout_menu.addWidget(self.button_help)
+
+        self.create_menu_area()
 
         # Création de la zone map-inspecteur
         self.layout_map_inspector = QtWidgets.QHBoxLayout()
@@ -77,18 +59,84 @@ class Window(object):
         self.scrollArea.setGeometry(QtCore.QRect(0, 0, 350, 16777215))
         self.layout_inspector = QtWidgets.QVBoxLayout(self.scrollArea)
 
-        """Crée le QPushButton et l'ajoute à la QScrollBar"""
-        self.button_add_robot = QtWidgets.QPushButton(self.scrollArea)
-        self.button_add_robot.setMinimumSize(0, 30)
-        self.button_add_robot.setText("Ajouter un robot")
-        self.button_add_robot.setStyleSheet(QPUSHBUTTON)
-        self.button_add_robot.clicked.connect(lambda: self.add_robot())
-        self.layout_inspector.addWidget(self.button_add_robot)
+        #"""Crée le QPushButton et l'ajoute à la QScrollBar"""
+        #self.button_add_robot = QtWidgets.QPushButton(self.scrollArea)
+        #self.button_add_robot.setMinimumSize(0, 30)
+        #self.button_add_robot.setText("Ajouter un robot")
+        #self.button_add_robot.setStyleSheet(QPUSHBUTTON)
+        #self.button_add_robot.clicked.connect(lambda: self.add_robot())
+        #self.layout_inspector.addWidget(self.button_add_robot)
 
+    def create_menu_area(self):
+        """ Création de la zone menu"""
+        self.menu_area = QtWidgets.QGroupBox(self.main_window)
+        self.layout_menu = QtWidgets.QHBoxLayout(self.menu_area)
+        self.layout_window.addWidget(self.menu_area)
+
+        # Création du bouton record
+        self.button_record = QtWidgets.QPushButton(self.menu_area)
+        self.button_record.setMaximumSize(200, 16777215)
+        self.button_record.setText("Record")
+        self.button_record.setCheckable(True)
+        self.layout_menu.addWidget(self.button_record)
+        self.button_record.clicked.connect(lambda: color_record())
+
+
+        def color_record():
+            """ Change la couleur du bouton record suivant qu'il est activé ou non """
+            if self.button_record.isChecked():
+                self.button_record.setStyleSheet("background-color: grey")
+            else:
+                self.button_record.setStyleSheet("background-color: red")
+
+        # Création du bouton play
+        self.button_play = QtWidgets.QPushButton(self.menu_area)
+        self.button_play.setMaximumSize(200, 16777215)
+        self.button_play.setText("|>")
+        self.layout_menu.addWidget(self.button_play)
+
+        # Création du bouton pause
+        self.button_pause = QtWidgets.QPushButton(self.menu_area)
+        self.button_pause.setMaximumSize(200, 16777215)
+        self.button_pause.setText("||")
+        self.layout_menu.addWidget(self.button_pause)
+
+        # Création du bouton arrêt
+        self.button_stop = QtWidgets.QPushButton(self.menu_area)
+        self.button_stop.setMaximumSize(200, 16777215)
+        self.button_stop.setText("Stop")
+        self.layout_menu.addWidget(self.button_stop)
+
+        # Création du bouton sauvegarder
+        self.button_save = QtWidgets.QPushButton(self.menu_area)
+        self.button_save.setMaximumSize(200, 16777215)
+        self.button_save.setText("Save")
+        self.layout_menu.addWidget(self.button_save)
+
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.layout_menu.addItem(spacerItem)
+
+        # Création du bouton configuration
+        self.button_settings = QtWidgets.QPushButton(self.menu_area)
+        self.button_settings.setText("Configuration")
+        self.layout_menu.addWidget(self.button_settings)
+        self.button_settings.clicked.connect(lambda: show_settings(self.main_window))
+
+        # Création du bouton aide
+        self.button_help = QtWidgets.QPushButton(self.menu_area)
+        self.button_help.setText("Aide")
+        self.layout_menu.addWidget(self.button_help)
+
+def show_settings(main_window):
+    """ Ouvre un popup (QDialog) Configuration permettant la modification des réglages d'enregistrement"""
+    setting = QtWidgets.QDialog(main_window)
+    setting.setWindowTitle("Configuration")
+    setting.setMinimumSize(500,750)
+    setting.exec_()
 
 def show_help(main_window):
-    """Ouvre une pop_up Aide avec la contenu du fichier aide.txt"""
-    aide = QMessageBox(main_window)
+    """Ouvre une pop_up (QMessageBox) Aide avec la contenu du fichier aide.txt"""
+    aide = QtWidgets.QMessageBox(main_window)
     aide.setWindowTitle("Aide")
     list_aide = []
     with open("aide.txt", encoding='utf-8') as f:
@@ -99,6 +147,7 @@ def show_help(main_window):
 
 
 def main(backend):
+    """ Création la fenêtre principale """
     import sys
     app = QtWidgets.QApplication(sys.argv)
     Window(backend)
