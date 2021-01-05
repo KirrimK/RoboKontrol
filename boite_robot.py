@@ -178,9 +178,11 @@ class BoiteRobot:
             equipement = equipements[name]
             if type(equipement) == Actuator:
                 actuator = equipements[name]
+                self.current_actuators_list.append (name)
                 actuator.add_actuator()
                 print("actionneur ajouté")
             if type(equipement) == Sensor:
+                self.current_sensors_list.append (name)
                 sensor = equipements[name]
                 sensor.add_capteur()
 
@@ -189,18 +191,26 @@ class BoiteRobot:
             equipement = self.current_equipement_dic.pop(name)
             if type(equipement) == Actuator:
                 actuator = equipements[name]
+                self.current_actuators_list.pop (self.current_actuators_list.index (name))
                 actuator.remove_actionneur()
             if type(equipement) == Sensor:
                 sensor = equipements[name]
+                self.current_sensors_list.pop ( self.current_sensors_list.index (name))
                 sensor.remove_capteur()
 
         #Change les capteurs en actionneurs si neccessaire.
-        for name in current_sensors_list :
+        for name in self.current_sensors_list :
             if type (equipements [name]) == Actuator :
-                actuator = equipments [name]
+                actuator = equipements [name]
+                self.current_actuators_list.append (name)
+                self.current_sensors_list.pop ( self.current_sensors_list.index (name))
+                actuator.add_actuator()
+                sensor = self.current_equipement_dic [name]
+                sensor.remove_capteur ()
 
-        # Met à jour la liste des capteurs présents
+        # Met à jour la liste et le dictionnaire des capteurs présents
         self.current_equipement_list = equipements_list
+        self.current_equipement_dic = equipements
 
         # Initialise la mise à jours des capteurs
         for equipement in self.current_capteurs_dic.values():
