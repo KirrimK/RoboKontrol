@@ -5,11 +5,11 @@ import lxml.etree as ET
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication #, QMainWindow, QWidget
+from PyQt5.QtWidgets import QApplication #, QMainWindow, QWidget,
 from PyQt5.QtGui import QBrush, QColor, QPainter #,Qpen
 
 #brosses
-ROBOT_COLOR= 'yellow'
+ROBOT_COLOR= 'gold'
 ROBOT_BRUSH=QBrush(QColor(ROBOT_COLOR))
 
 class MapView(QtWidgets.QWidget):
@@ -83,14 +83,22 @@ class MapView(QtWidgets.QWidget):
 #        tooltip = r.type.name + ' ' + f.call_sign + ' ' + f.qfu
 #        self.setToolTip(tooltip)
 
-#    def controlerobot(self, event):
-        """controle du robot en cliquant sur la carte et avec le clavier"""
-        
-        # Do nothing for the moment...
-
-
-#            shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(text), self)
-#            shortcut.activated.connect(slot)
+#    def controleclicevent(self, event):
+        self.controlclic()
+     def controlclic(self):
+        """controle du robot en cliquant sur la carte """
+        destination=[]
+        destination=self.buttonDownPos
+        #todo #send order to bot
+    #def controledragndropevent(self,event):
+        self.controldragndrop()
+    #def controldragndrop(self):     
+        """controle avec drag and drop"""
+    #def controleclavierevent(self,event):
+        self.controleclavier() 
+    #def controleclavier(self):       
+#        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(text), self)
+#        shortcut.activated.connect(slot)
 
 
         #add_shortcut('b_up', lambda: ))
