@@ -58,9 +58,10 @@ class RobotItem(QGraphicsEllipseItem):
 
     def controlerobot(self, event):
         """controle du robot en cliquant sur la carte et avec le clavier"""
+        
         # Do nothing for the moment...
-            shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(text), self)
-            shortcut.activated.connect(slot)
+            #shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(text), self)
+            #shortcut.activated.connect(slot)
 
         #add_shortcut('b_up', lambda: ))
         #add_shortcut('b_down', lambda:)
