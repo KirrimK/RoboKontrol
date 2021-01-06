@@ -78,20 +78,23 @@ class MapView(QtWidgets.QWidget):
         # build the ellipse
 #        width = #5
 #        self.setRect(-width, -width, width * 2, width * 2)
+
         #todo # add tooltip
 #        tooltip = r.type.name + ' ' + f.call_sign + ' ' + f.qfu
 #        self.setToolTip(tooltip)
 
-#    def mousePressEvent(self, event):
-#        """control du robot en cliquant sur la carte"""
+#    def controlerobot(self, event):
+        """controle du robot en cliquant sur la carte et avec le clavier"""
         # Do nothing for the moment...
-#        event.accept()
+#            shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(text), self)
+#            shortcut.activated.connect(slot)
 
-#    def update_position(self):
-#        """moves the robot in the scene"""
-#        position = self.robot.get_position(#)
-#        self.setBrush(ROBOT_BRUSH)
-#        self.setPos(position.x, position.y)
+        #add_shortcut('b_up', lambda: ))
+        #add_shortcut('b_down', lambda:)
+        #add_shortcut('b_left', lambda )
+        #add_shortcut('b_right', lambda )
+        #return toolbar
+#        event.accept()
 
 App = QApplication(sys.argv)
 map_view = MapView(None)
