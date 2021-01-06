@@ -48,21 +48,35 @@ class MapView(QtWidgets.QWidget):
         """
         self.map_data = []
         root = ET.parse(config_path).getroot()
-        self.map_width = float(root.attrib.get('width'))
-        self.map_height = float(root.attrib.get('height'))
-        self.map_margin = float(root.attrib.get('margin'))
+        self.map_width = int(root.attrib.get('width'))
+        self.map_height = int(root.attrib.get('height'))
+        self.map_margin = int(root.attrib.get('margin'))
         for rect in root.findall('rect'):
             nom = rect.attrib.get('nom')
             color = rect.find("color").text
             order = float(rect.find("order").text)
             size = rect.find("size").text.strip().split("x")
-            size[0] = int(size[0])//5
-            size[1] = int(size[1])//5
             pos = rect.find("pos").text.strip().split("x")
-            pos[0] = int(pos[0])//5
-            pos[1] = int(pos[1])//5
+            size, pos = self.calc_pos_size(pos, size)
             rect_data = (nom, color, order, size, pos)
             self.map_data.append(rect_data)
+    
+    def calc_pos_size(self, pos, size):
+        """Calcule les positions et tailles en fonction de la taille du widget"""
+        size[0] = int(size[0])
+        size[1] = int(size[1])
+        pos[0] = int(pos[0])
+        pos[1] = int(pos[1])
+        width = self.frameGeometry.width()
+        height = self.frameGeometry.height()
+        map_ttl_width = self.map_width + 2 * self.map_margin
+        map_ttl_height = self.map_height + 2 * self.map_height
+        ratio_map = map_ttl_height/map_ttl_width
+        ratio_widget = height/width
+        min_dim_width = height >= width
+
+        return pos, size
+
         
 #class RobotItem(QGraphicsEllipseItem):
 #    """The view of a robot in the GraphicsScene"""
@@ -83,6 +97,7 @@ class MapView(QtWidgets.QWidget):
 #        tooltip = r.type.name + ' ' + f.call_sign + ' ' + f.qfu
 #        self.setToolTip(tooltip)
 
+
 #    def controleclicevent(self, event):
         self.controlclic()
      def controlclic(self):
@@ -99,6 +114,7 @@ class MapView(QtWidgets.QWidget):
     #def controleclavier(self):       
 #        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(text), self)
 #        shortcut.activated.connect(slot)
+
 
 
         #add_shortcut('b_up', lambda: ))
