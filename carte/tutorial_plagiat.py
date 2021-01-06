@@ -25,6 +25,7 @@ class Window(QWidget):
         painter.drawEllipse(40, 40, 400, 400)
         painter.setPen(QPen(Qt.green,  8, Qt.SolidLine))
         painter.setBrush(QBrush(Qt.red, Qt.SolidPattern))
+        painter.drawEllipse(50, 50, 300, 300)
 
 App = QApplication(sys.argv)
 window = Window()
