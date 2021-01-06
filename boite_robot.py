@@ -317,6 +317,7 @@ class Actuator:
         self.doubleSpinBox_actuator.setMaximum(self.max_val)
         self.doubleSpinBox_actuator.setMinimum(self.min_val)
         self.doubleSpinBox_actuator.setSingleStep(self.step)
+        self.doubleSpinBox_actuator.valueChanged.connect (lambda : print ("Valeur changée"))#TODO : Connecter une méthode d'envoi de commande
         try:
             self.doubleSpinBox_actuator.setValue(self.value)
         except TypeError:
@@ -379,9 +380,6 @@ class Actuator:
         if self.type_actionneur == "DISCRET":
             try:
                 self.doubleSpinBox_actuator.setValue(self.value)
-                print (self.value)
-                print (self.doubleSpinBox_actuator.value ())
-                print ('valeur changée')
             except TypeError:
                 pass
         if self.type_actionneur == "BINAIRE":
