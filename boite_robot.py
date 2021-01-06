@@ -380,6 +380,7 @@ class Actuator:
             try:
                 self.doubleSpinBox_actuator.setValue(self.value)
                 print (self.value)
+                print (self.doubleSpinBox_actuator.value ())
                 print ('valeur changée')
             except TypeError:
                 pass
