@@ -159,7 +159,7 @@ class Radio :
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
             if not self.backend.annu.find (rid).check_eqp (sid):
-                self.backend.annu.find (rid).create_eqp (sid, "Capteur", None)
+                self.backend.annu.find (rid).create_eqp (sid, "Capteur", 0 , 100, 1, None)
             self.backend.annu.find (rid,sid).set_state (float (valeur))
             
 
@@ -183,7 +183,7 @@ class Radio :
                 add = True
                 val = self.backend.annu.find (rid, sid).get_state() [0]
             if add:
-                self.backend.annu.find (rid).create_eqp (sid, "Capteur", unit)#TODO: Changer cette ligne (après modification de annuaire)
+                self.backend.annu.find (rid).create_eqp (sid, "Capteur", minV, maxV, step, unit)#TODO: Changer cette ligne (après modification de annuaire)
                 self.backend.annu.find (rid, sid).set_state (val)
 
     def send_cmd (self,cmd):

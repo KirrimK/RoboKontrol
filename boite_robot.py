@@ -390,7 +390,7 @@ class Actuator:
             self.pushButton_led.setStyleSheet("background-color : {0};".format(self.value))
 
 
-class Sensor:
+class Sensor:#TODO : Rendre la classe compatible avec le backend (ajout de min, max et step)
     """ Crée l'affichage d'un capteur (hérité de la classe Capteur d'annuaire) et l'ajoute dans la boite capteurs """
 
     def __init__(self, nom, valeur, unite, boite_capteurs, layout_boite_capteurs, last_update):
