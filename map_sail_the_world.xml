@@ -1,7 +1,7 @@
 <!--Les coordonnées de position sont celles du coin inférieur gauche de l'objet-->
 <map height="3000" width="2000" margin="200">
     <rect nom="table_de_jeu">
-        <color>dimgrey</color>
+        <color>black</color>
         <order>0</order>
         <size>3000x2000</size> <!--XxY-->
         <pos>0x0</pos> <!--XxY-->

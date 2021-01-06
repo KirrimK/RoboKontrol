@@ -32,11 +32,14 @@ class MapView(QtWidgets.QWidget):
         self.paint()
 
     def paint(self):
-        """Dessin de la map"""
+        """Dessin de la map et des robots"""
         painter = QPainter(self)
         for rect in self.map_data:
+            size = rect[4]
+            pos = rect[3]
+            size, pos = self.calc_pos_size(pos, size)
             painter.setBrush(QBrush(QColor(rect[1]), Qt.SolidPattern))
-            painter.drawRect(rect[4][0], rect[4][1], rect[3][0], rect[3][1])
+            painter.drawRect(pos[0], pos[1], size[0], size[1])
             #TODO: modifier en fonction de la taille de la map
         #dessine robot
 
@@ -57,26 +60,38 @@ class MapView(QtWidgets.QWidget):
             order = float(rect.find("order").text)
             size = rect.find("size").text.strip().split("x")
             pos = rect.find("pos").text.strip().split("x")
-            size, pos = self.calc_pos_size(pos, size)
             rect_data = (nom, color, order, size, pos)
             self.map_data.append(rect_data)
-    
+
     def calc_pos_size(self, pos, size):
         """Calcule les positions et tailles en fonction de la taille du widget"""
-        size[0] = int(size[0])
-        size[1] = int(size[1])
-        pos[0] = int(pos[0])
-        pos[1] = int(pos[1])
-        width = self.frameGeometry.width()
-        height = self.frameGeometry.height()
-        map_ttl_width = self.map_width + 2 * self.map_margin
-        map_ttl_height = self.map_height + 2 * self.map_height
-        ratio_map = map_ttl_height/map_ttl_width
-        ratio_widget = height/width
-        min_dim_width = height >= width
-
-        return pos, size
-
+        new_pos = [0, 0]
+        new_size = [0, 0]
+        new_size[0] = int(size[0])
+        new_size[1] = int(size[1])
+        new_pos[0] = int(pos[0])
+        new_pos[1] = int(pos[1])
+        print(new_pos, new_size)
+        width = self.geometry().width()
+        height = self.geometry().height()
+        print(width, height)
+        map_ttl_height = self.map_width + 2 * self.map_margin
+        map_ttl_width = self.map_height + 2 * self.map_margin
+        print(map_ttl_width, map_ttl_height)
+        if map_ttl_width/width >= map_ttl_height/height:
+            resize_factor = map_ttl_width/width
+            new_size[0] = int(new_size[0])//resize_factor + self.map_margin//resize_factor
+            new_size[1] = int(new_size[1])//resize_factor + self.map_margin//resize_factor + height/2 - map_ttl_height//resize_factor/2
+            new_pos[0] = int(new_pos[0])//resize_factor
+            new_pos[1] = int(new_pos[1])//resize_factor
+        else:
+            resize_factor = map_ttl_height/height
+            new_size[0] = int(new_size[0])//resize_factor + self.map_margin//resize_factor + width/2 - map_ttl_width//resize_factor/2
+            new_size[1] = int(new_size[1])//resize_factor + self.map_margin//resize_factor
+            new_pos[0] = int(new_pos[0])//resize_factor
+            new_pos[1] = int(new_pos[1])//resize_factor
+        print(new_pos, new_size)
+        return new_pos, new_size
         
 #class RobotItem(QGraphicsEllipseItem):
 #    """The view of a robot in the GraphicsScene"""
