@@ -57,7 +57,59 @@ class Equipement:
         """Retourne le type de l'équipement"""
         return type(self)
 
-class Actionneur(Equipement):
+class Capteur(Equipement):
+    """Définit un capteur avec un nom, une valeur et une unité
+
+    Attributs:
+    Hérités d'Equipement
+    - nom (str): le nom du capteur
+    - unite (str): unité du capteur
+    - last_updt (float): timestamp de la derniere update de la valeur
+
+    Nouveaux:
+    - min (float): minimum attendu du capteur (UI only)
+    - max (float): maximum attendu du capteur (UI only)
+    - step (float): le step du capteur (UI only)
+    - valeur (float): la valeur du capteur
+    """
+    def __init__(self, nom, min_val, max_val, step, unite=None):
+        super().__init__(nom)
+        self.valeur = 0
+        self.min_val = min_val
+        self.max_val = max_val
+        self.unite = unite
+        self.step = step
+
+    def __str__(self):
+        nom = self.nom
+        val = self.valeur
+        min_v = self.min_val
+        max_v = self.max_val
+        unt = self.unite
+        stp = self.step
+        return "Cpt. [{}] Val.: {} ({}) {} -> {} ({})".format(nom, val, unt, min_v, max_v, stp)
+
+    def get_state(self):
+        """Renvoie l'état de l'équipement
+
+        Sortie:
+            - state (float, float, float, float)
+            - [0]: valeur actuelle
+            - [1]: valeur min
+            - [2]: valeur max
+            - [3]: step
+        """
+        return (self.valeur, self.min_val, self.max_val, self.step)
+
+    def set_state(self, valeur):
+        """Change la valeur
+
+        Entrée:
+        - valeur (float)"""
+        self.valeur = valeur
+        self.updt()
+
+class Actionneur(Capteur):
     """Définit un actionneur basique attaché à un robot,
     dont les commandes peuvent prendre une valeur (int) entre max et min (int),
     le tout dans une certaine unité.
@@ -65,26 +117,22 @@ class Actionneur(Equipement):
     auquel cas la valeur de ce capteur sera aussi stockée dans ce même objet
 
     Attributs:
-    Hérités d'Equipement:
+    Hérités de Capteur:
     - nom (str): le nom de l'actionneur
     - unite (str): l'unité dans laquelle les valeurs de l'actionneurs sont exprimées
     - last_updt (float): timestamp de la derniere update de la valeur
-
-    Nouveaux:
     - valeur (float|None): valeur retournée par le capteur associé (None si sans retour)
     - min_val (float): valeur minimale de la commande
     - max_val (float): valeur max de la commannde
     - step (float): le step de l'actionneur (la commande doit être un multiple)
+
+    Nouveaux:
     - last_cmd (float): le timestamp de la dernière commande envoyée
     """
     def __init__(self, nom, min_val, max_val, step=1, unite=None):
-        super().__init__(nom)
-        self.valeur = None
-        self.min_val = min_val
-        self.max_val = max_val
-        self.unite = unite
-        self.step = step
+        super().__init__(nom, min_val, max_val, step, unite)
         self.last_cmd = None
+        self.valeur = None
 
     def __str__(self):
         nom = self.nom
@@ -94,27 +142,6 @@ class Actionneur(Equipement):
         unt = self.unite
         stp = self.step
         return "Act. [{}] Val.: {} ({}) {} -> {} ({})".format(nom, val, unt, min_v, max_v, stp)
-
-    def get_state(self):
-        """Retourne la valeur et le min/max d'un actionneur
-
-        Sortie:
-        - state (float|None, float, float, float)
-            - [0]: valeur de l'actionneur (None si sans retour)
-            - [1]: valeur min
-            - [2]: valeur max
-            - [3]: step actionneur
-        """
-        return (self.valeur, self.min_val, self.max_val, self.step)
-
-    def set_state(self, valeur):
-        """Change la valeur du capteur associé
-
-        Entrée:
-        - valeur (float) (devrait être compris entre min et max actionneur inclus)
-        """
-        self.valeur = valeur
-        self.updt()
 
     def updt_cmd(self):
         """Met à jour le timestamp de dernière commande"""
@@ -165,58 +192,6 @@ class LED(Actionneur):
         if isinstance(valeur, tuple) and len(valeur) == 3:
             self.valeur = valeur
             self.updt()
-
-class Capteur(Equipement):
-    """Définit un capteur avec un nom, une valeur et une unité
-
-    Attributs:
-    Hérités d'Equipement
-    - nom (str): le nom du capteur
-    - unite (str): unité du capteur
-    - last_updt (float): timestamp de la derniere update de la valeur
-
-    Nouveaux:
-    - valeur (float): valeur du capteur"""
-    def __init__(self, nom, valeur=0, unite=None):
-        super().__init__(nom)
-        self.valeur = valeur
-        self.unite = unite
-
-    def __str__(self):
-        nom = self.nom
-        val = self.valeur
-        unite = self.unite
-        return "Capteur [{}] Val.:{} ({})".format(nom, val, unite)
-
-    def get_state(self):
-        """Renvoie la valeur du capteur
-
-        Sortie:
-        - valeur (int)"""
-        return (self.valeur,)
-
-    def set_state(self, valeur):
-        """Change la valeur du capteur
-
-        Entrée:
-        - valeur (int)"""
-        self.valeur = valeur
-        self.updt()
-
-class Batterie(Capteur):
-    """Une classe dérivée de Capteur, permettant de faire la distinction
-    entre les capteurs "normaux" et la charge de la batterie au niveau de
-    l'interface graphique."""
-    def __init__(self, nom):
-        super().__init__(nom, 0, "%")
-        #TODO: demander à Victor d'implémenter dans ivy_radio une distinction lors de CaptReport?
-        # par exemple Capt[Report/Decl] <robot> battery 100 => assignation automatique batterie
-
-    def __str__(self):
-        nom = self.nom
-        val = self.valeur
-        unite = self.unite
-        return "Batterie [{}] Val.:{} ({})".format(nom, val, unite)
 
 class Robot:
     """Classe définissant un robot avec les attributs suivants:
@@ -296,8 +271,7 @@ class Robot:
             à choisir en inscrivant la chaine de caractère du nom de classe associé:
                 'Equipement' / 'Actionneur' / 'Binaire' / 'Capteur'
             - args (tuple): tous les autres arguments liés à la création des eqps
-                si actionneur: (min, max, step (, unit))
-                si capteur: (unit)
+                si actionneur ou capteur: (min, max, step (, unit))
         """
         eqp = None
         if eqp_type == "Equipement":
@@ -314,11 +288,14 @@ class Robot:
         elif eqp_type == "Binaire":
             eqp = Binaire(eqp_name)
         elif eqp_type == "Capteur":
-            if len(args) == 1:
-                unit = args[0]
+            min_v = args[0]
+            max_v = args[1]
+            step = args[2]
+            if len(args) == 4:
+                unit = args[3]
             else:
                 unit = None
-            eqp = Capteur(eqp_name, unite=unit)
+            eqp = Capteur(eqp_name, min_v, max_v, step, unit)
 
         if eqp is not None:
             self.updt_eqp(eqp)

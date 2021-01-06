@@ -8,16 +8,16 @@ IVYAPPNAME = 'Radio'
 
 	#Informations
 """Le premier groupe de capture est le nom du robot"""
-CAPT_DECL = "CaptDecl (.+) (.+) (.*)"
+CAPT_DECL = "CaptDecl (.+) (.+) (.+) (.+) (.+) (.*)"
 ACTU_DECL = 'ActuatorDecl (.*) (.*) (.*) (.*) (.*) (.*)'
-POS_REG = 'PosReport (.+) (.+);(.+);(.+)'
+POS_REG = 'PosReport (.+) (.+) (.+) (.+)'
 CAPT_REG = 'CaptReport (.+) (.+) (.+)'
 
 	#Commands
 """Le premier argument sera le nom du robot"""
-SPEED_CMD = "SpeedCmd {} {},{},{}"
-POS_CMD =  "PosCmd {} {},{}"
-POS_ORIENT_CMD = "PosCmdOrient {} {},{},{}"
+SPEED_CMD = "SpeedCmd {} {} {} {}"
+POS_CMD =  "PosCmd {} {} {}"
+POS_ORIENT_CMD = "PosCmdOrient {} {} {} {}"
 ACTUATOR_CMD = "ActuatorCmd {} {} {}"
 KILL_CMD = "Shutdown {}"
 
@@ -159,11 +159,11 @@ class Radio :
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
             if not self.backend.annu.find (rid).check_eqp (sid):
-                self.backend.annu.find (rid).create_eqp (sid, "Capteur", None)
+                self.backend.annu.find (rid).create_eqp (sid, "Capteur", 0 , 100, 1, None)
             self.backend.annu.find (rid,sid).set_state (float (valeur))
             
 
-    def on_captdecl (self, sender, rid, sid, unit= None):
+    def on_captdecl (self, sender, rid, sid, minV, maxV, step, unit= None):
         """Fonction appellée automatiquement par IvyBind. Place le capteur sid sur le robot rid dans l'annuaire.
         Si le robot rid n'est pas connu, il est ajouté.
         Si le robot a déjà un capteur qui a le nom sid, la valeur est gardée.
@@ -183,7 +183,7 @@ class Radio :
                 add = True
                 val = self.backend.annu.find (rid, sid).get_state() [0]
             if add:
-                self.backend.annu.find (rid).create_eqp (sid, "Capteur", unit)
+                self.backend.annu.find (rid).create_eqp (sid, "Capteur", minV, maxV, step, unit)
                 self.backend.annu.find (rid, sid).set_state (val)
 
     def send_cmd (self,cmd):
@@ -205,13 +205,13 @@ class Radio :
         """Appelé automatiquement à l'arrêt du programme. Enlève la radio du bus Ivy."""
         IvyStop()
 
-if __name__ == '__main__' :
-    #Tests du programme
-    Radio1 = Radio ()
-    Radio1.start()
-    sleep (0.5) #/!\ Très important, la ligne précédente s'execute lentement
-    #Actual tests :
-    Radio1.send_cmd (POS_CMD.format ('test', 2000,0))
-    #End tests
-    sleep (1)
-    Radio1.stop ()
+#if __name__ == '__main__' :
+#    #Tests du programme
+#    Radio1 = Radio ()
+#    Radio1.start()
+#    sleep (0.5) #/!\ Très important, la ligne précédente s'execute lentement
+#    #Actual tests :
+#    Radio1.send_cmd (POS_CMD.format ('test', 2000,0))
+#    #End tests
+#    sleep (1)
+#    Radio1.stop ()

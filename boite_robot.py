@@ -4,6 +4,7 @@ from PyQt5 import QtWidgets, QtCore
 import annuaire
 import time
 
+#TODO: ajouter min max step aux capteurs
 # Définition des mins et maxs de tension pour la batterie (en V)
 MIN_BATTERIE = 9
 MAX_BATTERIE = 12
@@ -221,6 +222,7 @@ class BoiteRobot:
             if type(equipement) == Sensor:
                 equipement.update_capteur()
             if type(equipement) == Actuator:
+                print ('Appel à update actionneur')
                 equipement.update_actuator()
 
     @QtCore.pyqtSlot()
@@ -258,6 +260,17 @@ class Actuator:
         self.label_name_actuator = QtWidgets.QLabel(self.groupBox_actuator)
         self.label_command_actuator = QtWidgets.QLabel(self.groupBox_actuator)
         self.lcdNumber_ping_actuator = QtWidgets.QLCDNumber(self.groupBox_actuator)
+        if self.type_actionneur == "BINAIRE":
+            self.checkBox_actuator = QtWidgets.QCheckBox(self.groupBox_actuator)
+
+        if self.type_actionneur == "DISCRET":
+            self.doubleSpinBox_actuator = QtWidgets.QDoubleSpinBox(self.groupBox_actuator)
+
+        if self.type_actionneur == "MULTIPLE":
+            self.comboBox_actuator = QtWidgets.QComboBox(self.groupBox_actuator)
+
+        if self.type_actionneur == "COMPLEXE":
+            self.pushButton_actuator = QtWidgets.QPushButton(self.groupBox_actuator)
 
     def add_actuator(self):
         """Ajoute un actionneur (QGridLayout) dans la boite actionneurs (QGroupBox)"""
@@ -294,14 +307,12 @@ class Actuator:
     def create_actuator_binaire(self):
         """Crée et ajoute un actionneur de type binaire (QCheckBox)"""
 
-        self.checkBox_actuator = QtWidgets.QCheckBox(self.groupBox_actuator)
         self.checkBox_actuator.setText("")
         self.gridLayout_actuator.addWidget(self.checkBox_actuator, 0, 1, 1, 1, QT_CENTER)
 
     def create_actuator_discret(self):
         """Crée et ajoute un actionneur de type discret (QDoubleSpinBox)"""
 
-        self.doubleSpinBox_actuator = QtWidgets.QDoubleSpinBox(self.groupBox_actuator)
         self.doubleSpinBox_actuator.setMinimumSize(0, 30)
         self.doubleSpinBox_actuator.setMaximum(self.max_val)
         self.doubleSpinBox_actuator.setMinimum(self.min_val)
@@ -315,8 +326,7 @@ class Actuator:
     def create_actuator_multiple(self):
         """Crée et ajoute un actionneur de type multiple (QComboBox)"""
         list_options = self.info_actionneur
-        self.comboBox_actuator = QtWidgets.QComboBox(self.groupBox_actuator)
-
+        
         self.comboBox_actuator.addItem(list_options[self.value].strip('"'))
         for i in range(len(list_options)):
             if i != self.value:
@@ -334,7 +344,6 @@ class Actuator:
     def create_actuator_complexe(self):
         """Crée et ajoute un actionneur de type complexe (QPushButton) : il s'agit d'un bouton qui peut ouvrir un
         menu plus détaillée de l'actionneur (QDialog par exemple) """
-        self.pushButton_actuator = QtWidgets.QPushButton(self.groupBox_actuator)
         self.pushButton_actuator.setText(self.info_actionneur[0])
         self.pushButton_actuator.clicked.connect(lambda: self.open_actionneur_complexe())
         self.gridLayout_actuator.addWidget(self.pushButton_actuator, 0, 1, 1, 1)
@@ -370,6 +379,8 @@ class Actuator:
         if self.type_actionneur == "DISCRET":
             try:
                 self.doubleSpinBox_actuator.setValue(self.value)
+                print (self.value)
+                print ('valeur changée')
             except TypeError:
                 pass
         if self.type_actionneur == "BINAIRE":
@@ -382,7 +393,7 @@ class Actuator:
             self.pushButton_led.setStyleSheet("background-color : {0};".format(self.value))
 
 
-class Sensor:
+class Sensor:#TODO : Rendre la classe compatible avec le backend (ajout de min, max et step)
     """ Crée l'affichage d'un capteur (hérité de la classe Capteur d'annuaire) et l'ajoute dans la boite capteurs """
 
     def __init__(self, nom, valeur, unite, boite_capteurs, layout_boite_capteurs, last_update):
@@ -412,10 +423,11 @@ class Sensor:
         self.lcdNumber_ping_capteur = QtWidgets.QLCDNumber(self.groupBox_sensors)
         self.lcdNumber_ping_capteur.setMaximumSize(QtCore.QSize(16777215, 25))
         self.gridLayout_capteur.addWidget(self.lcdNumber_ping_capteur, 1, 1, 1, 1)
+        self.lcdNumber_capteur = QtWidgets.QLCDNumber(self.groupBox_sensors)
 
     def add_capteur(self):
         """ Ajoute un capteur (QGridLayout) dans la boite capteur (QGroupBox) """
-
+        
         if self.nom == "Batterie":
             n = 100  # n permet d'afficher les décimales de la tension
             self.progressBar = QtWidgets.QProgressBar(self.groupBox_sensors)
@@ -428,7 +440,6 @@ class Sensor:
             self.progressBar.setMaximumSize(160, 25)
 
         else:
-            self.lcdNumber_capteur = QtWidgets.QLCDNumber(self.groupBox_sensors)
             self.lcdNumber_capteur.setMinimumSize(160, 25)
             self.gridLayout_capteur.addWidget(self.lcdNumber_capteur, 0, 1, 1, 1)
             self.lcdNumber_capteur.display(self.valeur)
