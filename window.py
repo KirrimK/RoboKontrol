@@ -79,15 +79,7 @@ class Window(object):
         self.button_record.setText("Record")
         self.button_record.setCheckable(True)
         self.layout_menu.addWidget(self.button_record)
-        self.button_record.clicked.connect(lambda: color_record())
-
-
-        def color_record():
-            """ Change la couleur du bouton record suivant qu'il est activé ou non """
-            if self.button_record.isChecked():
-                self.button_record.setStyleSheet("background-color: grey")
-            else:
-                self.button_record.setStyleSheet("background-color: red")
+        self.button_record.clicked.connect(lambda: self.record())
 
         # Création du bouton play
         self.button_play = QtWidgets.QPushButton(self.menu_area)
@@ -126,6 +118,16 @@ class Window(object):
         self.button_help = QtWidgets.QPushButton(self.menu_area)
         self.button_help.setText("Aide")
         self.layout_menu.addWidget(self.button_help)
+
+    @QtCore.pyqtSlot()
+    def record(self):
+        """ Initialise l'enregistrement des messages et commandes et arrête l'enregistrement lorsque cliquer une seconde fois """
+        if self.button_record.isChecked():
+            self.button_record.setStyleSheet("background-color: red")
+            self.backend.record("BMC")
+        else:
+            self.button_record.setStyleSheet("background-color: grey")
+            self.backend.record("EMC")
 
 def show_settings(main_window):
     """ Ouvre un popup (QDialog) Configuration permettant la modification des réglages d'enregistrement"""
