@@ -8,17 +8,12 @@ ROBOT-COLOR= 'yellow'
 robot_brush=QBrush(QColor(ROBOT-COLOR))
 
 class MapView(QtWidgets.QWidget):
-
-
     def __init__(self, simu):
+        
         super().__init__()
-
         # show the window
         self.show()
         
-
-
-
 class RobotItem(QGraphicsEllipseItem):
     """The view of a robot in the GraphicsScene"""
 
@@ -33,7 +28,7 @@ class RobotItem(QGraphicsEllipseItem):
         # build the ellipse
         width = #5
         self.setRect(-width, -width, width * 2, width * 2)
-        # add tooltip
+        #todo # add tooltip
         tooltip = r.type.name + ' ' + f.call_sign + ' ' + f.qfu
         self.setToolTip(tooltip)
 
@@ -45,5 +40,5 @@ class RobotItem(QGraphicsEllipseItem):
     def update_position(self):
         """moves the robot in the scene"""
         position = self.robot.get_position(#)
-        self.setBrush(#robot_brush)
+        self.setBrush(ROBOT-BRUSH)
         self.setPos(position.x, position.y)
