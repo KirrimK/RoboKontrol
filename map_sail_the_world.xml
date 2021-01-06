@@ -1,33 +1,33 @@
 <!--Les coordonnées de position sont celles du coin inférieur gauche de l'objet-->
 <map height="3000" width="2000" margin="200">
     <rect nom="table_de_jeu">
-        <color>white</color>
+        <color>dimgrey</color>
         <order>0</order>
-        <size>3000x2000</color> <!--XxY-->
+        <size>3000x2000</size> <!--XxY-->
         <pos>0x0</pos> <!--XxY-->
     </rect>
     <rect nom="barriere_nord">
         <color>grey</color>
         <order>0</order>
-        <size>3000x22</color>
+        <size>3000x22</size>
         <pos>0x2000</pos>
     </rect>
     <rect nom="barriere_sud">
         <color>grey</color>
         <order>0</order>
-        <size>3000x22</color>
+        <size>3000x22</size>
         <pos>0x-22</pos>
     </rect>
     <rect nom="barriere_est">
         <color>grey</color>
         <order>0</order>
-        <size>22x2000</color>
+        <size>22x2000</size>
         <pos>3000x0</pos>
     </rect>
     <rect nom="barriere_ouest">
         <color>grey</color>
         <order>0</order>
-        <size>22x2000</color>
+        <size>22x2000</size>
         <pos>-22x0</pos>
     </rect>
 </map>

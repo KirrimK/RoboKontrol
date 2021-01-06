@@ -1,8 +1,8 @@
-<map>
-    <rect id=000001>
+<map height="400" width="300" margin="20">
+    <rect nom="01">
         <color>white</color>
         <order>0</order>
-        <size>100x200</color>
+        <size>100x200</size>
         <pos>0x0</pos>
     </rect>
 </map>
