@@ -222,6 +222,7 @@ class BoiteRobot:
             if type(equipement) == Sensor:
                 equipement.update_capteur()
             if type(equipement) == Actuator:
+                print ('Appel à update actionneur')
                 equipement.update_actuator()
 
     @QtCore.pyqtSlot()
@@ -378,6 +379,8 @@ class Actuator:
         if self.type_actionneur == "DISCRET":
             try:
                 self.doubleSpinBox_actuator.setValue(self.value)
+                print (self.value)
+                print ('valeur changée')
             except TypeError:
                 pass
         if self.type_actionneur == "BINAIRE":
@@ -440,7 +443,6 @@ class Sensor:#TODO : Rendre la classe compatible avec le backend (ajout de min, 
             self.lcdNumber_capteur.setMinimumSize(160, 25)
             self.gridLayout_capteur.addWidget(self.lcdNumber_capteur, 0, 1, 1, 1)
             self.lcdNumber_capteur.display(self.valeur)
-            print ('lcd ajouté')
 
         self.layout_box_capteurs.addLayout(self.gridLayout_capteur)
 

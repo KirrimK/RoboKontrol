@@ -183,7 +183,7 @@ class Radio :
                 add = True
                 val = self.backend.annu.find (rid, sid).get_state() [0]
             if add:
-                self.backend.annu.find (rid).create_eqp (sid, "Capteur", minV, maxV, step, unit)#TODO: Changer cette ligne (après modification de annuaire)
+                self.backend.annu.find (rid).create_eqp (sid, "Capteur", minV, maxV, step, unit)
                 self.backend.annu.find (rid, sid).set_state (val)
 
     def send_cmd (self,cmd):

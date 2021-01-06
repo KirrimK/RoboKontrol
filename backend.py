@@ -3,6 +3,7 @@
 from time import sleep, time
 import annuaire
 import ivy_radio as rd
+import sys
 
 class Backend:
     """Un objet faisant le lien entre un Annuaire (module annuaire)
@@ -275,13 +276,13 @@ class Backend:
                 - [1]: record_cmds"""
         return (self.radio.record_msgs, self.radio.record_cmds)
 
-#if __name__ == '__main__':
-#    PRINT_FL = 0
-#    if len(sys.argv) == 2 and sys.argv[1] == "--no-print":
-#        PRINT_FL = -1
-#    if len(sys.argv) == 2 and sys.argv[1] == "--spam-print":
-#        PRINT_FL = 1
-#    if len(sys.argv) == 2 and sys.argv[1] == "--erase-print":
-#        PRINT_FL = 2
-#    with Backend(annuaire.Annuaire(), rd.Radio(), PRINT_FL) as backend:
-#        backend.run_as_loop()
+if __name__ == '__main__':
+    PRINT_FL = 0
+    if len(sys.argv) == 2 and sys.argv[1] == "--no-print":
+        PRINT_FL = -1
+    if len(sys.argv) == 2 and sys.argv[1] == "--spam-print":
+        PRINT_FL = 1
+    if len(sys.argv) == 2 and sys.argv[1] == "--erase-print":
+        PRINT_FL = 2
+    with Backend(annuaire.Annuaire(), rd.Radio(), PRINT_FL) as backend:
+        backend.run_as_loop()
