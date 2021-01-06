@@ -1,19 +1,43 @@
 import math
+import lxml.etree as ET
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import QPen, QBrush, QColor
 
 #brosses
-ROBOT-COLOR= 'yellow'
-robot_brush=QBrush(QColor(ROBOT-COLOR))
+ROBOT_COLOR= 'yellow'
+ROBOT_BRUSH=QBrush(QColor(ROBOT_COLOR))
 
 class MapView(QtWidgets.QWidget):
-    def __init__(self, simu):
-        
+
+    """Un widget permettant de visualiser la carte et les robots dessus"""
+    def __init__(self, parent):
         super().__init__()
+        self.parent = parent
+        self.map_data = []
+
         # show the window
         self.show()
+    
+    def paintEvent(self, event):
+        """Evt appellé à chaque fois que l'on veut redessiner la map"""
+        self.paint()
+    
+    def paint(self):
+        """Dessin de la map"""
+        for elt in self.map_data:
+            pass
+        #dessine robot
+
+    def updt_map_data(self, config_path):
+        """Mise à jour des objets à dessiner sur la map
         
+        Entrée:
+            - config_path (str): le chemin du fichier xml de config map"""
+        pass
+        
+
+
 class RobotItem(QGraphicsEllipseItem):
     """The view of a robot in the GraphicsScene"""
 
