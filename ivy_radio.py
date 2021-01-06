@@ -159,7 +159,7 @@ class Radio :
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
             if not self.backend.annu.find (rid).check_eqp (sid):
-                self.backend.annu.find (rid).create_eqp (sid, "Capteur", 0 , 100, 1, None)
+                self.backend.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
             self.backend.annu.find (rid,sid).set_state (float (valeur))
             
 
