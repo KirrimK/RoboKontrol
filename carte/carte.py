@@ -4,7 +4,8 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import QPen, QBrush, QColor
 
 #brosses
-robot_brush
+ROBOT-COLOR= 'yellow'
+robot_brush=QBrush(QColor(ROBOT-COLOR))
 
 class MapView(QtWidgets.QWidget):
 
@@ -15,7 +16,7 @@ class MapView(QtWidgets.QWidget):
         self.time_increment = 1
 
         # Settings
-        self.setWindowTitle('interface de controle du robot')
+        
         self.resize(WIDTH, HEIGHT)
 
         # create components
@@ -23,8 +24,6 @@ class MapView(QtWidgets.QWidget):
         self.scene = QtWidgets.QGraphicsScene()
         self.view = PanZoomView(self.scene)
         self.time_entry = QtWidgets.QLineEdit()
-        
-
         
 
         # add the robot elements to the graphic scene and then fit it in the view
