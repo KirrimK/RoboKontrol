@@ -8,7 +8,7 @@ IVYAPPNAME = 'Radio'
 
 	#Informations
 """Le premier groupe de capture est le nom du robot"""
-CAPT_DECL = "CaptDecl (.+) (.+) (.*)"#TODO: ajouter min max step aux capteurs
+CAPT_DECL = "CaptDecl (.+) (.+) (.+) (.+) (.+) (.*)"
 ACTU_DECL = 'ActuatorDecl (.*) (.*) (.*) (.*) (.*) (.*)'
 POS_REG = 'PosReport (.+) (.+) (.+) (.+)'
 CAPT_REG = 'CaptReport (.+) (.+) (.+)'
@@ -163,7 +163,7 @@ class Radio :
             self.backend.annu.find (rid,sid).set_state (float (valeur))
             
 
-    def on_captdecl (self, sender, rid, sid, unit= None):
+    def on_captdecl (self, sender, rid, sid, minV, maxV, step, unit= None):
         """Fonction appellée automatiquement par IvyBind. Place le capteur sid sur le robot rid dans l'annuaire.
         Si le robot rid n'est pas connu, il est ajouté.
         Si le robot a déjà un capteur qui a le nom sid, la valeur est gardée.
@@ -183,7 +183,7 @@ class Radio :
                 add = True
                 val = self.backend.annu.find (rid, sid).get_state() [0]
             if add:
-                self.backend.annu.find (rid).create_eqp (sid, "Capteur", unit)
+                self.backend.annu.find (rid).create_eqp (sid, "Capteur", unit)#TODO: Changer cette ligne (après modification de annuaire)
                 self.backend.annu.find (rid, sid).set_state (val)
 
     def send_cmd (self,cmd):
