@@ -222,7 +222,6 @@ class BoiteRobot:
             if type(equipement) == Sensor:
                 equipement.update_capteur()
             if type(equipement) == Actuator:
-                print ('Appel à update actionneur')
                 equipement.update_actuator()
 
     @QtCore.pyqtSlot()
@@ -380,7 +379,10 @@ class Actuator:
         if self.type_actionneur == "DISCRET":
             try:
                 self.doubleSpinBox_actuator.setValue(self.value)
+                self.doubleSpinBox_actuator.valueChanged (self.value)
+                print (self.doubleSpinBox_actuator.value())
             except TypeError:
+                print ("Type error")
                 pass
         if self.type_actionneur == "BINAIRE":
             if self.value == 0:
