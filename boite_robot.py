@@ -157,10 +157,10 @@ class BoiteRobot:
             if eqp_type == annuaire.Actionneur:
                 valeur, min_val, max_val, step = eqp_value
                 equipements[eqp_name] = Actuator(eqp_name, valeur, min_val, max_val, step, eqp_unit, "DISCRET",
-                                                 self.groupBox_actuator, self.layout_box_actuators, eqp_last_updt)
+                                                 self.groupBox_actuator, self.layout_box_actuators, self.inspecteur.backend, self.rid,  eqp_last_updt)
             if eqp_type == annuaire.Binaire:
                 equipements[eqp_name] = Actuator(eqp_name, eqp_value, 0, 1, 1, None, "BINAIRE", self.groupBox_actuator,
-                                                 self.layout_box_actuators, eqp_last_updt)
+                                                 self.layout_box_actuators, self.inspecteur.backend, self.rid, eqp_last_updt)
 
             if eqp_type == annuaire.Capteur:
                 sensor = Sensor(eqp_name, eqp_value, eqp_unit, self.groupBox_sensors,
@@ -236,11 +236,13 @@ class Actuator:
     """ Définit l'affichage d'un actionneur (QGridLayout) situé dans la boite actionneur """
 
     def __init__(self, nom: str, valeur: int or tuple, min_val, max_val, step: float, unite: str or None, type: str,
-                 boite_actionneurs, layout_boite_actionneurs,
+                 boite_actionneurs, layout_boite_actionneurs, backend, rid,
                  last_update):
         """ Crée l'affichage de l'actionneur (hérité de la classe Actionneur d'annuaire) et l'ajoute dans la
         boite actionneurs """
         self.nom = nom
+        self.rid = rid
+        self.backend = backend
         self.min_val = min_val
         self.max_val = max_val
         self.groupBox_actuator = boite_actionneurs
@@ -316,7 +318,7 @@ class Actuator:
         self.doubleSpinBox_actuator.setMaximum(self.max_val)
         self.doubleSpinBox_actuator.setMinimum(self.min_val)
         self.doubleSpinBox_actuator.setSingleStep(self.step)
-        self.doubleSpinBox_actuator.valueChanged.connect (lambda : print ("Valeur changée"))#TODO : Connecter une méthode d'envoi de commande
+        self.doubleSpinBox_actuator.valueChanged.connect (lambda : self.backend.sendeqpcmd (self.rid,self.nom,self.doubleSpinBox_actuator.value()))#TODO : Connecter une méthode d'envoi de commande
         try:
             self.doubleSpinBox_actuator.setValue(self.value)
         except TypeError:
@@ -379,7 +381,6 @@ class Actuator:
         if self.type_actionneur == "DISCRET":
             try:
                 self.doubleSpinBox_actuator.setValue(self.value)
-                self.doubleSpinBox_actuator.valueChanged (self.value)
                 print (self.doubleSpinBox_actuator.value())
             except TypeError:
                 print ("Type error")
