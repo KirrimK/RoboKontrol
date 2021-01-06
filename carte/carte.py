@@ -94,7 +94,7 @@ class MapView(QtWidgets.QWidget):
 #        self.setRect(-width, -width, width * 2, width * 2)
 
         #todo # add tooltip
-#        tooltip = r.type.name + ' ' + f.call_sign + ' ' + f.qfu
+#        tooltip = r.type.name
 #        self.setToolTip(tooltip)
 
 
@@ -104,7 +104,9 @@ class MapView(QtWidgets.QWidget):
         """controle du robot en cliquant sur la carte """
         destination=[]
         destination=self.buttonDownPos
-        #todo #send order to bot
+        if destination!=robot.getposition:
+            parent.backend.sendposcmd_robot(self,robot_name,destination)
+        
     #def controledragndropevent(self,event):
         self.controldragndrop()
     #def controldragndrop(self):     
@@ -113,14 +115,11 @@ class MapView(QtWidgets.QWidget):
         self.controleclavier() 
     #def controleclavier(self):       
 #        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(text), self)
-#        shortcut.activated.connect(slot)
-
-
-
+#       shortcut.activated.connect(slot)
         #add_shortcut('b_up', lambda: ))
         #add_shortcut('b_down', lambda:)
-        #add_shortcut('b_left', lambda )
-        #add_shortcut('b_right', lambda )
+        #add_shortcut('b_left', lambda: )
+        #add_shortcut('b_right', lambda: )
         #return toolbar
 #        event.accept()
 
