@@ -78,7 +78,7 @@ class BoiteRobot:
         self.lcdNumber_x = self.create_coord("X", "mm")
         self.lcdNumber_y = self.create_coord("Y", "mm")
         self.lcdNumber_theta = self.create_coord("Orientation", "degré")
-        self.lcdNumber_ping_pos = self.create_coord("Ping", "s")
+        self.lcdNumber_ping_pos = self.create_coord("Dernier message", "s")
 
     def create_coord(self, coord: str, unite: str):
         """Crée une ligne coordonnée (QLabel et QLCDNumber dans un QLayout) et renvoie le QLCDNumber"""
@@ -286,7 +286,7 @@ class Actuator:
 
         self.gridLayout_actuator.addWidget(self.label_name_actuator, 0, 0, 1, 1)
 
-        self.label_command_actuator.setText("ping (s)")
+        self.label_command_actuator.setText("Dernier message (s)")
         self.label_command_actuator.setMinimumSize(120, 30)
         self.gridLayout_actuator.addWidget(self.label_command_actuator, 1, 0, 1, 1)
         self.lcdNumber_ping_actuator.setMaximumSize(QtCore.QSize(16777215, 25))
