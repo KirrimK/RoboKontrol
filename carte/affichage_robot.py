@@ -26,7 +26,7 @@ class Robots:
                 
 class RobotMotion:
     def __init__(self, radar):
-        self.mapView = map
+        self.MapView = map
         # list of the current robots
         self.current_robots = []
         # dictionary of the corresponding robots items in the scene
@@ -41,12 +41,12 @@ class RobotMotion:
         # add new robots who were added
         for r in set(new_robots) - set(self.current_robots):
             item = mapItem(self.mapView.simulation, r)  # create an item
-            self.mapView.scene.addItem(item)  # add it to scene
+            self.MapView.scene.addItem(item)  # add it to scene
             self.robots_items_dict[f] = item  # add it to item dict
         # remove robots items for who were deleted
         for r in set(self.current_robots) - set(new_robots):
             item = self.robots_items_dict.pop(f)  # get item  in the dictionary (and remove it)
-            self.mapView.scene.removeItem(item)   # remove it also from scene
+            self.MapView.scene.removeItem(item)   # remove it also from scene
         # refresh current robots list
         self.current_robots = new_robots
         # get conflicting robots
@@ -82,7 +82,5 @@ class RobotItem(QGraphicsEllipseItem):
     def update_position(self, is_conflict):
         """moves the robot in the scene"""
         position = self.robot.get_position(#)
-        self.setBrush(DEP_BRUSH if self.flight.type == traffic.Movement.DEP else ARR_BRUSH)
-        if is_conflict:
-            self.setBrush(CONF_BRUSH)
+        self.setBrush(#DEP_BRUSH if self.flight.type == traffic.Movement.DEP else ARR_BRUSH)
         self.setPos(position.x, position.y)
