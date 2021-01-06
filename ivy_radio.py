@@ -9,7 +9,7 @@ IVYAPPNAME = 'Radio'
 	#Informations
 """Le premier groupe de capture est le nom du robot"""
 CAPT_DECL = "CaptDecl (.+) (.+) (.+) (.+) (.+) (.*)"
-ACTU_DECL = 'ActuatorDecl (.*) (.*) (.*) (.*) (.*) (.*)'
+ACTU_DECL = 'ActuatorDecl (.+) (.+) (.+) (.+) (.+) (.*)'
 POS_REG = 'PosReport (.+) (.+) (.+) (.+)'
 CAPT_REG = 'CaptReport (.+) (.+) (.+)'
 
