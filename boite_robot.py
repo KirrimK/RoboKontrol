@@ -153,9 +153,9 @@ class BoiteRobot:
             eqp_last_updt = eqp[2]
             eqp_last_cmd = eqp[3]
             eqp_unit = eqp[4]
-
+            valeur, min_val, max_val, step = eqp_value
             if eqp_type == annuaire.Actionneur:
-                valeur, min_val, max_val, step = eqp_value
+
                 equipements[eqp_name] = Actuator(eqp_name, valeur, min_val, max_val, step, eqp_unit, "DISCRET",
                                                  self.groupBox_actuator, self.layout_box_actuators, self.inspecteur.backend, self.rid,  eqp_last_updt)
             if eqp_type == annuaire.Binaire:
@@ -163,7 +163,7 @@ class BoiteRobot:
                                                  self.layout_box_actuators, self.inspecteur.backend, self.rid, eqp_last_updt)
 
             if eqp_type == annuaire.Capteur:
-                sensor = Sensor(eqp_name, eqp_value, eqp_unit, self.groupBox_sensors,
+                sensor = Sensor(eqp_name, valeur, min_val,max_val, step, eqp_unit, self.groupBox_sensors,
                                 self.layout_box_capteurs, eqp_last_updt)
                 equipements[eqp_name] = sensor
 
@@ -398,12 +398,15 @@ class Actuator:
 class Sensor:#TODO : Rendre la classe compatible avec le backend (ajout de min, max et step)
     """ Crée l'affichage d'un capteur (hérité de la classe Capteur d'annuaire) et l'ajoute dans la boite capteurs """
 
-    def __init__(self, nom, valeur, unite, boite_capteurs, layout_boite_capteurs, last_update):
+    def __init__(self, nom, valeur, min, max, step: float, unite, boite_capteurs, layout_boite_capteurs, last_update):
         """ Héritagede la classe Capteur de annuaire et création de l'affichage du capteur puis ajout dans boite
         capteurs """
 
         self.nom = nom
         self.valeur = valeur
+        self.min_val = min
+        self.max_val = max
+        self.step = step
         self.unite = unite
         self.layout_box_capteurs = layout_boite_capteurs
         self.groupBox_sensors = boite_capteurs
@@ -430,11 +433,11 @@ class Sensor:#TODO : Rendre la classe compatible avec le backend (ajout de min, 
     def add_capteur(self):
         """ Ajoute un capteur (QGridLayout) dans la boite capteur (QGroupBox) """
         
-        if self.nom == "Batterie":
-            n = 100  # n permet d'afficher les décimales de la tension
+        if self.min_val == None and self.max_val == None and self.step == None:
+            #n = 100  # n permet d'afficher les décimales de la tension
             self.progressBar = QtWidgets.QProgressBar(self.groupBox_sensors)
-            self.progressBar.setRange(MIN_BATTERIE * n, MAX_BATTERIE * n)
-            self.progressBar.setValue(self.valeur * n)
+            self.progressBar.setRange(self.min_val, self.max_val)
+            self.progressBar.setValue(self.valeur)
             self.progressBar.setFormat(str(self.valeur))
             self.progressBar.setStyleSheet(QPROGRESSBAR)
             self.progressBar.setAlignment(QT_CENTER)
@@ -445,6 +448,7 @@ class Sensor:#TODO : Rendre la classe compatible avec le backend (ajout de min, 
             self.lcdNumber_capteur.setMinimumSize(160, 25)
             self.gridLayout_capteur.addWidget(self.lcdNumber_capteur, 0, 1, 1, 1)
             self.lcdNumber_capteur.display(self.valeur)
+
 
         self.layout_box_capteurs.addLayout(self.gridLayout_capteur)
 
