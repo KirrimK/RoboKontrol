@@ -223,6 +223,7 @@ class BoiteRobot:
                 equipement.update_capteur()
             if type(equipement) == Actuator:
                 equipement.update_actuator()
+        self.layout_box_actuators.update ()
 
     @QtCore.pyqtSlot()
     def update_boite_robot(self):
@@ -259,7 +260,8 @@ class Actuator:
 
         self.gridLayout_actuator = QtWidgets.QGridLayout()
         self.label_name_actuator = QtWidgets.QLabel(self.groupBox_actuator)
-        self.label_command_actuator = QtWidgets.QLabel(self.groupBox_actuator)
+        self.label_command_actuator_tps = QtWidgets.QLabel(self.groupBox_actuator)
+        self.layout_box_actuators = QtWidgets.QLabel(self.groupBox_actuator)
         self.lcdNumber_ping_actuator = QtWidgets.QLCDNumber(self.groupBox_actuator)
         if self.type_actionneur == "BINAIRE":
             self.checkBox_actuator = QtWidgets.QCheckBox(self.groupBox_actuator)
@@ -286,7 +288,7 @@ class Actuator:
 
         self.gridLayout_actuator.addWidget(self.label_name_actuator, 0, 0, 1, 1)
 
-        self.label_command_actuator.setText("Dernier message (s)")
+        self.label_command_actuator_tps.setText("Dernier message (s)")
         self.label_command_actuator.setMinimumSize(120, 30)
         self.gridLayout_actuator.addWidget(self.label_command_actuator, 1, 0, 1, 1)
         self.lcdNumber_ping_actuator.setMaximumSize(QtCore.QSize(16777215, 25))
