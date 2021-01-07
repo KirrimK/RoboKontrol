@@ -415,7 +415,6 @@ class Actuator:
                 self.doubleSpinBox_actuator.setValue(self.value)
                 print (self.doubleSpinBox_actuator.value())
             except TypeError:
-                print ("Type error")
                 pass
         if self.type_actionneur == "BINAIRE":
             if self.value == 0:
@@ -496,4 +495,5 @@ class Sensor:#TODO : Rendre la classe compatible avec le backend (ajout de min, 
         self.lcdNumber_ping_capteur.display(self.ping)
 
         # Met à jour à jour les informations du capteur
-        self.lcdNumber_capteur.display(self.valeur)
+        if self.valeur is not None :
+            self.lcdNumber_capteur.display(self.valeur)
