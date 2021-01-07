@@ -430,7 +430,7 @@ class Sensor:#TODO : Rendre la classe compatible avec le backend (ajout de min, 
     """ Crée l'affichage d'un capteur (hérité de la classe Capteur d'annuaire) et l'ajoute dans la boite capteurs """
 
     def __init__(self, nom, valeur, minV, maxV, step, unite, boite_capteurs, layout_boite_capteurs, last_update):
-        """ Héritagede la classe Capteur de annuaire et création de l'affichage du capteur puis ajout dans boite
+        """ Héritage de la classe Capteur de annuaire et création de l'affichage du capteur puis ajout dans boite
         capteurs """
 
         self.nom = nom
@@ -488,12 +488,11 @@ class Sensor:#TODO : Rendre la classe compatible avec le backend (ajout de min, 
 
     def update_capteur(self):
         """ Met à jour le capteur """
+        # Met à jour à jour les informations du capteur
+        if self.valeur is not None :
+            self.lcdNumber_capteur.display(self.valeur)
 
         # Calcul du ping
         self.timestamp = time.time()
         self.ping = abs(self.timestamp - self.last_update)
         self.lcdNumber_ping_capteur.display(self.ping)
-
-        # Met à jour à jour les informations du capteur
-        if self.valeur is not None :
-            self.lcdNumber_capteur.display(self.valeur)
