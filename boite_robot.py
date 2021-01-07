@@ -184,7 +184,8 @@ class BoiteRobot:
                                                  self.layout_box_actuators, self.inspecteur.backend, self.rid, eqp_last_updt)
 
             if eqp_type == annuaire.Capteur:
-                sensor = Sensor(eqp_name, eqp_value, eqp_unit, self.groupBox_sensors,
+                valeur, minV, maxV, step = eqp_value
+                sensor = Sensor(eqp_name, valeur, minV, maxV, step, eqp_unit, self.groupBox_sensors,
                                 self.layout_box_capteurs, eqp_last_updt)
                 equipements[eqp_name] = sensor
 
@@ -429,12 +430,13 @@ class Actuator:
 class Sensor:#TODO : Rendre la classe compatible avec le backend (ajout de min, max et step)
     """ Crée l'affichage d'un capteur (hérité de la classe Capteur d'annuaire) et l'ajoute dans la boite capteurs """
 
-    def __init__(self, nom, valeur, unite, boite_capteurs, layout_boite_capteurs, last_update):
+    def __init__(self, nom, valeur, minV, maxV, step, unite, boite_capteurs, layout_boite_capteurs, last_update):
         """ Héritagede la classe Capteur de annuaire et création de l'affichage du capteur puis ajout dans boite
         capteurs """
 
         self.nom = nom
         self.valeur = valeur
+        self.minV, self.maxV, self.step = minV, maxV, step
         self.unite = unite
         self.layout_box_capteurs = layout_boite_capteurs
         self.groupBox_sensors = boite_capteurs
@@ -465,7 +467,8 @@ class Sensor:#TODO : Rendre la classe compatible avec le backend (ajout de min, 
             n = 100  # n permet d'afficher les décimales de la tension
             self.progressBar = QtWidgets.QProgressBar(self.groupBox_sensors)
             self.progressBar.setRange(MIN_BATTERIE * n, MAX_BATTERIE * n)
-            self.progressBar.setValue(self.valeur * n)
+            if not self.valeur is None :
+                self.progressBar.setValue(self.valeur * n)
             self.progressBar.setFormat(str(self.valeur))
             self.progressBar.setStyleSheet(QPROGRESSBAR)
             self.progressBar.setAlignment(QT_CENTER)
