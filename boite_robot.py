@@ -433,13 +433,14 @@ class BoiteRobot(QWidget):
                                                    self.layout_box_actuators, self.rid, self.main_window)
 
             if eqp_type == annuaire.Capteur:
+
                 if min_val is None or max_val is None or step is None:
                     kind = "VALEUR"
                 else:
                     kind = "BAR"
                 equipements[eqp_name] = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update,
-                                                   "CAPTEUR",
-                                                   kind, self.layout_box_sensors, self.rid, self.main_window)
+                                                   "CAPTEUR", kind, self.layout_box_sensors, self.rid, self.main_window)
+
 
         return equipements
 
