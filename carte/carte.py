@@ -113,7 +113,7 @@ class MapView(QtWidgets.QWidget):
 #        self.setToolTip(tooltip)
 
 
-#    def controlclicevent(self, event):
+    def controlclicevent(self, event):
         self.controlclic()
      def controlclic(self):
         """controle du robot en cliquant sur la carte """
