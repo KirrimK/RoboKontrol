@@ -1,44 +1,315 @@
-""" boite_robot.py - Gère l'affichage d'une boite robot dans le layout parent situé dans le layout widget et effectue les mise à jours liées a ce robot"""
+""" boite_robot.py - Définit l'affichage d'une boite robot et de ses équipements """
 
-from PyQt5 import QtWidgets, QtCore
 import annuaire
 import time
-
-#TODO: ajouter min max step aux capteurs
-# Définition des mins et maxs de tension pour la batterie (en V)
-MIN_BATTERIE = 9
-MAX_BATTERIE = 12
+from PyQt5.QtWidgets import QLabel, QWidget, QSlider, QPushButton, QGridLayout, QGroupBox, QHBoxLayout, QVBoxLayout, \
+    QLineEdit, QDialog, QColorDialog, QCheckBox, QDoubleSpinBox, QProgressBar, QSpacerItem, QLCDNumber, QComboBox
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QSize
 
 # Customisation
 QPROGRESSBAR = "QProgressBar{background-color : grey;border : 1px; border: 2px solid grey; border-radius: 5px}"
 QLCD_STYLE = "QLCDNumber{background-color: grey;border: 2px solid rgb(113, 113, 113);border-width: 2px; " \
              "border-radius: 10px;  color: rgb(255, 255, 255)} "
-QPUSHBUTTON = "QPushButton{background-color: grey; border 2px solid rgb(113, 113, 113);border-width: 2px; " \
-              "border-radius: 10px;  color: rgb(0,0,0)} "
-
+QPUSHBUTTON = ""
+# QtWidgets size
+QLCD_SIZE1, QLCD_SIZE2 = QSize(60, 20), QSize(80, 20)
 # Alignment
-QT_CENTER = QtCore.Qt.AlignCenter
-QT_TOP = QtCore.Qt.AlignTop
+QT_CENTER, QT_RIGHT, QT_LEFT, QT_TOP = Qt.AlignCenter, Qt.AlignRight, Qt.AlignLeft, Qt.AlignTop
 
 
-class BoiteRobot:
-    """Définit un objet boite robot qui hérite des infomations du robot auquel il est associé et instancie
-    l'affichage dans l'inspecteur sous forme QGroupBox """
+# TODO: régler le problème de mise à jour des capteurs
 
-    def __init__(self, parent_widget, parent_layout, rid, inspector):
-        """Crée la boite robot dans le parent_layout situé dans un parent_widget et lui associe le numéro
-        robot_number """
+class Equipement(QWidget):
+    """ Définit l'affichage d'un équipement attaché à un robot
+        Arguments (cf annuaire.py):
+            - variety (str): actionneur(envoie des commandes et reçoit des messages) ou capteur (reçoit des messages)
+            - kind (str): définit le type d'affichage (QtWidget) de l'équipement (discret, binaire,
+                        multiple,complexe, led, valeur, bar)
+            - parent_layout (QLayout): layout dans lequel sera ajouté l'affichage de l'équipement
+            - window (QWidget): fenêtre principale de l'application
+            """
 
-        self.rid = rid
-        self.inspecteur = inspector
-        self.parent_widget = parent_widget
+    # Création du signal de mise à jour de la valeur de l'équipement
+    value_changed_signal = pyqtSignal(float)
+    # Création du signal de mise à jour de la valeur de dernier message reçu
+    ping_changed_signal = pyqtSignal(float)
+
+    def __init__(self, name, value, min_val, max_val, step, unite, last_update, variety, kind, parent_layout, rid: str,
+                 window):
+        super(Equipement, self).__init__()
+        # Instanciation des attributs de l'équipement
+        self.name = name
+        self.value = value
+        self.min_val = min_val
+        self.max_val = max_val
+        self.step = step
+        self.unite = unite
+        self.last_update = last_update
+        self.variety = variety
+        self.kind = kind
         self.parent_layout = parent_layout
+        self.rid = rid
+        self.window = window
+        self.timestamp = time.time()
+        self.ping = abs(self.timestamp - self.last_update)
+        self.backend = self.window.backend
+
+        # Création des widgets de l'équipement
+        self.gridLayout_equipement = QGridLayout()
+        self.spacerItem_equipement = QSpacerItem(1, 10)
+
+        self.label_name_equipement = QLabel()
+        self.label_message_equipement = QLabel()
+        self.lcdNumber_ping_equipement = QLCDNumber()
+
+        if self.kind == "BINAIRE":
+            self.checkBox_equipement = QCheckBox()
+            self.label_command = QLabel()
+            self.label_last_command = QLabel()
+
+        if self.kind == "DISCRET":
+            self.layout_discret = QHBoxLayout()
+            self.slider_equipement = QSlider(Qt.Horizontal)
+            self.doubleSpinBox_equipement = QDoubleSpinBox()
+            self.label_command = QLabel()
+            self.label_last_command = QLabel()
+
+        if self.kind == "MULTIPLE":
+            self.comboBox_equipement = QComboBox()
+            self.label_command = QLabel()
+            self.label_last_command = QLabel()
+
+        if self.kind == "COMPLEXE":
+            self.pushButton_equipement = QPushButton()
+            self.label_command = QLabel()
+            self.label_last_command = QLabel()
+
+        if self.kind == "LED":
+            self.pushButton_led = QPushButton()
+            self.label_command = QLabel()
+            self.label_last_command = QLabel()
+
+        if self.kind == "VALEUR":
+            self.lcdNumber_equipement = QLCDNumber()
+
+        if self.kind == "BAR":
+            self.progressBar_equipement = QProgressBar()
+
+        # Configuration des widgets de l'équipement
+        self.ui_setup_equipement()
+
+        # Connexion du signal de pin du dernier message reçu màj avec le slot d'affichage du ping du dernier message
+        self.ping_changed_signal.connect(lambda ping: self.lcdNumber_ping_equipement.display(round(ping, 1)))
+
+    def ui_setup_equipement(self):
+        """ Configure l'ensemble des widgets de l'équipement"""
+
+        self.gridLayout_equipement.setAlignment(QT_TOP)
+
+        self.label_name_equipement.setMaximumSize(100, 25)
+        if self.unite is None:
+            self.label_name_equipement.setText(self.name)
+        else:
+            self.label_name_equipement.setText('{0} ({1}):'.format(self.name, self.unite))
+        self.gridLayout_equipement.addWidget(self.label_name_equipement, 0, 0, 1, 1, QT_LEFT)
+
+        self.label_message_equipement.setText("Dernier message (ms)")
+        self.gridLayout_equipement.addWidget(self.label_message_equipement, 1, 0, 1, 1, QT_LEFT)
+        self.lcdNumber_ping_equipement.setMaximumSize(QSize(75, 25))
+        self.lcdNumber_ping_equipement.setStyleSheet(QLCD_STYLE)
+        self.lcdNumber_ping_equipement.setFixedSize(QLCD_SIZE2)
+        self.gridLayout_equipement.addWidget(self.lcdNumber_ping_equipement, 1, 1, 1, 1, QT_RIGHT)
+
+        if self.kind == "BINAIRE":
+            self.checkBox_equipement.setText("")
+            self.checkBox_equipement.stateChanged.connect(lambda: self.oncheckbox_toggled())
+            self.gridLayout_equipement.addWidget(self.checkBox_equipement, 0, 1, 1, 1, QT_CENTER)
+
+        if self.kind == "DISCRET":
+            self.slider_equipement.setFixedSize(100, 30)
+            self.slider_equipement.setMinimum(self.min_val)
+            self.slider_equipement.setMaximum(self.max_val)
+            self.slider_equipement.setSingleStep(self.step)
+            self.slider_equipement.valueChanged.connect(lambda: self.onvaluechanged_slider())
+            self.layout_discret.addWidget(self.slider_equipement)
+            self.doubleSpinBox_equipement.setFixedSize(50, 30)
+            self.doubleSpinBox_equipement.setMaximum(self.max_val)
+            self.doubleSpinBox_equipement.setMinimum(self.min_val)
+            self.doubleSpinBox_equipement.setSingleStep(self.step)
+            self.doubleSpinBox_equipement.valueChanged.connect(lambda: self.onvaluechanged())
+            self.layout_discret.addWidget(self.doubleSpinBox_equipement)
+            self.gridLayout_equipement.addLayout(self.layout_discret, 0, 1, 1, 1, QT_RIGHT)
+
+        if self.kind == "MULTIPLE":
+            self.gridLayout_equipement.addWidget(self.comboBox_equipement, 0, 1, 1, 1, QT_RIGHT)
+
+        if self.kind == "COMPLEXE":
+            self.pushButton_equipement.setText(self.info_actionneur[0])
+            self.pushButton_equipement.clicked.connect(lambda: self.open_actionneur_complexe())
+            self.gridLayout_equipement.addWidget(self.pushButton_equipement, 0, 1, 1, 1, QT_RIGHT)
+
+        if self.kind == "LED":
+            self.pushButton_led.setText('Choisir la couleur')
+            self.pushButton_led.clicked.connect(lambda: self.open_led_menu())
+            self.gridLayout_equipement.addWidget(self.pushButton_led, 0, 1, 1, 1, QT_RIGHT)
+
+        if self.kind == "VALEUR":
+            self.lcdNumber_equipement.setMinimumSize(150, 30)
+            self.lcdNumber_equipement.setStyleSheet(QLCD_STYLE)
+            self.gridLayout_equipement.addWidget(self.lcdNumber_equipement, 0, 1, 1, 1, QT_RIGHT)
+
+            # Connexion du signal de màj de la valeur avec la slot d'affichage de la valeur'
+            self.value_changed_signal.connect(lambda val: self.lcdNumber_equipement.display(int(val)))
+
+        if self.kind == "BAR":
+            self.progressBar_equipement = QProgressBar()
+            self.progressBar_equipement.setRange(int(self.min_val), int(self.max_val))
+            self.progressBar_equipement.setStyleSheet(QPROGRESSBAR)
+            self.progressBar_equipement.setAlignment(QT_CENTER)
+            self.progressBar_equipement.setFixedSize(150, 30)
+            self.gridLayout_equipement.addWidget(self.progressBar_equipement, 0, 1, 1, 1, QT_RIGHT)
+
+            # Connexion du signal de màj de la bar de progression avec la slot d'affichage de la valeur'
+            self.value_changed_signal.connect(lambda val: self.progressBar_equipement.setValue(int(val)))
+
+    def add_equipement(self):
+        """ Ajoute l'équipement dans la bon layout parent selon qu'il est actionneur ou capteur"""
+
+        if self.variety == "ACTIONNEUR":
+            self.parent_layout.addItem(self.spacerItem_equipement)
+            self.label_command.setText("None")
+            self.gridLayout_equipement.addWidget(self.label_command, 2, 1, 1, 1, QT_LEFT)
+            self.label_last_command.setText("Dernière commande envoyée:")
+            self.gridLayout_equipement.addWidget(self.label_last_command, 2, 0, 1, 1, QT_RIGHT)
+
+        if self.variety == "CAPTEUR":
+            self.parent_layout.addItem(self.spacerItem_equipement)
+
+        # Ajoute l'affichage de l'équipement dans le parent layout
+        self.parent_layout.addLayout(self.gridLayout_equipement)
+
+    def remove_equipement(self):
+        """ Retire l'affichage de l'équipement"""
+
+        self.gridLayout_equipement.hide()
+
+    @pyqtSlot()
+    def open_led_menu(self):
+        """Ouvre une fenêtre de sélection de couleur (QColorDialog) et modifie la valeur de l'actionneur la couleur
+        choisie """
+
+        self.value = QColorDialog.getColor().name()
+        self.pushButton_led.setStyleSheet("background-color : {0};".format(self.value))
+
+    @pyqtSlot()
+    def open_actionneur_complexe(self):
+        """Ouvre un QDilaog (à compléter) qui change la valeur de l'actionneur"""
+
+        self.value = QDialog()
+
+    @pyqtSlot()
+    def onvaluechanged(self):
+        """ Affiche et envoie vers backend la dernière commande d'un actionneur discret"""
+        self.backend.sendeqpcmd(self.rid, self.name, self.doubleSpinBox_equipement.value())
+        self.label_command.setText(str(self.doubleSpinBox_equipement.value()))
+        self.slider_equipement.setValue(int(self.doubleSpinBox_equipement.value()))
+
+    @pyqtSlot()
+    def onvaluechanged_slider(self):
+        """ Affiche et envoie vers backend la dernière commande d'un actionneur discret"""
+        self.backend.sendeqpcmd(self.rid, self.name, self.doubleSpinBox_equipement.value())
+        self.label_command.setText(str(self.slider_equipement.value()))
+        self.doubleSpinBox_equipement.setValue((self.slider_equipement.value()))
+
+    @pyqtSlot()
+    def oncheckbox_toggled(self):
+        """ Affiche et renvoie vers backend la dernière commande d'un actionneur binaire"""
+        if self.checkBox_equipement.isChecked():
+            self.backend.sendeqpcmd(self.rid, self.name, 1)
+            self.label_command.setText(str(1))
+        else:
+            self.backend.sendeqpcmd(self.rid, self.name, 0)
+            self.label_command.setText(str(0))
+
+    @pyqtSlot()
+    def update_ping(self, last_update):
+        # Calcul et mise à jour du denier message reçu
+        self.timestamp = time.time()
+        self.ping = abs(self.timestamp - last_update)
+        self.lcdNumber_ping_equipement.display(str(round(self.ping, 1)))
+
+    @pyqtSlot()
+    def update_equipement(self, value):
+        """ Met à jour l'équipement suivant son type"""
+
+        self.ping_changed_signal.emit(self.ping)
+
+        if self.kind == "BINAIRE":
+            if self.value == 0:
+                self.checkBox_equipement.setChecked(False)
+            if self.value == 1:
+                self.checkBox_equipement.setChecked(True)
+
+        if self.kind == "DISCRET" and self.value is not None:
+            self.doubleSpinBox_equipement.setValue(self.value)
+            self.slider_equipement.setValue(self.value)
+            print ('Updated to {}'.format(self.slider_equipement.value()))
+
+        if self.kind == "MULTIPLE":
+            pass
+
+        if self.kind == "COMPLEXE":
+            pass
+
+        if self.kind == "LED":
+            self.pushButton_led.setStyleSheet("background: {}".format(self.value))
+
+        if self.kind == "VALEUR":
+            if self.value is not None:
+                # Emission de signal de màj de la valeur de l'équipement
+                self.value_changed_signal.emit(self.value)
+
+        if self.kind == "BAR" and self.value is not None:
+            self.progressBar_equipement.setValue(int(value))
+
+
+class BoiteRobot(QWidget):
+    """Définit l'affiche d'un robot sous forme d'un QGroupBox """
+
+    # Création de signal de mise jour de la liste des équipements associés au robot
+    list_equipement_changed_signal = pyqtSignal(list)
+
+    def __init__(self, rid: str, main_window):
+
+        super().__init__()
+        self.rid = rid
+        self.main_window = main_window
+
         self.position = ()
         self.timestamp = time.time()
+        self.backend = self.main_window.backend
 
-        self.groupBox_robot = QtWidgets.QGroupBox(self.parent_widget)
-        self.layout_box_robot = QtWidgets.QVBoxLayout(self.groupBox_robot)
-        self.parent_layout.addWidget(self.groupBox_robot, 0, QT_TOP)
+        # Création de la boite robot (QGroupBox)
+        self.groupBox_robot = QGroupBox()
+        self.groupBox_robot.setMaximumSize(340, 16777215)
+        #self.groupBox_robot.setStyleSheet("QGroupBox { background-color: rgb(255, 255, 255); border: 1px solid grey; }")
+        self.layout_box_robot = QVBoxLayout(self.groupBox_robot)
+
+        # Création des widgets de la boite robot
+        self.layout_name_delete = QHBoxLayout()
+        self.label_name = QLabel()
+        self.button_delete = QPushButton()
+        self.layout_coord = QHBoxLayout()
+        self.layout_last_message = QHBoxLayout()
+        self.groupBox_actuators = QGroupBox()
+        self.groupBox_sensors = QGroupBox()
+        self.layout_box_actuators = QVBoxLayout(self.groupBox_actuators)
+        self.layout_box_sensors = QVBoxLayout(self.groupBox_sensors)
+        self.label_last_message = QLabel()
+        self.lcdNumber_last_message = QLCDNumber()
+        self.layout_last_command = QHBoxLayout()
+        self.label_positionCommand = QLabel()
+        self.QLineEdit_positionCommand = QLineEdit()
 
         # Liste des équipements attachés au robot
         self.current_equipement_list = []
@@ -48,417 +319,212 @@ class BoiteRobot:
         self.current_sensors_list = []
         self.current_capteurs_dic = {}
 
-        # Création de l'entête position
-        self.create_position()
-        self.create_box_actuators()
-        self.create_box_sensors()
+        # Configuration des widgets de la boite robot
+        self.ui_setup_boite_robot()
 
-    def create_position(self):
-        """Crée l'entête de la boite robot où l'on retrouve son nom, le bouton supprimer et ses coordonnées)"""
+        self.QLineEdit_position_command = None
 
-        self.layout_name_delete = QtWidgets.QHBoxLayout()
-        # self.layout_name_delete.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        # self.main_window.timer.timeout.connect(lambda: self.update_boite_robot())
+        # Connexion du signal de mise à jours des équipements avec le slot de mise à jour de l'ensemble des équipements
+        self.list_equipement_changed_signal.connect(lambda: self.update_equipements())
 
-        self.label_name = QtWidgets.QLabel(self.groupBox_robot)
+    def ui_setup_boite_robot(self):
+        """ Configure l'ensemble de la boite robot"""
+
+        # Configuration de l'affichage du nom robot et du bouton oublier
         self.label_name.setMinimumSize(0, 30)
-        self.label_name.setMaximumSize(100, 30)
+        # self.label_name.setMaximumSize(100, 30)
         self.label_name.setText(self.rid)
         self.layout_name_delete.addWidget(self.label_name)
-
-        self.button_delete = QtWidgets.QPushButton(self.groupBox_robot)
-        self.button_delete.setMaximumSize(150, 30)
+        self.button_delete.setMaximumSize(150, 25)
         self.button_delete.setStyleSheet(QPUSHBUTTON)
         self.button_delete.setText("Oublier")
         self.button_delete.clicked.connect(lambda: self.remove_box_robot())
         self.layout_name_delete.addWidget(self.button_delete)
-
         self.layout_box_robot.addLayout(self.layout_name_delete)
 
-        # Création de l'affichage des coordonnées"
-        self.lcdNumber_x = self.create_coord("X", "mm")
-        self.lcdNumber_y = self.create_coord("Y", "mm")
-        self.lcdNumber_theta = self.create_coord("Orientation", "degré")
-        self.lcdNumber_ping_pos = self.create_coord("Ping", "s")
-
-    def create_coord(self, coord: str, unite: str):
-        """Crée une ligne coordonnée (QLabel et QLCDNumber dans un QLayout) et renvoie le QLCDNumber"""
-
-        self.layout_coord = QtWidgets.QHBoxLayout()
-        self.layout_coord.setContentsMargins(0, 0, 0, 0)
-        self.label_coord = QtWidgets.QLabel(self.groupBox_robot)
-        self.label_coord.setMaximumSize(150, 30)
-        self.label_coord.setText('{0} ({1}):'.format(coord, unite))
-        self.layout_coord.addWidget(self.label_coord)
-        self.lcdNumber_coord = QtWidgets.QLCDNumber(self.groupBox_robot)
-        self.lcdNumber_coord.setMaximumSize(75, 30)
-        self.lcdNumber_coord.setStyleSheet(QLCD_STYLE)
-        self.layout_coord.addWidget(self.lcdNumber_coord)
+        # Configuration de l'affichage des coordonnées"
+        self.lcdNumber_x = self.ui_setup_coord("X", "mm")
+        self.lcdNumber_y = self.ui_setup_coord("Y", "mm")
+        self.lcdNumber_theta = self.ui_setup_coord("θ", "°")
         self.layout_box_robot.addLayout(self.layout_coord)
-        return self.lcdNumber_coord
 
-    def create_box_actuators(self):
-        """ Crée la boite actionneurs (QGroupBox) et l'ajoute dans la boite robot"""
+        # Configuration de l'affichage du dernier message reçu
+        self.label_last_message.setText("Dernier message (s):")
+        self.layout_last_message.addWidget(self.label_last_message)
+        self.lcdNumber_last_message.setFixedSize(QLCD_SIZE2)
+        self.lcdNumber_last_message.setStyleSheet(QLCD_STYLE)
+        self.layout_last_message.addWidget(self.lcdNumber_last_message)
+        self.layout_box_robot.addLayout(self.layout_last_message)
 
-        self.groupBox_actuator = QtWidgets.QGroupBox(self.groupBox_robot)
-        self.groupBox_actuator.setAlignment(QT_CENTER)
-        self.groupBox_actuator.setTitle("Actionneurs")
-        self.layout_box_actuators = QtWidgets.QVBoxLayout(self.groupBox_actuator)
-        self.layout_box_robot.addWidget(self.groupBox_actuator, 0, QT_TOP)
+        # Confiuration de l'envoyeur de commandes de postion
+        self.label_positionCommand.setText("Dernière commande envoyée:")
+        self.layout_last_command.addWidget(self.label_positionCommand)
+        self.QLineEdit_positionCommand = QLineEdit()
+        self.QLineEdit_positionCommand.setInputMask("0000 : 0000 : 000")
+        self.QLineEdit_positionCommand.setText("1500 : 0000 : 000")
+        self.QLineEdit_positionCommand.editingFinished.connect(lambda: self.onEditingFinished())
+        self.layout_last_command.addWidget(self.QLineEdit_positionCommand)
+        self.layout_box_robot.addLayout(self.layout_last_command)
 
-    def create_box_sensors(self):
-        """ Crée la boite capteurs (QGroupBox) et l'ajoute dans la boite robot"""
+        # Configuration de la Configure la boite actionneurs
+        self.groupBox_actuators.setAlignment(QT_CENTER)
+        self.groupBox_actuators.setTitle("Actionneurs")
+        self.layout_box_robot.addWidget(self.groupBox_actuators, 0, QT_TOP)
 
-        self.groupBox_sensors = QtWidgets.QGroupBox(self.groupBox_robot)
+        # Configuration de la boite capteurs
         self.groupBox_sensors.setAlignment(QT_CENTER)
         self.groupBox_sensors.setTitle("Capteurs:")
-        self.layout_box_capteurs = QtWidgets.QVBoxLayout(self.groupBox_sensors)
         self.layout_box_robot.addWidget(self.groupBox_sensors, 0, QT_TOP)
 
-    @QtCore.pyqtSlot()
-    def remove_box_robot(self):
-        """Permet la suppression de la boite robot dont le numéro est placé en paramètre"""
+    def ui_setup_coord(self, coord: str, unite: str):
+        """Configure un duo de widget (QLabel et QLCDNumber dans un QLayout) et renvoie le QLCDNumber"""
 
-        self.groupBox_robot.hide()
-        self.inspecteur.backend.stopandforget_robot(self.rid)
+        self.label_coord = QLabel()
+        self.label_coord.setText('{0} ({1}):'.format(coord, unite))
+        self.layout_coord.addWidget(self.label_coord)
+        self.lcdNumber_coord = QLCDNumber()
+        self.lcdNumber_coord.setFixedSize(QLCD_SIZE1)
+        self.lcdNumber_coord.setStyleSheet(QLCD_STYLE)
+        self.layout_coord.addWidget(self.lcdNumber_coord)
+        return self.lcdNumber_coord
 
     def update_position(self):
-        """Met à jour la position de la boite robot"""
+        """ Met à jour la position de la boite robot """
 
         # Mise à jour du vecteur position du robot
-        self.position = self.inspecteur.backend.getdata_robot(self.rid)[0]
+        self.position = self.backend.getdata_robot(self.rid)[0]
         # Récupération du timestamp de dernière mise à jour de la position
-        self.last_updt_pos = self.inspecteur.backend.getdata_robot(self.rid)[2]  # todo:pb de remise à 0?
+        self.last_update_pos = self.backend.getdata_robot(self.rid)[2]
 
         # Calcul du ping
         self.timestamp = time.time()
-        self.ping = abs(self.last_updt_pos-self.timestamp)
+        self.ping = abs(self.last_update_pos - self.timestamp)
 
-        # Mise à jour des valeurs affichés par les QLCDNUmber
+        # Mise à jour des valeurs affichées par les QLCDNUmber
         self.lcdNumber_x.display(self.position[0])
         self.lcdNumber_y.display(self.position[1])
         self.lcdNumber_theta.display(self.position[2])
-        self.lcdNumber_ping_pos.display(self.ping)
+        self.lcdNumber_last_message.display(str(round(self.ping, 1)))
 
-    def load_equipement(self):
-        """ Charge la liste des des équipements du robot et charge les informations de chaque équipement présent"""
+    def get_equipements(self):
+        """ Charge la liste des des équipements du robot et les informations de chaque équipement présent.
+            Renvoie le dictionnaire des équipements (clé= nom de l'équipement, valeur= objet de la class Equipement)"""
 
         # Mise à jour de la liste de l'équipement du robot
-        self.equipement_list = self.inspecteur.backend.getdata_robot(self.rid)[1]
+        self.equipement_list = self.backend.getdata_robot(self.rid)[1]
         equipements = {}
 
         for eqp_name in self.equipement_list:
-            eqp = self.inspecteur.backend.getdata_eqp(self.rid, eqp_name)
+            eqp = self.backend.getdata_eqp(self.rid, eqp_name)
             eqp_type = eqp[0]
             eqp_value = eqp[1]
-            eqp_last_updt = eqp[2]
-            eqp_last_cmd = eqp[3]
-            eqp_unit = eqp[4]
+            last_update = eqp[2]
+            # eqp_last_cmd = eqp[3]
+            unit = eqp[4]
+            value, min_val, max_val, step = eqp_value
 
             if eqp_type == annuaire.Actionneur:
-                valeur, min_val, max_val, step = eqp_value
-                equipements[eqp_name] = Actuator(eqp_name, valeur, min_val, max_val, step, eqp_unit, "DISCRET",
-                                                 self.groupBox_actuator, self.layout_box_actuators, eqp_last_updt)
+                equipements[eqp_name] = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update,
+                                                   "ACTIONNEUR",
+                                                   "DISCRET", self.layout_box_actuators, self.rid, self.main_window)
+
             if eqp_type == annuaire.Binaire:
-                equipements[eqp_name] = Actuator(eqp_name, eqp_value, 0, 1, 1, None, "BINAIRE", self.groupBox_actuator,
-                                                 self.layout_box_actuators, eqp_last_updt)
+                equipements[eqp_name] = Equipement(eqp_name, value, 0, 1, 1, None, last_update, "ACTIONNEUR", "BINAIRE",
+                                                   self.layout_box_actuators, self.rid, self.main_window)
 
             if eqp_type == annuaire.Capteur:
-                sensor = Sensor(eqp_name, eqp_value, eqp_unit, self.groupBox_sensors,
-                                self.layout_box_capteurs, eqp_last_updt)
-                equipements[eqp_name] = sensor
+
+                if min_val is None or max_val is None or step is None:
+                    kind = "VALEUR"
+                else:
+                    kind = "BAR"
+                equipements[eqp_name] = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update,
+                                                   "CAPTEUR", kind, self.layout_box_sensors, self.rid, self.main_window)
+
 
         return equipements
 
+    @pyqtSlot()
     def update_equipements(self):
         """ Met à jour l'ensemble des équipements accrochés au robots et initialise la mise à jour de chaque
         équipement """
-
-        # Mets à jour le dictionnaire des équipements
-        equipements = self.load_equipement()
-        # Crée une liste des équipemnts présents sur le robot
-        equipements_list = [key for key in equipements.keys()]
+        # Met à jour le dictionnaire des équipements
+        equipements = self.get_equipements()
+        # Crée une liste des équipements présents sur le robot
+        equipements_list = [key for key in equipements]
 
         # Ajoute les nouveaux équipements
         for name in set(equipements_list) - set(self.current_equipement_list):
             self.current_equipement_dic[name] = equipements[name]
             equipement = equipements[name]
-            if type(equipement) == Actuator:
-                actuator = equipements[name]
-                self.current_actuators_list.append (name)
-                actuator.add_actuator()
-            if type(equipement) == Sensor:
-                self.current_sensors_list.append (name)
-                sensor = equipements[name]
-                sensor.add_capteur()
+            equipement.add_equipement()
 
         # Supprime les équipements qui ne sont plus présents
         for name in set(self.current_equipement_list) - set(equipements_list):
             equipement = self.current_equipement_dic.pop(name)
-            if type(equipement) == Actuator:
-                actuator = equipements[name]
-                self.current_actuators_list.pop (self.current_actuators_list.index (name))
-                actuator.remove_actionneur()
-            if type(equipement) == Sensor:
-                sensor = equipements[name]
-                self.current_sensors_list.pop ( self.current_sensors_list.index (name))
-                sensor.remove_capteur()
+            equipement.remove_equipement()
 
-        #Change les capteurs en actionneurs si neccessaire.
-        for name in self.current_sensors_list :
-            if type (equipements [name]) == Actuator :
-                actuator = equipements [name]
-                self.current_actuators_list.append (name)
-                self.current_sensors_list.pop ( self.current_sensors_list.index (name))
+        # Change les capteurs en actionneurs si néccessaire.
+        for name in self.current_sensors_list:
+            if type(equipements[name]) == annuaire.Actionneur:
+                actuator = equipements[name]
+                self.current_actuators_list.append(name)
+                self.current_sensors_list.pop(self.current_sensors_list.index(name))
                 actuator.add_actuator()
-                sensor = self.current_equipement_dic [name]
-                sensor.remove_capteur ()
+                sensor = self.current_equipement_dic[name]
+                sensor.remove_capteur()
 
         # Met à jour la liste et le dictionnaire des capteurs présents
         self.current_equipement_list = equipements_list
         self.current_equipement_dic = equipements
 
-        # Initialise la mise à jours des capteurs
+        # Emission pour chaque équipement de la nouvelle valeur et du nouveau ping
         for equipement in self.current_equipement_dic.values():
-            if type(equipement) == Sensor:
-                equipement.update_capteur()
-            if type(equipement) == Actuator:
-                print ('Appel à update actionneur')
-                equipement.update_actuator()
+            # Récupération de la nouvelle valeur
+            value = equipement.value
+            # Calcul du ping
+            last_update = equipement.last_update
+            ping = abs(time.time() - last_update)
+            print(equipement.name, value, ping)
+            if equipement.value is not None:
+                # Emission de la nouvelle valeur de l'équipement
+                equipement.value_changed_signal.emit(value)
+            # Emission du nouveau ping de l'équipement
+            equipement.ping_changed_signal.emit(ping)
+            print ("Valeur du LCD : {}".format(equipement.lcdNumber_equipement.value()))
 
-    @QtCore.pyqtSlot()
+        # self.layout_box_actuators.update()
+
+        #Force le changement d'affichage des boites d'actionneurs et de capteurs.
+        equipement.lcdNumber_equipement.repaint ()
+        self.groupBox_actuators.repaint ()
+        self.groupBox_sensors.repaint ()
+
+    @pyqtSlot()
     def update_boite_robot(self):
         """ Initialise la mise à jour de la position et des équipements du robot de la boite robot """
 
+        # Initialise la mise à jours de la position du robot
         self.update_position()
-        self.update_equipements()
+        # Récupération de la liste des équipements du robot
+        new_equipements = self.backend.getdata_robot(self.rid)[1]
+        # Emission du signal de mise à jour des équipements du robot
+        self.list_equipement_changed_signal.emit(new_equipements)
 
+    @pyqtSlot()
+    def remove_box_robot(self):
+        """ Supprime  la boite robot dont le numéro est placé en paramètre et envoie l'information à backend """
 
-class Actuator:
-    """ Définit l'affichage d'un actionneur (QGridLayout) situé dans la boite actionneur """
+        self.groupBox_robot.hide()
+        self.backend.stopandforget_robot(self.rid)
 
-    def __init__(self, nom: str, valeur: int or tuple, min_val, max_val, step: float, unite: str or None, type: str,
-                 boite_actionneurs, layout_boite_actionneurs,
-                 last_update):
-        """ Crée l'affichage de l'actionneur (hérité de la classe Actionneur d'annuaire) et l'ajoute dans la
-        boite actionneurs """
-        self.nom = nom
-        self.min_val = min_val
-        self.max_val = max_val
-        self.groupBox_actuator = boite_actionneurs
-        self.layout_box_actuators = layout_boite_actionneurs
-        self.unite = unite
-        self.value = valeur
-        self.type_actionneur = type
-        self.step = step
-        self.info_actionneur = ["état1", "état2", "état3", "état4", "état5"]
-        # TODO : ajouter les actionneurs types multiples
-        self.last_commande = ""
-        self.last_update = last_update
-        self.timestamp = time.time()
+    @pyqtSlot()
+    def onEditingFinished(self):
+        """"Appelée après la fin de l'édition de self.QLineEdit_positionCommand"""
+        self.backend.sendposcmd_robot(self.rid, [int(i) for i in self.QLineEdit_positionCommand.text().split(' : ')])
 
-        self.gridLayout_actuator = QtWidgets.QGridLayout()
-        self.label_name_actuator = QtWidgets.QLabel(self.groupBox_actuator)
-        self.label_command_actuator = QtWidgets.QLabel(self.groupBox_actuator)
-        self.lcdNumber_ping_actuator = QtWidgets.QLCDNumber(self.groupBox_actuator)
-        if self.type_actionneur == "BINAIRE":
-            self.checkBox_actuator = QtWidgets.QCheckBox(self.groupBox_actuator)
-
-        if self.type_actionneur == "DISCRET":
-            self.doubleSpinBox_actuator = QtWidgets.QDoubleSpinBox(self.groupBox_actuator)
-
-        if self.type_actionneur == "MULTIPLE":
-            self.comboBox_actuator = QtWidgets.QComboBox(self.groupBox_actuator)
-
-        if self.type_actionneur == "COMPLEXE":
-            self.pushButton_actuator = QtWidgets.QPushButton(self.groupBox_actuator)
-
-    def add_actuator(self):
-        """Ajoute un actionneur (QGridLayout) dans la boite actionneurs (QGroupBox)"""
-
-        # spacerItem_actionneur = create_space()
-        # self.layout_box_actuators.addItem(spacerItem_actionneur)
-
-        if self.unite is None:
-            self.label_name_actuator.setText(self.nom)
-        else:
-            self.label_name_actuator.setText("{0} ({1})".format(self.nom, self.unite))
-
-        self.gridLayout_actuator.addWidget(self.label_name_actuator, 0, 0, 1, 1)
-
-        self.label_command_actuator.setText("ping (s)")
-        self.label_command_actuator.setMinimumSize(120, 30)
-        self.gridLayout_actuator.addWidget(self.label_command_actuator, 1, 0, 1, 1)
-        self.lcdNumber_ping_actuator.setMaximumSize(QtCore.QSize(16777215, 25))
-        self.gridLayout_actuator.addWidget(self.lcdNumber_ping_actuator, 1, 1, 1, 1)
-        self.layout_box_actuators.addLayout(self.gridLayout_actuator)
-
-        if self.type_actionneur == "BINAIRE":
-            self.create_actuator_binaire()
-
-        if self.type_actionneur == "DISCRET":
-            self.create_actuator_discret()
-
-        if self.type_actionneur == "MULTIPLE":
-            self.create_actuator_multiple()
-
-        if self.type_actionneur == "COMPLEXE":
-            self.create_actuator_complexe()
-
-    def create_actuator_binaire(self):
-        """Crée et ajoute un actionneur de type binaire (QCheckBox)"""
-
-        self.checkBox_actuator.setText("")
-        self.gridLayout_actuator.addWidget(self.checkBox_actuator, 0, 1, 1, 1, QT_CENTER)
-
-    def create_actuator_discret(self):
-        """Crée et ajoute un actionneur de type discret (QDoubleSpinBox)"""
-
-        self.doubleSpinBox_actuator.setMinimumSize(0, 30)
-        self.doubleSpinBox_actuator.setMaximum(self.max_val)
-        self.doubleSpinBox_actuator.setMinimum(self.min_val)
-        self.doubleSpinBox_actuator.setSingleStep(self.step)
-        try:
-            self.doubleSpinBox_actuator.setValue(self.value)
-        except TypeError:
-            pass
-        self.gridLayout_actuator.addWidget(self.doubleSpinBox_actuator, 0, 1, 1, 1)
-
-    def create_actuator_multiple(self):
-        """Crée et ajoute un actionneur de type multiple (QComboBox)"""
-        list_options = self.info_actionneur
-        
-        self.comboBox_actuator.addItem(list_options[self.value].strip('"'))
-        for i in range(len(list_options)):
-            if i != self.value:
-                self.comboBox_actuator.addItem(list_options[i].strip('"'))
-
-        self.gridLayout_actuator.addWidget(self.comboBox_actuator, 0, 1, 1, 1)
-
-    def create_actuator_led(self):
-        """ Création d'un actionneur complexe spéciale : la LED """
-        self.pushButton_led = QtWidgets.QPushButton(self.groupBox_actuator)
-        self.pushButton_led.setText("Choisir la couleur")
-        self.pushButton_led.clicked.connect(lambda: self.open_LED_menu())
-        self.gridLayout_actuator.addWidget(self.pushButton_led, 0, 1, 1, 1)
-
-    def create_actuator_complexe(self):
-        """Crée et ajoute un actionneur de type complexe (QPushButton) : il s'agit d'un bouton qui peut ouvrir un
-        menu plus détaillée de l'actionneur (QDialog par exemple) """
-        self.pushButton_actuator.setText(self.info_actionneur[0])
-        self.pushButton_actuator.clicked.connect(lambda: self.open_actionneur_complexe())
-        self.gridLayout_actuator.addWidget(self.pushButton_actuator, 0, 1, 1, 1)
-
-    @QtCore.pyqtSlot()
-    def open_LED_menu(self):
-        """Ouvre une fenêtre de sélection de couleur (QColorDialog) et modifie la valeur de l'actionneur la couleur
-        choisie """
-
-        self.value = QtWidgets.QColorDialog.getColor().name()
-        self.pushButton_led.setStyleSheet("background-color : {0};".format(self.value))
-
-    @QtCore.pyqtSlot()
-    def open_actionneur_complexe(self):  # TODO: idée d'autres actionneurs complexes?
-        """Ouvre un QDilaog à définir qui change la valeur de l'actionneur"""
-
-        self.value = QtWidgets.QDialog()
-
-    def remove_actionneur(self):
-        """Supprime l'affiche de l'actionneur (QGroupBox)"""
-
-        self.groupBox_actuator.hide()
-
-    def update_actuator(self):
-        """ Met à jour l'actionneur """
-
-        # Calcul du ping
-        self.timestamp = time.time()
-        self.ping_actuator = abs(self.timestamp - self.last_update)
-        self.lcdNumber_ping_actuator.display(self.ping_actuator)
-
-        # Mise à jour des informations de l'actionneur suivant son type
-        if self.type_actionneur == "DISCRET":
-            try:
-                self.doubleSpinBox_actuator.setValue(self.value)
-                print (self.value)
-                print (self.doubleSpinBox_actuator.value ())
-                print ('valeur changée')
-            except TypeError:
-                pass
-        if self.type_actionneur == "BINAIRE":
-            if self.value == 0:
-                self.checkBox_actuator.setChecked(False)
-            if self.value == 1:
-                self.checkBox_actuator.setChecked(True)
-
-        if self.type_actionneur == "LED":
-            self.pushButton_led.setStyleSheet("background-color : {0};".format(self.value))
-
-
-class Sensor:#TODO : Rendre la classe compatible avec le backend (ajout de min, max et step)
-    """ Crée l'affichage d'un capteur (hérité de la classe Capteur d'annuaire) et l'ajoute dans la boite capteurs """
-
-    def __init__(self, nom, valeur, unite, boite_capteurs, layout_boite_capteurs, last_update):
-        """ Héritagede la classe Capteur de annuaire et création de l'affichage du capteur puis ajout dans boite
-        capteurs """
-
-        self.nom = nom
-        self.valeur = valeur
-        self.unite = unite
-        self.layout_box_capteurs = layout_boite_capteurs
-        self.groupBox_sensors = boite_capteurs
-        self.last_update = last_update
-        self.timestamp = time.time()
-
-        self.gridLayout_capteur = QtWidgets.QGridLayout()
-
-        self.label_nom_capteur = QtWidgets.QLabel(self.groupBox_sensors)
-        self.label_nom_capteur.setMinimumSize(0, 30)
-        self.label_nom_capteur.setMaximumSize(100, 30)
-        self.label_nom_capteur.setText('{0} ({1}):'.format(self.nom, self.unite))
-        self.gridLayout_capteur.addWidget(self.label_nom_capteur, 0, 0, 1, 1)
-
-        self.label_message_capteur = QtWidgets.QLabel(self.groupBox_sensors)
-        self.label_message_capteur.setText("Dernier message (ms)")
-        self.gridLayout_capteur.addWidget(self.label_message_capteur, 1, 0, 1, 1)
-
-        self.lcdNumber_ping_capteur = QtWidgets.QLCDNumber(self.groupBox_sensors)
-        self.lcdNumber_ping_capteur.setMaximumSize(QtCore.QSize(16777215, 25))
-        self.gridLayout_capteur.addWidget(self.lcdNumber_ping_capteur, 1, 1, 1, 1)
-        self.lcdNumber_capteur = QtWidgets.QLCDNumber(self.groupBox_sensors)
-
-    def add_capteur(self):
-        """ Ajoute un capteur (QGridLayout) dans la boite capteur (QGroupBox) """
-        
-        if self.nom == "Batterie":
-            n = 100  # n permet d'afficher les décimales de la tension
-            self.progressBar = QtWidgets.QProgressBar(self.groupBox_sensors)
-            self.progressBar.setRange(MIN_BATTERIE * n, MAX_BATTERIE * n)
-            self.progressBar.setValue(self.valeur * n)
-            self.progressBar.setFormat(str(self.valeur))
-            self.progressBar.setStyleSheet(QPROGRESSBAR)
-            self.progressBar.setAlignment(QT_CENTER)
-            self.gridLayout_capteur.addWidget(self.progressBar, 0, 1, 1, 1)
-            self.progressBar.setMaximumSize(160, 25)
-
-        else:
-            self.lcdNumber_capteur.setMinimumSize(160, 25)
-            self.gridLayout_capteur.addWidget(self.lcdNumber_capteur, 0, 1, 1, 1)
-            self.lcdNumber_capteur.display(self.valeur)
-
-        self.layout_box_capteurs.addLayout(self.gridLayout_capteur)
-
-    def remove_capteur(self):
-        """ Supprime l'affiche du capteur (QGroupBox) """
-
-        self.groupBox_sensors.hide()
-
-    def update_capteur(self):
-        """ Met à jour le capteur """
-
-        # Calcul du ping
-        self.timestamp = time.time()
-        self.ping = abs(self.timestamp - self.last_update)
-        self.lcdNumber_ping_capteur.display(self.ping)
-
-        # Met à jour à jour les informations du capteur
-        self.lcdNumber_capteur.display(self.valeur)
+    @pyqtSlot()
+    def emergencyButtonPressed (self):
+        """Appelée si le bouton d'arrêt d'urgence d'un robot est pressé"""
+        self.backend.emergency_stop_robot (self.rid)

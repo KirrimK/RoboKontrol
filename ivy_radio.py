@@ -9,7 +9,7 @@ IVYAPPNAME = 'Radio'
 	#Informations
 """Le premier groupe de capture est le nom du robot"""
 CAPT_DECL = "CaptDecl (.+) (.+) (.+) (.+) (.+) (.*)"
-ACTU_DECL = 'ActuatorDecl (.*) (.*) (.*) (.*) (.*) (.*)'
+ACTU_DECL = 'ActuatorDecl (.+) (.+) (.+) (.+) (.+) (.*)'
 POS_REG = 'PosReport (.+) (.+) (.+) (.+)'
 CAPT_REG = 'CaptReport (.+) (.+) (.+)'
 
@@ -19,6 +19,7 @@ SPEED_CMD = "SpeedCmd {} {} {} {}"
 POS_CMD =  "PosCmd {} {} {}"
 POS_ORIENT_CMD = "PosCmdOrient {} {} {} {}"
 ACTUATOR_CMD = "ActuatorCmd {} {} {}"
+STOP_BUTTON_CMD = "Emergency {}"
 KILL_CMD = "Shutdown {}"
 
 MSG = '(.*)'
@@ -29,8 +30,9 @@ def temps (t):
     Output : a formated string that gives a more explicit time than t
 
     /!\ Cette fonction est à l'heure d'hiver."""
-    i = gmtime(t)
-    return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (i.tm_year, i.tm_mon, i.tm_mday, i.tm_hour+1, i.tm_min, i.tm_sec)+'{:.3}'.format (t%1)[1:]
+    i = gmtime(t+1*3600)
+    return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (i.tm_year, i.tm_mon, i.tm_mday,
+                                            i.tm_hour, i.tm_min, i.tm_sec) +'{:.3}'.format (t%1)[1:]
 
 class Radio :
     """Classe de l'objet qui est connecté au channel Ivy
@@ -72,23 +74,27 @@ class Radio :
 
     def on_msg (self, sender, message):
         """Input fait par IvyBindMsg ('(.*)')
-        Stocke les messages sous forme de tupple dans msgsBuffer si le booléen self.record_msgs est True
+        Stocke les messages sous forme de tupple dans msgsBuffer
+        si le booléen self.record_msgs est True
         Vérifie si l'expéditeur est enregistré et l'enregistre si ce n'est pas fait."""
         if self.record_msgs :
             self.msgsBuffer.append ((time(),str(sender), message))
 
     def register_stop (self, save = True, del_buffers = True, *args):
-        """Arrête un enregistrement, supprime optionellemnt le tampon, et le sauvegarde vers un document .txt
-        Input : 
+        """Arrête un enregistrement, supprime optionellemnt le tampon,
+        et le sauvegarde vers un document .txt
+        Input :
             _ save (bool) : condition d'enregistrement dans un document texte (True par défaut)
             _ del_buffers (bool) : condition d'effacement du tampon (True par défaut)
-            _ args : autres arguments entrés ('all', 'msgs' et/ou 'cmds' (strings)) considérés comme un tupple"""
+            _ args : autres arguments entrés ('all', 'msgs' et/ou 'cmds' (strings))
+                considérés comme un tuple"""
         if 'all' in args :
             args += ('msgs','cmds')
         if 'msgs' in args :
             self.record_msgs = False
             if save :
-                path = 'messages.txt' #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
+                path = 'messages.txt'
+                #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
                 with open (path,'a') as fichier :
                     fichier.write ('Jour\t\tHeure\t\tExpediteur\t\tMessage\n\n')
                     for ligne in self.msgsBuffer :
@@ -98,7 +104,8 @@ class Radio :
         if 'cmds' in args :
             self.record_cmds = False
             if save :
-                path = 'commandes.txt' #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
+                path = 'commandes.txt'
+                #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
                 with open (path,'a') as fichier :
                     fichier.write ('Jour\t\tHeure\t\tCommande\n\n')
                     for ligne in self.cmdsBuffer :
@@ -113,9 +120,8 @@ class Radio :
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
-            self.backend.annu.find (rid).set_pos (float (x), float(y), float(theta))
-            
-                
+            self.backend.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
+
     def on_actudecl (self, sender, rid, aid, minV, maxV, step = 1, unit = None):
         """Fonction appelée automatiquement par IvyBind. Ajoute l'actionnneur aid sur le robot rid.
         Si le robot rid n'est pas connu, il est ajouté.
@@ -141,13 +147,15 @@ class Radio :
             if Binaire :
                 self.backend.annu.find (rid).create_eqp (aid, "Binaire")
             else :
-                self.backend.annu.find (rid).create_eqp (aid, "Actionneur", float(minV), float(maxV), float(step), unit)
+                self.backend.annu.find (rid).create_eqp (aid, "Actionneur",
+                                                        float(minV), float(maxV), float(step), unit)
             if Val:
                 self.backend.annu.find (rid,aid).set_state (valeur)
-            
+
 
     def on_captreg (self, sender, rid, sid, valeur):
-        """Fonction appelée automatiquement par IvyBind. Change la valeur du capteur sid sur le robot rid.
+        """Fonction appelée automatiquement par IvyBind.
+        Change la valeur du capteur sid sur le robot rid.
         Si aucun robot rid n'est connu, le robot est ajouté.
         Si le robot rid n'a pas de capteur sid, le capteur est ajouté.
         Arguments :
@@ -161,10 +169,11 @@ class Radio :
             if not self.backend.annu.find (rid).check_eqp (sid):
                 self.backend.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
             self.backend.annu.find (rid,sid).set_state (float (valeur))
-            
+
 
     def on_captdecl (self, sender, rid, sid, minV, maxV, step, unit= None):
-        """Fonction appellée automatiquement par IvyBind. Place le capteur sid sur le robot rid dans l'annuaire.
+        """Fonction appellée automatiquement par IvyBind.
+        Place le capteur sid sur le robot rid dans l'annuaire.
         Si le robot rid n'est pas connu, il est ajouté.
         Si le robot a déjà un capteur qui a le nom sid, la valeur est gardée.
         Si le robot a déjà un actionneur nommé sid, la fonction ne fait rien.

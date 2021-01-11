@@ -130,6 +130,16 @@ class Backend:
         """
         self.annu.add_robot(annuaire.Robot(robot_name))
 
+    def emergency_stop_robot (self, rid):
+        """Commande équivalente au boutton d'arrêt d'urgence.
+        Est supposée bloquer les actionneurs et moteurs du robot sans pour autant arrêter le
+        retour d'informations.
+
+        Entrée :
+            _ rid (str) : nom du robot à stopper"""
+        if self.radio_started:
+            self.radio.send_cmd (rd.STOP_BUTTON_CMD.format (rid))
+
     def stopandforget_robot(self, robot_name):
         """Permet d'arrêter le robot en question
         (via un message Shutdown ivy, si la radio est activée)
@@ -164,7 +174,7 @@ class Backend:
             if pos[2] is None:
                 self.radio.send_cmd (rd.POS_CMD.format (robot_name, pos[0], pos[1]))
             else:
-                self.radio.send_cmd (rd.POS_ORIENT_CMD.format (robot_name, pos[0], pos[1], pos[2]))
+                self.radio.send_cmd (rd.POS_ORIENT_CMD.format (robot_name, pos[0], pos[1], pos[2]*3.141592654/180))
 
     def sendeqpcmd(self, robot_name, eqp_name, state):
         """Envoie une commande d'état à un équipement (qui recoit des commandes)
