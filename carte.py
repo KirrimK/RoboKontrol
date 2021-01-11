@@ -33,6 +33,7 @@ class MapView(QtWidgets.QWidget):
         self.timer.start(50)
 
         self.setMouseTracking(True)
+        self.key_binding={}
 
         self.show()
 
@@ -132,6 +133,21 @@ class MapView(QtWidgets.QWidget):
             new_size[1] = -(int(new_size[1])//resize_factor)
         return new_size, new_pos
 
+    def updt_key_binding(self, config_path):
+        """Mise à jour des raccourcis clavier
+
+        Entrée:
+            - config_path (str): le chemin du fichier xml de config des touches
+        """
+        self.key_binding = {}
+        try:
+            root = ET.parse(config_path).getroot()
+            self.UP_KEY = int(root.attrib.get('UP_KEY'))
+            self.UP_KEY = int(root.attrib.get('UP_KEY'))
+            self.UP_KEY = int(root.attrib.get('UP_KEY'))
+            self.UP_KEY = int(root.attrib.get('UP_KEY'))
+           
+            
     def keyPressEvent(self, event):
         """Une touche du clavier est pressée"""
         self.key_binding={}
