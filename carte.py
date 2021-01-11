@@ -188,6 +188,7 @@ class MapView(QtWidgets.QWidget):
             new_pos[1] = (int(-new_pos[1] + height + 2) -
                          self.map_margin//resize_factor)*resize_factor
         return new_pos
+<<<<<<< HEAD
 
 
 
@@ -247,3 +248,5 @@ class MapView(QtWidgets.QWidget):
         #add_shortcut('b_right', lambda: )
         #return toolbar
         #event.accept()
+=======
+>>>>>>> 784293c600e84fcf8dfa67fb96072a3f9c17c0b4
