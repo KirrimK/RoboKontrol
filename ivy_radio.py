@@ -19,6 +19,7 @@ SPEED_CMD = "SpeedCmd {} {} {} {}"
 POS_CMD =  "PosCmd {} {} {}"
 POS_ORIENT_CMD = "PosCmdOrient {} {} {} {}"
 ACTUATOR_CMD = "ActuatorCmd {} {} {}"
+STOP_BUTTON_CMD = "Emergency {}"
 KILL_CMD = "Shutdown {}"
 
 MSG = '(.*)'
