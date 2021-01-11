@@ -134,51 +134,47 @@ class MapView(QtWidgets.QWidget):
 class RobotItem(): #QGraphicsEllipseItem):
     """The view of a robot in the GraphicsScene"""
 
-    def __init__(self, simu, f):
+    def __init__(self, *args):
         """RobotItem constructor, creates the ellipse and adds to the scene"""
         super().__init__(None)
-        #self.setZValue(mapview.PLOT_Z_VALUE)
-
-        # instance variables
-        #self.robot = r
+        self.setZValue(mapview.PLOT_Z_VALUE)
         # build the ellipse
         width = 5
-        #self.setRect(-width, -width, width * 2, width * 2)
+        self.setRect(-width, -width, width * 2, width * 2)
 
         #todo # add tooltip
-        #tooltip = r.type.name
-        #self.setToolTip(tooltip)
+        tooltip = r.type.name
+        self.setToolTip(tooltip)
 
 
-    def controleclicevent(self, event):
+    def controlclicevent(self, event):
         self.controlclic()
 
     def controlclic(self):
         """controle du robot en cliquant sur la carte """
-        destination = []
-        #destination=self.buttonDownPos
-        #if destination!=robot.getposition:
-        #    parent.backend.sendposcmd_robot(self,robot_name,destination)
-
-    def controledragndropevent(self, event):
+        destination=[]
+        destination=self.buttonDownPos
+        if destination!=robot.getposition:
+            parent.backend.sendposcmd_robot(self,robot_name,destination)
+        
+    def controledragndropevent(self,event):
         self.controldragndrop()
 
-    def controldragndrop(self):
+    def controldragndrop(self):     
         """controle avec drag and drop"""
 
     def controleclavierevent(self,event):
-        self.controleclavier()
-
-    def controleclavier(self):
-        pass
-        #shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(text), self)
-        #shortcut.activated.connect(slot)
-        #add_shortcut('b_up', lambda: ))
+        self.controleclavier() 
+    def controleclavier(self):       
+        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(text), self)
+        shortcut.activated.connect(slot)
+        #add_shortcut('b_up', lambda: pass)
         #add_shortcut('b_down', lambda:)
         #add_shortcut('b_left', lambda: )
         #add_shortcut('b_right', lambda: )
         #return toolbar
         #event.accept()
+
 
 #App = QApplication(sys.argv)
 #map_view = MapView(None)
