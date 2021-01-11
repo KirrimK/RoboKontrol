@@ -22,6 +22,9 @@ class MapView(QtWidgets.QWidget):
         self.map_width = 10
         self.map_height = 10
         self.map_margin = 0
+
+        self.mouse_pos = None
+
         self.timer = QTimer()
         self.timer.timeout.connect(self.repaint)
         self.timer.start(100)
@@ -92,6 +95,41 @@ class MapView(QtWidgets.QWidget):
             new_size[0] = (int(new_size[0])//resize_factor)
             new_size[1] = -(int(new_size[1])//resize_factor)
         return new_size, new_pos
+
+    def mousePressEvent(self, QMouseEvent):
+        """La souris est cliquée"""
+        self.mouse_pos = QMouseEvent.localPos()
+        self.reverse_mouse_pos(self.mouse_pos)
+        if QMouseEvent.button() == Qt.LeftButton:
+            pass
+        elif QMouseEvent.button() == Qt.RightButton:
+            #do what you want here
+            pass
+
+    def mouseMoveEvent(self, event):
+        """Quand la souris est bougée sur la fenêtre"""
+        self.mouse_pos = event.localPos()
+        self.reverse_mouse_pos(self.mouse_pos)
+
+    def reverse_mouse_pos(self, qpoint):
+        """Calcule la position de la souris relative à la carte"""
+        qpoint_x = qpoint.x()
+        qpoint_y = qpoint.y()
+        new_pos = [qpoint_x, qpoint_y]
+        width = self.geometry().width()
+        height = self.geometry().height()
+        map_ttl_height = self.map_width + 2 * self.map_margin
+        map_ttl_width = self.map_height + 2 * self.map_margin
+        if map_ttl_width/width >= map_ttl_height/height:
+            resize_factor = map_ttl_width/width
+            new_pos[0] = (int(new_pos[0]) - self.map_margin//resize_factor)*resize_factor
+            new_pos[1] = (int(-new_pos[1] + height) - self.map_margin//resize_factor - height/2 + map_ttl_height//resize_factor/2)*resize_factor
+        else:
+            resize_factor = map_ttl_height/height
+            new_pos[0] = (int(new_pos[0]) - self.map_margin//resize_factor - width/2 + map_ttl_width//resize_factor/2)*resize_factor
+            new_pos[1] = (int(-new_pos[1] + height) - self.map_margin//resize_factor)*resize_factor
+        print(new_pos)
+
 
 class RobotItem(): #QGraphicsEllipseItem):
     """The view of a robot in the GraphicsScene"""
