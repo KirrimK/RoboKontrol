@@ -1,16 +1,15 @@
 """Module carte.py - gestion de l'affichage sur la carte"""
 
-import sys
+from math import pi
 import lxml.etree as ET
 
-from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtWidgets import QApplication #, QMainWindow, QWidget,
-from PyQt5.QtGui import QBrush, QColor, QPainter #, QPen
+from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtCore import Qt, QTimer, QRect
+from PyQt5.QtGui import QBrush, QColor, QPainter#, QPen
 
-#brosses
-ROBOT_COLOR= 'gold'
-ROBOT_BRUSH=QBrush(QColor(ROBOT_COLOR))
+ROBOT_COLOR= 'green'
+ROBOT_BRUSH=QBrush(QColor(ROBOT_COLOR), Qt.SolidPattern)
+ROBOT_SIZE = 200
 
 class MapView(QtWidgets.QWidget):
 
@@ -38,13 +37,26 @@ class MapView(QtWidgets.QWidget):
     def paint(self):
         """Dessin de la map et des robots"""
         painter = QPainter(self)
+        #paint map
         for rect in self.map_data:
             size = rect[3]
             pos = rect[4]
             size, pos = self.calc_pos_size(size, pos)
             painter.setBrush(QBrush(QColor(rect[2]), Qt.SolidPattern))
             painter.drawRect(pos[0], pos[1], size[0], size[1])
-        #dessine robot
+        #paint robots
+        bkd_robots = self.parent.backend.annu.robots
+        for robot in bkd_robots:
+            robot_pos = [bkd_robots[robot].x, bkd_robots[robot].y, bkd_robots[robot].theta]
+            robot_size = [ROBOT_SIZE, ROBOT_SIZE]
+            mrbsize, mrbpos = self.calc_pos_size(robot_size, robot_pos)
+            painter.setBrush(ROBOT_BRUSH)
+            robot_rect = QRect(mrbpos[0] - mrbsize[0]/2, mrbpos[1] - mrbsize[1]/2, mrbsize[0], mrbsize[1])
+            painter.drawEllipse(robot_rect)
+            start_angle = (robot_pos[2] - 1) * 16
+            span_angle = 2 * 16
+            painter.drawPie(robot_rect, start_angle, span_angle)
+            painter.drawText(robot_rect, Qt.AlignCenter, robot)
 
     def updt_map_data(self, config_path):
         """Mise à jour des objets à dessiner sur la map
@@ -96,6 +108,11 @@ class MapView(QtWidgets.QWidget):
             new_size[1] = -(int(new_size[1])//resize_factor)
         return new_size, new_pos
 
+    def keyPressEvent(self, e):
+        """Une touche du clavier est pressée"""
+        if e.key() == Qt.Key_F5:
+            pass
+
     def mousePressEvent(self, QMouseEvent):
         """La souris est cliquée"""
         self.mouse_pos = QMouseEvent.localPos()
@@ -131,51 +148,47 @@ class MapView(QtWidgets.QWidget):
         print(new_pos)
 
 
-class RobotItem(): #QGraphicsEllipseItem):
-    """The view of a robot in the GraphicsScene"""
+#class RobotItem(): #QGraphicsEllipseItem):
+#    """The view of a robot in the GraphicsScene"""
 
-    def __init__(self, *args):
-        """RobotItem constructor, creates the ellipse and adds to the scene"""
-        super().__init__(None)
-        self.setZValue(mapview.PLOT_Z_VALUE)
-        # build the ellipse
-        width = 5
-        self.setRect(-width, -width, width * 2, width * 2)
+#    def __init__(self, *args):
+#        """RobotItem constructor, creates the ellipse and adds to the scene"""
+#        super().__init__(None)
+#        self.setZValue(mapview.PLOT_Z_VALUE)
+#        # build the ellipse
+#        width = 5
+#        self.setRect(-width, -width, width * 2, width * 2)
 
         #todo # add tooltip
-        tooltip = r.type.name
-        self.setToolTip(tooltip)
+#        tooltip = r.type.name
+#        self.setToolTip(tooltip)
 
 
-    def controlclicevent(self, event):
-        self.controlclic()
+#    def controlclicevent(self, event):
+#        self.controlclic()
 
-    def controlclic(self):
-        """controle du robot en cliquant sur la carte """
-        destination=[]
-        destination=self.buttonDownPos
-        if destination!=robot.getposition:
-            parent.backend.sendposcmd_robot(self,robot_name,destination)
+#    def controlclic(self):
+#        """controle du robot en cliquant sur la carte """
+#        destination=[]
+#        destination=self.buttonDownPos
+#        if destination!=robot.getposition:
+#            parent.backend.sendposcmd_robot(self,robot_name,destination)
         
-    def controledragndropevent(self,event):
-        self.controldragndrop()
+#    def controledragndropevent(self,event):
+#        self.controldragndrop()
 
-    def controldragndrop(self):     
-        """controle avec drag and drop"""
+#    def controldragndrop(self):     
+#        """controle avec drag and drop"""
 
-    def controleclavierevent(self,event):
-        self.controleclavier() 
-    def controleclavier(self):       
-        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(text), self)
-        shortcut.activated.connect(slot)
+#    def controleclavierevent(self,event):
+#        self.controleclavier()
+ 
+#    def controleclavier(self):       
+#        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(text), self)
+#        shortcut.activated.connect(slot)
         #add_shortcut('b_up', lambda: pass)
         #add_shortcut('b_down', lambda:)
         #add_shortcut('b_left', lambda: )
         #add_shortcut('b_right', lambda: )
         #return toolbar
         #event.accept()
-
-
-#App = QApplication(sys.argv)
-#map_view = MapView(None)
-#sys.exit(App.exec())
