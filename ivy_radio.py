@@ -137,23 +137,35 @@ class Radio :
             _droits (str) : Determine ce que fait l'equipement
             _ unit (str) : Unité de la valeur."""
         if self.backend is not None:
-            Val = False
-            Binaire = False
-            if float (minV) + float (step) >= float (maxV) :
-                Binaire = True
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
                 self.send_cmd (DESCR_CMD.format (rid))
-            elif self.backend.annu.find (rid,aid) is not None :
-                Val = True
-                valeur = self.backend.annu.find (rid,aid).get_state () [0]
-            if Binaire :
-                self.backend.annu.find (rid).create_eqp (aid, "Binaire")
-            else :
-                self.backend.annu.find (rid).create_eqp (aid, "Actionneur",
-                                                        float(minV), float(maxV), float(step), unit)
-            if Val:
-                self.backend.annu.find (rid,aid).set_state (valeur)
+            if droits == 'RW':
+                Val = False
+                Binaire = False
+                if float (minV) + float (step) >= float (maxV) :
+                    Binaire = True
+                if self.backend.annu.find (rid,aid) is not None :
+                    Val = True
+                    valeur = self.backend.annu.find (rid,aid).get_state () [0]
+                if Binaire :
+                    self.backend.annu.find (rid).create_eqp (aid, "Binaire")
+                else :
+                    self.backend.annu.find (rid).create_eqp (aid, "Actionneur",
+                                                            float(minV), float(maxV), float(step), unit)
+                if Val:
+                    self.backend.annu.find (rid,aid).set_state (valeur)
+            elif droits == 'READ':
+                 add = False
+                if not self.backend.annu.find (rid).check_eqp (sid):
+                    add = True
+                    val = None
+                elif self.backend.annu.find (rid, sid).get_type () is not Actionneur :
+                    add = True
+                    val = self.backend.annu.find (rid, sid).get_state() [0]
+                if add:
+                    self.backend.annu.find (rid).create_eqp (sid, "Capteur", minV, maxV, step, unit)
+                    self.backend.annu.find (rid, sid).set_state (val)
 
 
     def on_captreg (self, sender, rid, sid, valeur):
