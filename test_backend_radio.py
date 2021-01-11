@@ -38,7 +38,7 @@ def test_backend_send_cmds(recwarn, capsys):
         assert ('Radio@localhost', 'StopIvyTest') in ivy_test_list
         assert ('Radio@localhost', 'ActuatorCmd test act 0') in ivy_test_list
         assert ('Radio@localhost', 'PosCmd test 0 0') in ivy_test_list
-        assert ('Radio@localhost', 'PosCmdOrient test 0 0 0') in ivy_test_list
+        assert ('Radio@localhost', 'PosCmdOrient test 0 0 0.0') in ivy_test_list
 
     finally:
         results_to_file("backend_send_cmds", recwarn, capsys, TEST_TIME)
