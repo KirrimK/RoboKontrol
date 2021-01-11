@@ -38,6 +38,7 @@ class MapView(QtWidgets.QWidget):
     def paint(self):
         """Dessin de la map et des robots"""
         painter = QPainter(self)
+        liste_bot=parent.backend.get_all_robots()
         for rect in self.map_data:
             size = rect[3]
             pos = rect[4]
@@ -45,6 +46,11 @@ class MapView(QtWidgets.QWidget):
             painter.setBrush(QBrush(QColor(rect[2]), Qt.SolidPattern))
             painter.drawRect(pos[0], pos[1], size[0], size[1])
         #dessine robot
+        #for bot in liste_bot (provisoire)
+            #bot_size=?
+            #bot_pos=parent.backend.get_datarobot(bot)[0]
+            #bot_color=?
+            
 
     def updt_map_data(self, config_path):
         """Mise à jour des objets à dessiner sur la map
@@ -153,8 +159,8 @@ class RobotItem(): #QGraphicsEllipseItem):
     def controlclic(self):
         """controle du robot en cliquant sur la carte """
         destination=[]
-        destination=self.buttonDownPos
-        if destination!=robot.getposition:
+        destination=self.buttonDownPos()
+        if destination!=robot.getposition():
             parent.backend.sendposcmd_robot(self,robot_name,destination)
         
     def controledragndropevent(self,event):
