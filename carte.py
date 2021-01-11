@@ -43,13 +43,16 @@ class MapView(QtWidgets.QWidget):
     def paint(self):
         """Dessin de la map et des robots"""
         painter = QPainter(self)
+
         #paint map
+
         for rect in self.map_data:
             size = rect[3]
             pos = rect[4]
             size, pos = self.calc_pos_size(size, pos)
             painter.setBrush(QBrush(QColor(rect[2]), Qt.SolidPattern))
             painter.drawRect(pos[0], pos[1], size[0], size[1])
+
         #paint robots
         bkd_robots = self.parent.backend.annu.robots
         for robot in bkd_robots:
@@ -73,6 +76,7 @@ class MapView(QtWidgets.QWidget):
         height = self.geometry().height()
         rlp = self.relative_mspos
         painter.drawText(0, height-20, "x: {} y: {}".format(int(rlp[0]), int(rlp[1])))
+
 
     def updt_map_data(self, config_path):
         """Mise à jour des objets à dessiner sur la map
@@ -188,3 +192,65 @@ class MapView(QtWidgets.QWidget):
             new_pos[1] = (int(-new_pos[1] + height + 2) -
                          self.map_margin//resize_factor)*resize_factor
         return new_pos
+<<<<<<< HEAD
+
+
+
+        tooltip = r.type.name
+        self.setToolTip(tooltip)
+
+
+    
+
+    def controlclic(self):
+        """controle du robot en cliquant sur la carte """
+        destination=[]
+        destination=self.buttonDownPos()
+        if destination!=robot.getposition():
+            parent.backend.sendposcmd_robot(self,robot_name,destination)
+        
+    
+
+    def controldragndrop(self):     
+        """controle avec drag and drop"""
+
+    
+    def controleclavier(self):       
+        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(text), self)
+        shortcut.activated.connect(slot)
+=======
+#        tooltip = r.type.name
+#        self.setToolTip(tooltip)
+
+
+#    def controlclicevent(self, event):
+#        self.controlclic()
+
+#    def controlclic(self):
+#        """controle du robot en cliquant sur la carte """
+#        destination=[]
+#        destination=self.buttonDownPos
+#        if destination!=robot.getposition:
+#            parent.backend.sendposcmd_robot(self,robot_name,destination)
+
+#    def controledragndropevent(self,event):
+#        self.controldragndrop()
+
+#    def controldragndrop(self):
+#        """controle avec drag and drop"""
+
+#    def controleclavierevent(self,event):
+#        self.controleclavier()
+
+#    def controleclavier(self):
+#        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(text), self)
+#        shortcut.activated.connect(slot)
+>>>>>>> dd8e3c038277918df25277a08fc754cd30c4e648
+        #add_shortcut('b_up', lambda: pass)
+        #add_shortcut('b_down', lambda:)
+        #add_shortcut('b_left', lambda: )
+        #add_shortcut('b_right', lambda: )
+        #return toolbar
+        #event.accept()
+=======
+>>>>>>> 784293c600e84fcf8dfa67fb96072a3f9c17c0b4
