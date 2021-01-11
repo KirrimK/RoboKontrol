@@ -1,0 +1,17 @@
+<settings>
+  <setting nom="Fichier de Carte">
+    <field>map_sail_the_world.xml</field>
+  </setting>
+  <setting nom="UP_KEY">
+    <field>z</field>
+  </setting>
+  <setting nom="DOWN_KEY">
+    <field>s</field>
+  </setting>
+  <setting nom="LEFT_KEY">
+    <field>q</field>
+  </setting>
+  <setting nom="RIGHT_KEY">
+    <field>d</field>
+  </setting>
+</settings>

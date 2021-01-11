@@ -1,5 +1,7 @@
 """Module ui_window.py - Crée la fenêtre comportant l'inspecteur, la carte et la zone de menu"""
 
+from carte import MapView
+import lxml.etree as ET
 import boite_robot
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QScrollArea, QGroupBox, QPushButton, QSpacerItem, \
     QDialog, QGraphicsView, QSizePolicy, QMessageBox, QApplication, QMainWindow, QFrame
@@ -65,8 +67,12 @@ class Window(QMainWindow):
 
         # Connexion du signal de mise à jour de la liste des robots présents avec le slot de maj des robots affichés
         self.list_robot_changed_signal.connect(lambda l: self.update_robots(l))
+        
+        self.settings_dict = load_from_file("settings.xml")
+        self.act_settings()
 
     def ui_setup_map(self):
+        self.map_view = MapView(self)
         self.map_view.setMinimumSize(QSize(0, 250))
         self.layout_map_inspector.addWidget(self.map_view)
 
@@ -118,7 +124,7 @@ class Window(QMainWindow):
         # Création du bouton configuration
         self.button_settings.setText("Configuration")
         self.layout_menu.addWidget(self.button_settings)
-        self.button_settings.clicked.connect(lambda: show_settings())
+        self.button_settings.clicked.connect(self.show_settings)
 
         # Création du bouton aide
         self.button_help.setText("Aide")
@@ -139,6 +145,45 @@ class Window(QMainWindow):
         deleted_robot.remove_box_robot()
         # Envoie l'information que le robot a été oublié (via le bouton oublier)
         self.backend.stopandforget_robot(nom_robot)
+    
+    def act_settings(self):
+        """Effectuer les actions liées aux paramètres"""
+        self.map_view.updt_map_data(self.settings_dict["Fichier de Carte"])
+    
+    def show_settings(self):
+        """ Ouvre un popup (QDialog) Configuration
+        permettant la modification des réglages d'enregistrement"""
+        setting = QtWidgets.QDialog(self.main_window)
+        setting.setWindowTitle("Configuration")
+        setting.setMinimumSize(500, 400)
+        setting.layout = QtWidgets.QVBoxLayout(setting)
+
+        #paramètres d'un setting
+        field_dict = {}
+
+        def updt_settings():
+            """Mise à jour des paramètres"""
+            for setting_nm in self.settings_dict:
+                self.settings_dict[setting_nm] = field_dict[setting_nm].text()
+            to_file(self.settings_dict)
+
+        update_btn = QtWidgets.QPushButton("Sauvegarder")
+        setting.layout.addWidget(update_btn)
+        update_btn.clicked.connect(updt_settings)
+        update_btn.clicked.connect(self.act_settings)
+
+        for setting_nm in self.settings_dict:
+            box_layout = QtWidgets.QHBoxLayout()
+            setting.layout.addLayout(box_layout)
+
+            label = QtWidgets.QLabel(setting_nm)
+            box_layout.addWidget(label)
+
+            field_dict[setting_nm] = QtWidgets.QLineEdit(setting)
+            field_dict[setting_nm].setText(self.settings_dict[setting_nm])
+            box_layout.addWidget(field_dict[setting_nm])
+
+        setting.exec_()
 
     @pyqtSlot()
     def update_robots(self, new_robots):
@@ -177,16 +222,6 @@ class Window(QMainWindow):
         self.update_robots(new_robots)
         self.list_robot_changed_signal.emit(self.current_robots_list)
 
-
-@pyqtSlot()
-def show_settings():
-    """ Ouvre un popup (QDialog) Configuration permettant la modification des réglages d'enregistrement"""
-    setting = QDialog()
-    setting.setWindowTitle("Configuration")
-    setting.setMinimumSize(500, 750)
-    setting.exec_()
-
-
 @pyqtSlot()
 def show_help():
     """Ouvre une pop_up (QMessageBox) Aide avec la contenu du fichier aide.txt"""
@@ -199,6 +234,32 @@ def show_help():
     aide.setText("".join(list_aide))
     aide.exec_()
 
+    def load_from_file(file_path):
+    """Récupérer les paramètres à partir d'un fichier"""
+    settings = {}
+    try:
+        root = ET.parse(file_path).getroot()
+        for setting in root.findall('setting'):
+            nom = setting.attrib.get('nom')
+            field = setting.find("field").text
+            settings[nom] = field
+    except Exception as exc:
+        print(exc)
+    return settings
+
+def to_file(settings):
+    """Sauvegarde des évènements Evt dans un fichier (*.xml)
+    (génération par xml ElementTree)"""
+    root = ET.Element("settings")
+    for obj in settings:
+        obj_xml = ET.Element("setting")
+        obj_xml.set('nom', obj)
+        field = ET.SubElement(obj_xml, "field")
+        field.text = settings[obj]
+        root.append(obj_xml)
+    tree = ET.ElementTree(root)
+    with open("settings.xml", "wb") as save:
+        tree.write(save, pretty_print=True)
 
 def main(backend):
     """ Création la fenêtre principale """
