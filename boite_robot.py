@@ -515,5 +515,4 @@ class BoiteRobot(QWidget):
     @pyqtSlot()
     def oneditingfinished(self):
         """"Appelée après la fin de l'édition de self.QLineEdit_positionCommand"""
-        self.backend.sendposcmd_robot(self.rid, list(
-            int(i) for i in self.QLineEdit_positionCommand.text().split(' : ')))
+        self.backend.sendposcmd_robot(self.rid, list(int(i) for i in self.QLineEdit_positionCommand.text().split(' : ')))
