@@ -3,8 +3,9 @@
 from carte import MapView
 import lxml.etree as ET
 import boite_robot
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QScrollArea, QGroupBox, QPushButton, QSpacerItem, \
-    QDialog, QGraphicsView, QSizePolicy, QMessageBox, QApplication, QMainWindow, QFrame
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QScrollArea, QGroupBox, QPushButton, QSpacerItem
+from PyQt5.QtWidgets import QDialog, QGraphicsView, QSizePolicy, QMessageBox, QApplication, QMainWindow, QFrame, QLabel, QLineEdit
+
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QTimer, QSize, QRect
 
 QPUSHBUTTON = "background-color: grey; border 2px solid rgb(113, 113, 113);border-width: 2px; " \
@@ -153,10 +154,10 @@ class Window(QMainWindow):
     def show_settings(self):
         """ Ouvre un popup (QDialog) Configuration
         permettant la modification des réglages d'enregistrement"""
-        setting = QtWidgets.QDialog(self.main_window)
+        setting = QDialog(self.main_window)
         setting.setWindowTitle("Configuration")
         setting.setMinimumSize(500, 400)
-        setting.layout = QtWidgets.QVBoxLayout(setting)
+        setting.layout = QVBoxLayout(setting)
 
         #paramètres d'un setting
         field_dict = {}
@@ -167,19 +168,19 @@ class Window(QMainWindow):
                 self.settings_dict[setting_nm] = field_dict[setting_nm].text()
             to_file(self.settings_dict)
 
-        update_btn = QtWidgets.QPushButton("Sauvegarder")
+        update_btn = QPushButton("Sauvegarder")
         setting.layout.addWidget(update_btn)
         update_btn.clicked.connect(updt_settings)
         update_btn.clicked.connect(self.act_settings)
 
         for setting_nm in self.settings_dict:
-            box_layout = QtWidgets.QHBoxLayout()
+            box_layout = QHBoxLayout()
             setting.layout.addLayout(box_layout)
 
-            label = QtWidgets.QLabel(setting_nm)
+            label = QLabel(setting_nm)
             box_layout.addWidget(label)
 
-            field_dict[setting_nm] = QtWidgets.QLineEdit(setting)
+            field_dict[setting_nm] = QLineEdit(setting)
             field_dict[setting_nm].setText(self.settings_dict[setting_nm])
             box_layout.addWidget(field_dict[setting_nm])
 
@@ -234,7 +235,7 @@ def show_help():
     aide.setText("".join(list_aide))
     aide.exec_()
 
-    def load_from_file(file_path):
+def load_from_file(file_path):
     """Récupérer les paramètres à partir d'un fichier"""
     settings = {}
     try:

@@ -146,7 +146,8 @@ class MapView(QtWidgets.QWidget):
             self.UP_KEY = int(root.attrib.get('UP_KEY'))
             self.UP_KEY = int(root.attrib.get('UP_KEY'))
             self.UP_KEY = int(root.attrib.get('UP_KEY'))
-           
+        except:
+            pass
             
     def keyPressEvent(self, event):
         """Une touche du clavier est pressée"""
