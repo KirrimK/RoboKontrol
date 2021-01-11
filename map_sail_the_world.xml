@@ -7,16 +7,16 @@
         <pos>0x0</pos> <!--XxY-->
     </rect>
     <rect nom="barriere_nord">
-        <color>grey</color>
+        <color>red</color>
         <order>0</order>
         <size>3000x22</size>
-        <pos>0x2000</pos>
+        <pos>0x1999</pos>
     </rect>
     <rect nom="barriere_sud">
         <color>grey</color>
         <order>0</order>
         <size>3000x22</size>
-        <pos>0x-22</pos>
+        <pos>0x-21</pos>
     </rect>
     <rect nom="barriere_est">
         <color>grey</color>
@@ -28,6 +28,6 @@
         <color>grey</color>
         <order>0</order>
         <size>22x2000</size>
-        <pos>-22x0</pos>
+        <pos>-21x0</pos> <!--Il faudrait ajouter 1 à x car sinon il y a un décalage-->
     </rect>
 </map>

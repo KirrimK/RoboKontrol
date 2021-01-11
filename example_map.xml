@@ -7,8 +7,14 @@
     </rect>
     <rect nom="02">
         <color>red</color>
-        <order>0</order>
+        <order>1</order>
         <size>100x100</size>
         <pos>0x0</pos>
+    </rect>
+    <rect nom="02">
+        <color>green</color>
+        <order>-1</order>
+        <size>200x200</size>
+        <pos>100x100</pos>
     </rect>
 </map>
