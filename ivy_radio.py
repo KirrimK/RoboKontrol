@@ -8,8 +8,7 @@ IVYAPPNAME = 'Radio'
 
 	#Informations
 """Le premier groupe de capture est le nom du robot"""
-CAPT_DECL = "CaptDecl (.+) (.+) (.+) (.+) (.+) (.*)"
-ACTU_DECL = 'ActuatorDecl (.+) (.+) (.+) (.+) (.+) (.*)'
+ACTU_DECL = 'ActuatorDecl (.+) (.+) (.+) (.+) (.+) (.+) (.*)'
 POS_REG = 'PosReport (.+) (.+) (.+) (.+)'
 CAPT_REG = 'CaptReport (.+) (.+) (.+)'
 
@@ -21,6 +20,7 @@ POS_ORIENT_CMD = "PosCmdOrient {} {} {} {}"
 ACTUATOR_CMD = "ActuatorCmd {} {} {}"
 STOP_BUTTON_CMD = "Emergency {}"
 KILL_CMD = "Shutdown {}"
+DESCR_CMD = "ActuatorsRequest {}"
 
 MSG = '(.*)'
 
@@ -120,9 +120,10 @@ class Radio :
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
+                self.send_cmd (DESCR_CMD.format (rid))
             self.backend.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
 
-    def on_actudecl (self, sender, rid, aid, minV, maxV, step = 1, unit = None):
+    def on_actudecl (self, sender, rid, aid, minV, maxV, step = 1, droits, unit = None):
         """Fonction appelée automatiquement par IvyBind. Ajoute l'actionnneur aid sur le robot rid.
         Si le robot rid n'est pas connu, il est ajouté.
         Si aid est le nom d'un capteur déjà présent sur le robot, la valeur est gardée.
@@ -133,6 +134,7 @@ class Radio :
             _ minV (str) : Valeur minimale que l'actionneur peut prendre.
             _ maxV (str) : Valeur maximale que l'actionneur peut prendre
             _step (str) : Pas de déplacement de l'actionneur.
+            _droits (str) : Determine ce que fait l'equipement
             _ unit (str) : Unité de la valeur."""
         if self.backend is not None:
             Val = False
@@ -141,6 +143,7 @@ class Radio :
                 Binaire = True
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
+                self.send_cmd (DESCR_CMD.format (rid))
             elif self.backend.annu.find (rid,aid) is not None :
                 Val = True
                 valeur = self.backend.annu.find (rid,aid).get_state () [0]
@@ -165,35 +168,11 @@ class Radio :
             _ valeur (str) : Valeur transmise par le capteur."""
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
-                self.backend.track_robot (rid)
+                self.backend.track_robot (rid)                
+                self.send_cmd (DESCR_CMD.format (rid))
             if not self.backend.annu.find (rid).check_eqp (sid):
                 self.backend.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
             self.backend.annu.find (rid,sid).set_state (float (valeur))
-
-
-    def on_captdecl (self, sender, rid, sid, minV, maxV, step, unit= None):
-        """Fonction appellée automatiquement par IvyBind.
-        Place le capteur sid sur le robot rid dans l'annuaire.
-        Si le robot rid n'est pas connu, il est ajouté.
-        Si le robot a déjà un capteur qui a le nom sid, la valeur est gardée.
-        Si le robot a déjà un actionneur nommé sid, la fonction ne fait rien.
-        Arguments : _ sender (Ivy_client)
-                               _ rid (str) : Nom du robot
-                               _ sid (str) : Nom du capteur
-                               _ unit (str) : unité du capteur"""
-        if self.backend is not None:
-            if not self.backend.annu.check_robot (rid):
-                self.backend.track_robot (rid)
-            add = False
-            if not self.backend.annu.find (rid).check_eqp (sid):
-                add = True
-                val = None
-            elif self.backend.annu.find (rid, sid).get_type () is not Actionneur :
-                add = True
-                val = self.backend.annu.find (rid, sid).get_state() [0]
-            if add:
-                self.backend.annu.find (rid).create_eqp (sid, "Capteur", minV, maxV, step, unit)
-                self.backend.annu.find (rid, sid).set_state (val)
 
     def send_cmd (self,cmd):
         """Envoie du texte vers le bus Ivy et le stocke optionnellement sur les tampons
