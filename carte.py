@@ -130,6 +130,10 @@ class MapView(QtWidgets.QWidget):
 
     def keyPressEvent(self, event):
         """Une touche du clavier est pressée"""
+        robot_up_key = self.parent.settings_dict["UP_KEY"]
+        robot_down_key = self.parent.settings_dict["DOWN_KEY"]
+        robot_left_key = self.parent.settings_dict["LEFT_KEY"]
+        robot_right_key = self.parent.settings_dict["RIGHT_KEY"]
         if event.key() == Qt.Key_F5:
             pass
 
