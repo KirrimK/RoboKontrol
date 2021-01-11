@@ -159,7 +159,7 @@ class Equipement(QWidget):
             self.gridLayout_equipement.addWidget(self.lcdNumber_equipement, 0, 1, 1, 1, QT_RIGHT)
 
             # Connexion du signal de màj de la valeur avec la slot d'affichage de la valeur'
-            self.value_changed_signal.connect(lambda val: self.lcdNumber_equipement.display(val))
+            self.value_changed_signal.connect(lambda val: self.lcdNumber_equipement.display(int(val)))
 
         if self.kind == "BAR":
             self.progressBar_equipement = QProgressBar()
@@ -253,6 +253,7 @@ class Equipement(QWidget):
         if self.kind == "DISCRET" and self.value is not None:
             self.doubleSpinBox_equipement.setValue(self.value)
             self.slider_equipement.setValue(self.value)
+            print ('Updated to {}'.format(self.slider_equipement.value()))
 
         if self.kind == "MULTIPLE":
             pass
@@ -356,13 +357,13 @@ class BoiteRobot(QWidget):
         self.layout_last_message.addWidget(self.lcdNumber_last_message)
         self.layout_box_robot.addLayout(self.layout_last_message)
 
-        # Confiuration de l'envoyeur de commandes
+        # Confiuration de l'envoyeur de commandes de postion
         self.label_positionCommand.setText("Dernière commande envoyée:")
         self.layout_last_command.addWidget(self.label_positionCommand)
         self.QLineEdit_positionCommand = QLineEdit()
         self.QLineEdit_positionCommand.setInputMask("0000 : 0000 : 000")
         self.QLineEdit_positionCommand.setText("1500 : 0000 : 000")
-        self.QLineEdit_positionCommand.editingFinished.connect(lambda: self.oneditingfinished())
+        self.QLineEdit_positionCommand.editingFinished.connect(lambda: self.onEditingFinished())
         self.layout_last_command.addWidget(self.QLineEdit_positionCommand)
         self.layout_box_robot.addLayout(self.layout_last_command)
 
@@ -491,10 +492,12 @@ class BoiteRobot(QWidget):
                 equipement.value_changed_signal.emit(value)
             # Emission du nouveau ping de l'équipement
             equipement.ping_changed_signal.emit(ping)
+            print ("Valeur du LCD : {}".format(equipement.lcdNumber_equipement.value()))
 
         # self.layout_box_actuators.update()
 
         #Force le changement d'affichage des boites d'actionneurs et de capteurs.
+        equipement.lcdNumber_equipement.repaint ()
         self.groupBox_actuators.repaint ()
         self.groupBox_sensors.repaint ()
 
@@ -517,6 +520,11 @@ class BoiteRobot(QWidget):
         self.backend.stopandforget_robot(self.rid)
 
     @pyqtSlot()
-    def oneditingfinished(self):
+    def onEditingFinished(self):
         """"Appelée après la fin de l'édition de self.QLineEdit_positionCommand"""
-        self.backend.sendposcmd_robot(self.rid, list(int(i) for i in self.QLineEdit_positionCommand.text().split(' : ')))
+        self.backend.sendposcmd_robot(self.rid, [int(i) for i in self.QLineEdit_positionCommand.text().split(' : ')])
+
+    @pyqtSlot()
+    def emergencyButtonPressed (self):
+        """Appelée si le bouton d'arrêt d'urgence d'un robot est pressé"""
+        self.backend.emergency_stop_robot (self.rid)
