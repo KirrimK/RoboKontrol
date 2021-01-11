@@ -30,8 +30,8 @@ def temps (t):
     Output : a formated string that gives a more explicit time than t
 
     /!\ Cette fonction est à l'heure d'hiver."""
-    i = gmtime(t)
-    return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (i.tm_year, i.tm_mon, i.tm_mday, i.tm_hour+1, i.tm_min, i.tm_sec)+'{:.3}'.format (t%1)[1:]
+    i = gmtime(t+1*3600)
+    return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (i.tm_year, i.tm_mon, i.tm_mday, i.tm_hour, i.tm_min, i.tm_sec)+'{:.3}'.format (t%1)[1:]
 
 class Radio :
     """Classe de l'objet qui est connecté au channel Ivy
