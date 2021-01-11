@@ -292,7 +292,7 @@ class BoiteRobot(QWidget):
         # Création de la boite robot (QGroupBox)
         self.groupBox_robot = QGroupBox()
         self.groupBox_robot.setMaximumSize(340, 16777215)
-        self.groupBox_robot.setStyleSheet("QGroupBox { background-color: rgb(255, 255, 255); border: 1px solid grey; }")
+        #self.groupBox_robot.setStyleSheet("QGroupBox { background-color: rgb(255, 255, 255); border: 1px solid grey; }")
         self.layout_box_robot = QVBoxLayout(self.groupBox_robot)
 
         # Création des widgets de la boite robot
@@ -452,7 +452,7 @@ class BoiteRobot(QWidget):
         # Met à jour le dictionnaire des équipements
         equipements = self.get_equipements()
         # Crée une liste des équipements présents sur le robot
-        equipements_list = [key for key in equipements.keys()]
+        equipements_list = [key for key in equipements]
 
         # Ajoute les nouveaux équipements
         for name in set(equipements_list) - set(self.current_equipement_list):
@@ -467,7 +467,7 @@ class BoiteRobot(QWidget):
 
         # Change les capteurs en actionneurs si néccessaire.
         for name in self.current_sensors_list:
-            if type(equipements[name]) == Actuator:
+            if type(equipements[name]) == annuaire.Actionneur:
                 actuator = equipements[name]
                 self.current_actuators_list.append(name)
                 self.current_sensors_list.pop(self.current_sensors_list.index(name))
