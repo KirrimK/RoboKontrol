@@ -16,7 +16,7 @@
         <color>grey</color>
         <order>0</order>
         <size>3000x22</size>
-        <pos>0x-21</pos>
+        <pos>0x-20</pos>
     </rect>
     <rect nom="barriere_est">
         <color>grey</color>
@@ -28,6 +28,6 @@
         <color>grey</color>
         <order>0</order>
         <size>22x2000</size>
-        <pos>-21x0</pos> <!--Il faudrait ajouter 1 à x car sinon il y a un décalage-->
+        <pos>-20x0</pos> <!--Il faut ajouter 2 à x car sinon il y a un décalage (fine tuning nécessaire)-->
     </rect>
 </map>
