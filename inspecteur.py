@@ -5,7 +5,7 @@ from PyQt5 import QtWidgets, QtCore
 
 
 class Inspecteur(QtWidgets.QWidget):
-    """ Définit l'objet inspecteur qui comporte les boites robots et qui les relie à backend avec des signaux """
+    """ Définit l'objet inspecteur qui comport les boites robots et qui les relie à backend avec des signaux """
 
     def __init__(self, parent_widget, parent_layout, main_window, backend):
         super(Inspecteur, self).__init__()
