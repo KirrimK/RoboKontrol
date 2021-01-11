@@ -134,13 +134,27 @@ class MapView(QtWidgets.QWidget):
 
     def keyPressEvent(self, event):
         """Une touche du clavier est pressée"""
+        self.key_binding={}
         robot_up_key = self.parent.settings_dict["UP_KEY"]
         robot_down_key = self.parent.settings_dict["DOWN_KEY"]
         robot_left_key = self.parent.settings_dict["LEFT_KEY"]
         robot_right_key = self.parent.settings_dict["RIGHT_KEY"]
-        if event.key() == Qt.Key_F5:
-            pass
-
+        robot_pos = [bkd_robots[robot].x, bkd_robots[robot].y, bkd_robots[robot].theta]
+        incr=1
+        cmd_pos=[0,0,None]
+        if selected_robot is not None:
+            if event.key() == :QT.robot_up_key:
+                cmd_pos=[0,robot_pos[1]+incr
+            if event.key() == :QT.robot_down_key:
+                cmd_pos=[0,robot_pos[1]-incr
+            if event.key() == :QT.robot_left_key:
+                cmd_pos=[0,robot_pos[0]-incr       
+            if event.key() == :QT.robot_right_key:
+                cmd_pos=[0,robot_pos[0]+incr 
+        self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)        
+        else :
+            pass           
+        
     def mousePressEvent(self, event):
         """La souris est cliquée"""
         self.mouse_pos = event.localPos()
