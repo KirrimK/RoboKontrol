@@ -4,6 +4,7 @@ import sys
 from PyQt5 import QtCore, QtWidgets
 import inspecteur
 from carte import MapView
+import lxml.etree as ET
 
 QPUSHBUTTON = "background-color: grey; border 2px solid rgb(113, 113, 113);border-width: 2px; " \
               "border-radius: 10px;  color: rgb(0,0,0) "
@@ -23,7 +24,6 @@ class Window(object):
         self.backend = backend
         # Création du layout de la fenêtre
         self.layout_window = QtWidgets.QVBoxLayout(self.main_window)
-
 
         self.create_menu_area()
 
@@ -47,6 +47,8 @@ class Window(object):
         self.button_help.clicked.connect(lambda: show_help(self.main_window))
 
         self.main_window.show()
+        self.settings_dict = load_from_file("settings.xml")
+        self.act_settings()
 
     def create_inspecteur_scrollbar(self, main_window):
         """Crée  la QScrollBar qui contient les boites robots de la classe
@@ -124,36 +126,78 @@ class Window(object):
         self.button_settings = QtWidgets.QPushButton(self.menu_area)
         self.button_settings.setText("Configuration")
         self.layout_menu.addWidget(self.button_settings)
-        self.button_settings.clicked.connect(lambda: show_settings(self.main_window, self.map_view))
+        self.button_settings.clicked.connect(self.show_settings)
 
         # Création du bouton aide
         self.button_help = QtWidgets.QPushButton(self.menu_area)
         self.button_help.setText("Aide")
         self.layout_menu.addWidget(self.button_help)
 
-def show_settings(main_window, map_view):
-    """ Ouvre un popup (QDialog) Configuration
-    permettant la modification des réglages d'enregistrement"""
-    setting = QtWidgets.QDialog(main_window)
-    setting.setWindowTitle("Configuration")
-    setting.setMinimumSize(500, 400)
-    setting.layout = QtWidgets.QVBoxLayout(setting)
+    def act_settings(self):
+        """Effectuer les actions liées aux paramètres"""
+        self.map_view.updt_map_data(self.settings_dict["Fichier de Carte"])
 
-    #paramètre de la carte
-    setting.map_cf_layout = QtWidgets.QHBoxLayout()
-    setting.layout.addLayout(setting.map_cf_layout)
-    setting.map_cf_label = QtWidgets.QLabel("Fichier de carte:")
-    setting.map_cf_layout.addWidget(setting.map_cf_label)
+    def show_settings(self):
+        """ Ouvre un popup (QDialog) Configuration
+        permettant la modification des réglages d'enregistrement"""
+        setting = QtWidgets.QDialog(self.main_window)
+        setting.setWindowTitle("Configuration")
+        setting.setMinimumSize(500, 400)
+        setting.layout = QtWidgets.QVBoxLayout(setting)
 
-    setting.map_cf_field = QtWidgets.QLineEdit(setting)
-    setting.map_cf_layout.addWidget(setting.map_cf_field)
+        #paramètres d'un setting
+        field_dict = {}
 
-    setting.map_cf_btn = QtWidgets.QPushButton(">")
-    setting.map_cf_btn.setMaximumSize(40, 40)
-    setting.map_cf_layout.addWidget(setting.map_cf_btn)
-    setting.map_cf_btn.clicked.connect(lambda: map_view.updt_map_data(setting.map_cf_field.text()))
+        def updt_settings():
+            """Mise à jour des paramètres"""
+            for setting_nm in self.settings_dict:
+                self.settings_dict[setting_nm] = field_dict[setting_nm].text()
+            to_file(self.settings_dict)
 
-    setting.exec_()
+        update_btn = QtWidgets.QPushButton("Mettre à jour")
+        setting.layout.addWidget(update_btn)
+        update_btn.clicked.connect(updt_settings)
+        update_btn.clicked.connect(self.act_settings)
+
+        for setting_nm in self.settings_dict:
+            box_layout = QtWidgets.QHBoxLayout()
+            setting.layout.addLayout(box_layout)
+
+            label = QtWidgets.QLabel(setting_nm)
+            box_layout.addWidget(label)
+
+            field_dict[setting_nm] = QtWidgets.QLineEdit(setting)
+            field_dict[setting_nm].setText(self.settings_dict[setting_nm])
+            box_layout.addWidget(field_dict[setting_nm])
+
+        setting.exec_()
+
+def load_from_file(file_path):
+    """Récupérer les paramètres à partir d'un fichier"""
+    settings = {}
+    try:
+        root = ET.parse(file_path).getroot()
+        for setting in root.findall('setting'):
+            nom = setting.attrib.get('nom')
+            field = setting.find("field").text
+            settings[nom] = field
+    except Exception as exc:
+        print(exc)
+    return settings
+
+def to_file(settings):
+    """Sauvegarde des évènements Evt dans un fichier (*.xml)
+    (génération par xml ElementTree)"""
+    root = ET.Element("settings")
+    for obj in settings:
+        obj_xml = ET.Element("setting")
+        obj_xml.set('nom', obj)
+        field = ET.SubElement(obj_xml, "field")
+        field.text = settings[obj]
+        root.append(obj_xml)
+    tree = ET.ElementTree(root)
+    with open("settings.xml", "wb") as save:
+        tree.write(save, pretty_print=True)
 
 def show_help(main_window):
     """Ouvre une pop_up (QMessageBox) Aide avec la contenu du fichier aide.txt"""

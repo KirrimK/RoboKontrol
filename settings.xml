@@ -1,0 +1,8 @@
+<settings>
+  <setting nom="Fichier de Carte">
+    <field>map_sail_the_world.xml</field>
+  </setting>
+  <setting nom="Test Setting">
+    <field>Test</field>
+  </setting>
+</settings>
