@@ -154,7 +154,7 @@ class Window(object):
                 self.settings_dict[setting_nm] = field_dict[setting_nm].text()
             to_file(self.settings_dict)
 
-        update_btn = QtWidgets.QPushButton("Mettre à jour")
+        update_btn = QtWidgets.QPushButton("Sauvegarder")
         setting.layout.addWidget(update_btn)
         update_btn.clicked.connect(updt_settings)
         update_btn.clicked.connect(self.act_settings)
