@@ -1,5 +1,6 @@
 """Module ui_window.py - Crée la fenêtre comportant l'inspecteur, la carte et la zone de menu"""
 
+import sys
 from carte import MapView
 import lxml.etree as ET
 import boite_robot
@@ -68,7 +69,7 @@ class Window(QMainWindow):
 
         # Connexion du signal de mise à jour de la liste des robots présents avec le slot de maj des robots affichés
         self.list_robot_changed_signal.connect(lambda l: self.update_robots(l))
-        
+
         self.settings_dict = load_from_file("settings.xml")
         self.act_settings()
 
@@ -82,12 +83,12 @@ class Window(QMainWindow):
         BoiteRobot de boite_robot """
 
         self.inspector_scroll_area.setWidgetResizable(True)
-        self.inspector_scroll_area.setMinimumSize(QSize(350, 0))
-        self.inspector_scroll_area.setMaximumSize(QSize(350, 16777215))
+        self.inspector_scroll_area.setMinimumSize(QSize(410, 0))
+        self.inspector_scroll_area.setMaximumSize(QSize(410, 16777215))
         self.inspector_scroll_area.setFrameShape(QFrame.NoFrame)
         self.inspector_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scrollArea = QWidget()
-        self.scrollArea.setGeometry(QRect(0, 0, 350, 16777215))
+        self.scrollArea.setGeometry(QRect(0, 0, 410, 16777215))
         self.layout_map_inspector.addWidget(self.inspector_scroll_area)
         self.layout_window.addLayout(self.layout_map_inspector)
 
@@ -146,11 +147,11 @@ class Window(QMainWindow):
         deleted_robot.remove_box_robot()
         # Envoie l'information que le robot a été oublié (via le bouton oublier)
         self.backend.stopandforget_robot(nom_robot)
-    
+
     def act_settings(self):
         """Effectuer les actions liées aux paramètres"""
         self.map_view.updt_map_data(self.settings_dict["Fichier de Carte"])
-    
+
     def show_settings(self):
         """ Ouvre un popup (QDialog) Configuration
         permettant la modification des réglages d'enregistrement"""
@@ -264,7 +265,6 @@ def to_file(settings):
 
 def main(backend):
     """ Création la fenêtre principale """
-    import sys
     app = QApplication(sys.argv)
     window = Window(backend)
     window.main_window.show()

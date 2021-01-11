@@ -1,5 +1,5 @@
 """main.py"""
-#TODO: regarder lib argsparse pour arguments ligne de cmd meilleurs
+#regarder lib argsparse pour arguments ligne de cmd meilleurs
 import window
 import backend as ben
 import annuaire as an

@@ -113,7 +113,7 @@ class Equipement(QWidget):
             self.label_name_equipement.setText('{0} ({1}):'.format(self.name, self.unite))
         self.gridLayout_equipement.addWidget(self.label_name_equipement, 0, 0, 1, 1, QT_LEFT)
 
-        self.label_message_equipement.setText("Dernier message (ms)")
+        self.label_message_equipement.setText("Dern. Msg (ms)")
         self.gridLayout_equipement.addWidget(self.label_message_equipement, 1, 0, 1, 1, QT_LEFT)
         self.lcdNumber_ping_equipement.setMaximumSize(QSize(75, 25))
         self.lcdNumber_ping_equipement.setStyleSheet(QLCD_STYLE)
@@ -179,7 +179,7 @@ class Equipement(QWidget):
             self.parent_layout.addItem(self.spacerItem_equipement)
             self.label_command.setText("None")
             self.gridLayout_equipement.addWidget(self.label_command, 2, 1, 1, 1, QT_LEFT)
-            self.label_last_command.setText("Dernière commande envoyée:")
+            self.label_last_command.setText("Dern. Cmd:")
             self.gridLayout_equipement.addWidget(self.label_last_command, 2, 0, 1, 1, QT_RIGHT)
 
         if self.variety == "CAPTEUR":
@@ -291,7 +291,7 @@ class BoiteRobot(QWidget):
 
         # Création de la boite robot (QGroupBox)
         self.groupBox_robot = QGroupBox()
-        self.groupBox_robot.setMaximumSize(340, 16777215)
+        self.groupBox_robot.setMaximumSize(400, 16777215)
         #self.groupBox_robot.setStyleSheet("QGroupBox { background-color: rgb(255, 255, 255); border: 1px solid grey; }")
         self.layout_box_robot = QVBoxLayout(self.groupBox_robot)
 
@@ -381,7 +381,7 @@ class BoiteRobot(QWidget):
         """Configure un duo de widget (QLabel et QLCDNumber dans un QLayout) et renvoie le QLCDNumber"""
 
         self.label_coord = QLabel()
-        self.label_coord.setText('{0} ({1}):'.format(coord, unite))
+        self.label_coord.setText('{0} ({1})'.format(coord, unite))
         self.layout_coord.addWidget(self.label_coord)
         self.lcdNumber_coord = QLCDNumber()
         self.lcdNumber_coord.setFixedSize(QLCD_SIZE1)
@@ -491,7 +491,6 @@ class BoiteRobot(QWidget):
                 equipement.value_changed_signal.emit(value)
             # Emission du nouveau ping de l'équipement
             equipement.ping_changed_signal.emit(ping)
-            
 
         # self.layout_box_actuators.update()
 
