@@ -350,7 +350,7 @@ class BoiteRobot(QWidget):
         self.layout_box_robot.addLayout(self.layout_coord)
 
         # Configuration de l'affichage du dernier message reçu
-        self.label_last_message.setText("Dernier message (s):")
+        self.label_last_message.setText("Dern. Msg (s):")
         self.layout_last_message.addWidget(self.label_last_message)
         self.lcdNumber_last_message.setFixedSize(QLCD_SIZE2)
         self.lcdNumber_last_message.setStyleSheet(QLCD_STYLE)
@@ -358,11 +358,11 @@ class BoiteRobot(QWidget):
         self.layout_box_robot.addLayout(self.layout_last_message)
 
         # Confiuration de l'envoyeur de commandes de postion
-        self.label_positionCommand.setText("Dernière commande envoyée:")
+        self.label_positionCommand.setText("Dern. PosCmd:")
         self.layout_last_command.addWidget(self.label_positionCommand)
         self.QLineEdit_positionCommand = QLineEdit()
         self.QLineEdit_positionCommand.setInputMask("0000 : 0000 : 000")
-        self.QLineEdit_positionCommand.setText("1500 : 0000 : 000")
+        self.QLineEdit_positionCommand.setText("1500 : 1000 : 000")
         self.QLineEdit_positionCommand.editingFinished.connect(lambda: self.onEditingFinished())
         self.layout_last_command.addWidget(self.QLineEdit_positionCommand)
         self.layout_box_robot.addLayout(self.layout_last_command)
@@ -497,7 +497,7 @@ class BoiteRobot(QWidget):
         # self.layout_box_actuators.update()
 
         #Force le changement d'affichage des boites d'actionneurs et de capteurs.
-        equipement.lcdNumber_equipement.repaint ()
+        #equipement.lcdNumber_equipement.repaint ()
         self.groupBox_actuators.repaint ()
         self.groupBox_sensors.repaint ()
 

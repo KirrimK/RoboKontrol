@@ -185,6 +185,10 @@ class MapView(QtWidgets.QWidget):
                 cmd_pos[0] = self.relative_mspos[0]
                 cmd_pos[1] = self.relative_mspos[1]
                 self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)
+                cmd_x_le = str(cmd_pos[0])[:4]
+                cmd_y_le = str(cmd_pos[1])[:4]
+                qle_poscmd = self.parent.current_robots_dic[self.selected_robot].QLineEdit_positionCommand
+                qle_poscmd.setText("{} : {} : 000".format(cmd_x_le, cmd_y_le))
                 self.selected_robot = None
         elif event.button() == Qt.RightButton:
             self.selected_robot = None
