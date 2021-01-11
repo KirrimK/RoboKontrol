@@ -10,7 +10,7 @@ IVYAPPNAME = 'Radio'
 """Le premier groupe de capture est le nom du robot"""
 ACTU_DECL = 'ActuatorDecl (.+) (.+) (.+) (.+) (.+) (.+) (.*)'
 POS_REG = 'PosReport (.+) (.+) (.+) (.+)'
-CAPT_REG = 'CaptReport (.+) (.+) (.+)'
+CAPT_REG = 'ActuatorReport (.+) (.+) (.+)'
 
 	#Commands
 """Le premier argument sera le nom du robot"""
@@ -58,7 +58,6 @@ class Radio :
         IvyBindMsg (self.on_msg, MSG)
         IvyBindMsg (self.on_captreg, CAPT_REG)
         IvyBindMsg (self.on_actudecl, ACTU_DECL)
-        IvyBindMsg (self.on_captdecl, CAPT_DECL)
 
     #ENREGISTREMENT
 
@@ -123,7 +122,7 @@ class Radio :
                 self.send_cmd (DESCR_CMD.format (rid))
             self.backend.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
 
-    def on_actudecl (self, sender, rid, aid, minV, maxV, step = 1, droits, unit = None):
+    def on_actudecl (self, sender, rid, aid, minV, maxV, step, droits, unit = None):
         """Fonction appelée automatiquement par IvyBind. Ajoute l'actionnneur aid sur le robot rid.
         Si le robot rid n'est pas connu, il est ajouté.
         Si aid est le nom d'un capteur déjà présent sur le robot, la valeur est gardée.
@@ -156,7 +155,7 @@ class Radio :
                 if Val:
                     self.backend.annu.find (rid,aid).set_state (valeur)
             elif droits == 'READ':
-                 add = False
+                add = False
                 if not self.backend.annu.find (rid).check_eqp (sid):
                     add = True
                     val = None

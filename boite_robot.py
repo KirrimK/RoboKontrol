@@ -486,13 +486,12 @@ class BoiteRobot(QWidget):
             # Calcul du ping
             last_update = equipement.last_update
             ping = abs(time.time() - last_update)
-            print(equipement.name, value, ping)
             if equipement.value is not None:
                 # Emission de la nouvelle valeur de l'équipement
                 equipement.value_changed_signal.emit(value)
             # Emission du nouveau ping de l'équipement
             equipement.ping_changed_signal.emit(ping)
-            print ("Valeur du LCD : {}".format(equipement.lcdNumber_equipement.value()))
+            
 
         # self.layout_box_actuators.update()
 
