@@ -174,7 +174,7 @@ class Backend:
             if pos[2] is None:
                 self.radio.send_cmd (rd.POS_CMD.format (robot_name, pos[0], pos[1]))
             else:
-                self.radio.send_cmd (rd.POS_ORIENT_CMD.format (robot_name, pos[0], pos[1], pos[2]))
+                self.radio.send_cmd (rd.POS_ORIENT_CMD.format (robot_name, pos[0], pos[1], pos[2]*3.141592654/180))
 
     def sendeqpcmd(self, robot_name, eqp_name, state):
         """Envoie une commande d'état à un équipement (qui recoit des commandes)

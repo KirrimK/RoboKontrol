@@ -114,7 +114,7 @@ class Radio :
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
-            self.backend.annu.find (rid).set_pos (float (x), float(y), float(theta))
+            self.backend.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
             
                 
     def on_actudecl (self, sender, rid, aid, minV, maxV, step = 1, unit = None):

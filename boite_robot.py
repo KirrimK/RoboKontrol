@@ -494,6 +494,10 @@ class BoiteRobot(QWidget):
 
         # self.layout_box_actuators.update()
 
+        #Force le changement d'affichage des boites d'actionneurs et de capteurs.
+        self.groupBox_actuators.repaint ()
+        self.groupBox_sensors.repaint ()
+
     @pyqtSlot()
     def update_boite_robot(self):
         """ Initialise la mise à jour de la position et des équipements du robot de la boite robot """
