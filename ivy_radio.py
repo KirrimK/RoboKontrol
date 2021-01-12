@@ -136,9 +136,6 @@ class Radio :
             _droits (str) : Determine ce que fait l'equipement
             _ unit (str) : Unité de la valeur."""
         if self.backend is not None:
-            if not self.backend.annu.check_robot (rid):
-                self.backend.track_robot (rid)
-                self.send_cmd (DESCR_CMD.format (rid))
             if droits == 'RW':
                 Val = False
                 Binaire = False
