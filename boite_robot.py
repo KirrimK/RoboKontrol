@@ -11,6 +11,7 @@ QPROGRESSBAR = "QProgressBar{background-color : grey;border : 1px; border: 2px s
 QLCD_STYLE = "QLCDNumber{background-color: grey;border: 2px solid rgb(113, 113, 113);border-width: 2px; " \
              "border-radius: 10px;  color: rgb(255, 255, 255)} "
 QPUSHBUTTON = ""
+QEMERGENCYBUTTON = "QPushButton{background-color : rgb(255, 0, 0)}"
 # QtWidgets size
 QLCD_SIZE1, QLCD_SIZE2 = QSize(60, 20), QSize(80, 20)
 # Alignment
@@ -105,6 +106,8 @@ class Equipement(QWidget):
         self.lcdNumber_ping_equipement.display(str(round(ping, 1)))
 #        print (self.lcdNumber_ping_equipement.value ())
         self.window.repaint ()
+        
+
 
         self.value_changed_signal.connect(lambda val: self.update_equipement(val))
 
@@ -239,10 +242,11 @@ class Equipement(QWidget):
             self.label_command.setText(str(0))
 
     @pyqtSlot()
-    def update_ping(self, ping):
+    def update_ping(self, last_update):
         # Calcul et mise à jour du denier message reçu
-
-        self.lcdNumber_ping_equipement.display(str(round(ping, 1)))
+        self.timestamp = time.time()
+        self.ping = abs(self.timestamp - last_update)
+        self.lcdNumber_ping_equipement.display(str(round(self.ping, 1)))
 
     @pyqtSlot()
     def update_equipement(self, value):
@@ -259,7 +263,7 @@ class Equipement(QWidget):
         if self.kind == "DISCRET" and self.value is not None:
             self.doubleSpinBox_equipement.setValue(self.value)
             self.slider_equipement.setValue(self.value)
-            # print ('Updated to {}'.format(self.slider_equipement.value()))
+            print ('Updated to {}'.format(self.slider_equipement.value()))
 
         if self.kind == "MULTIPLE":
             pass
@@ -316,6 +320,7 @@ class BoiteRobot(QWidget):
         self.layout_last_command = QHBoxLayout()
         self.label_positionCommand = QLabel()
         self.QLineEdit_positionCommand = QLineEdit()
+        self.emergencyButton = QPushButton ()
 
         # Liste des équipements attachés au robot
         self.current_equipement_list = []
@@ -346,7 +351,13 @@ class BoiteRobot(QWidget):
         self.button_delete.setStyleSheet(QPUSHBUTTON)
         self.button_delete.setText("Oublier")
         self.button_delete.clicked.connect(lambda: self.remove_box_robot())
+
+        self.emergencyButton.setText ("Arrêt d'urgence")
+        self.emergencyButton.setStyleSheet (QEMERGENCYBUTTON)
+        self.emergencyButton.clicked.connect (lambda : self.backend.emergency_stop_robot (self.rid))
+        
         self.layout_name_delete.addWidget(self.button_delete)
+        self.layout_name_delete.addWidget(self.emergencyButton)
         self.layout_box_robot.addLayout(self.layout_name_delete)
 
         # Configuration de l'affichage des coordonnées"
@@ -474,11 +485,13 @@ class BoiteRobot(QWidget):
 
         # Change les capteurs en actionneurs si néccessaire.
         for name in self.current_sensors_list:
-            equipement = equipements[name]
-            if equipement.variety == "Actionneur":
+            eqpment = equipements[name]
+            if eqpment.variety == "ACTIONNEUR":
                 self.current_actuators_list.append(name)
+                eqpment.add_equipement ()
                 self.current_sensors_list.pop(self.current_sensors_list.index(name))
                 sensor = self.current_equipement_dic[name]
+                sensor.remove_equipement ()
 
         # Met à jour la liste et le dictionnaire des capteurs présents
         self.current_equipement_list = equipements_list
