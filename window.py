@@ -243,10 +243,8 @@ def show_help():
     """Ouvre une pop_up (QMessageBox) Aide avec la contenu du fichier aide.txt"""
     aide = QMessageBox()
     aide.setWindowTitle("Aide")
-    list_aide = []
     with open("aide.txt", encoding='utf-8') as file:
-        for line in file:
-            list_aide.append(line)
+        list_aide = file.readlines ()
     aide.setText("".join(list_aide))
     aide.exec_()
 
