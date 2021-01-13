@@ -1,6 +1,6 @@
-"""Module file_io.py - gestion de lecture et écriture dans les fichiers"""
+"""Module externals.py - gestion de lecture et écriture dans les fichiers + création de sous-process"""
 
-import os
+import os, subprocess, shutil, time
 import lxml.etree as ET
 
 MODULE_PATH = os.path.dirname(__file__)
@@ -56,3 +56,14 @@ def settings_to_file(path, settings):
     tree = ET.ElementTree(root)
     with open(path, "wb") as save:
         tree.write(save, pretty_print=True)
+
+def exec_simu(st_dict):
+    """Exécute un simulateur en parallèle"""
+    try:
+        if os.path.exists(st_dict["Chemin Simulateur"]):
+            if shutil.which("python3"):
+                subprocess.Popen(["python3", st_dict["Chemin Simulateur"], str(time.time())])
+            else:
+                subprocess.Popen(["python", st_dict["Chemin Simulateur"], str(time.time())])
+    except Exception as exc:
+        print(exc)
