@@ -1,6 +1,6 @@
 """Module carte.py - gestion de l'affichage sur la carte"""
 
-from math import sqrt
+from math import sqrt,atan,copysign
 import lxml.etree as ET
 
 from PyQt5 import QtWidgets #, QtGui
@@ -210,6 +210,12 @@ class MapView(QtWidgets.QWidget):
         """Quand la souris est bougée sur la fenêtre"""
         self.mouse_pos = event.localPos()
         self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
+        #☺if self.selected_robot is not None:
+          #  if events.button and Qt.LeftButton:
+           #     pos_cmd=[0,0,0]
+            #    pos_cmd[0]=pos_cmd[0]+copysign(incr,self.mouse_pos.x-self.mouse_posinit.x)#copysign renvoie incr avec le signe de la distance entre les position initiales et actuelles du curseur
+             #   pos_cmd[1]=pos_cmd[1]+copysign(incr,self.mouse_pos.y-self.mouse_posinit.y)
+              #  self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)
 
     def reverse_mouse_pos(self, qpoint):
         """Calcule la position de la souris relative à la carte"""
@@ -233,21 +239,9 @@ class MapView(QtWidgets.QWidget):
                          self.map_margin//resize_factor)*resize_factor
         return new_pos
     
-    #def DragEnterEvent (self,event):
-    #    """La souris est cliquée et le reste pour le drag"""
-    #    self.mouse_pos = event.localPos()
-    #    self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
-    #    if event.button() == Qt.LeftButton:
-    #        print("click gauche")
-    #        if self.selected_robot is not None:
-    #            DragMoveEvent()
-    #    elif event.button() == Qt.RightButton:
-    #        print("click droit")
-    #        self.selected_robot = None
-    #        for robot in self.parent.backend.annu.robots:
-    #            if self.distance(robot) < ROBOT_SIZE:
-    #                self.selected_robot = robot
     
+#def angle(dist_x,dist_y):
+    #return atan(dist_y/dist_x)
     #def DragMoveEvent(self,event):
     #    """commande du robot en drag and drop"""
     #    speed_cmd=0
@@ -256,4 +250,6 @@ class MapView(QtWidgets.QWidget):
     #    pos_cmd=[0,0,0]
     #    self.mouse_pos = event.localPos()
     #    self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
-    #    angle_cmd=                
+    #    angle_cmd= angle(self.relative_mpos.x-self.relative_entermpos.x,self.relative_mpos.y-self.relative_entermpos.y)
+    #
+                  
