@@ -232,3 +232,25 @@ class MapView(QtWidgets.QWidget):
             new_pos[1] = (int(-new_pos[1] + height + 2) -
                          self.map_margin//resize_factor)*resize_factor
         return new_pos
+    
+    def DragEnterEvent (self,event):
+        """La souris est cliquée et le reste pour le drag"""
+        self.mouse_pos = event.localPos()
+        self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
+        if event.button() == Qt.LeftButton:
+            print("click gauche")
+            if self.selected_robot is not None:
+                
+        elif event.button() == Qt.RightButton:
+            print("click droit")
+            self.selected_robot = None
+            for robot in self.parent.backend.annu.robots:
+                if self.distance(robot) < ROBOT_SIZE:
+                    self.selected_robot = robot
+    
+    def DragMoveEvent(self,event):
+        speed_cmd=0
+        #spd_cmd=DragStartPosition.manhattanLenght #renvoie une consigne de vitesse avec la distance entre la position actuelle du curseur et sa position de départ
+        pos_cmd=[0,0,0]
+                        
+        
