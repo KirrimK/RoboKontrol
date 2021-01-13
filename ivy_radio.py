@@ -30,8 +30,13 @@ KILL_CMD = "Shutdown {}"
 DESCR_CMD = "ActuatorsRequest {}"
 
 MSG = '(.*)'
+def temps (t, pt):
+    """Input : _timestamp (float) : donné par time ()
+                    _ premier_timestamp : date du premier timestamp de la session d'enregistrement
+        OutPut : str du temps en ms depuis le début de la session d'eregistrement"""
+    return str (int(1000 * (t-pt)))
 
-def temps (timestamp):
+def temps_deb (timestamp):
     """Input : t (float) : value given by time()
 
     Output : a formated string that gives a more explicit time than t
@@ -128,10 +133,13 @@ class Radio :
                 if path != "":
                     if path [-1] != "/":
                         path += "/"
-                with open (path+'messages.txt','a') as fichier :
-                    fichier.write ('Jour\t\tHeure\t\tExpediteur\t\tMessage\n\n')
-                    for ligne in self.msgs_buffer :
-                        fichier.write (temps (ligne[0])+'\t'+ligne[1]+'\t'+ligne[2]+'\n')
+                timestamp_deb = time()
+                with open ('{}messages{}.txt'.format (path, int (timestamp_deb)),'a') as fichier :
+                    fichier.write ('{}\nJour\t\tHeure\t\tExpediteur\t\tMessage\n\n'.format (timestamp_deb))
+                    for (i, ligne) in enumerate (self.msgs_buffer) :
+                        if i == 0:
+                            PremierTemps = ligne [0]
+                        fichier.write (temps (ligne[0], PremierTemps)+'\t'+ligne[1]+'\t'+ligne[2]+'\n')
             if del_buffers :
                 self.msgs_buffer = []
         if 'cmds' in args :
@@ -140,10 +148,13 @@ class Radio :
                 if path != "":
                     if path [-1] != "/":
                         path += "/"
-                with open (path+ 'commandes.txt','a') as fichier :
-                    fichier.write ('Jour\t\tHeure\t\tCommande\n\n')
+                tps = time ()
+                with open ('{}commandes{}.txt'.format (path, int(tps)),'a') as fichier :
+                    fichier.write ('{}\nJour\t\tHeure\t\tCommande\n\n'.format (temps_deb(tps)))
                     for ligne in self.cmds_buffer :
-                        fichier.write (temps (ligne[0])+'\t'+ligne[1]+'\n')
+                        if i == 0:
+                            PremierTemps = ligne [0]
+                        fichier.write (temps (ligne[0], PremierTemps)+'\t'+ligne[1]+'\n')
             if del_buffers :
                 self.cmds_buffer = []
      #REACTIONS AUX REGEXPS
