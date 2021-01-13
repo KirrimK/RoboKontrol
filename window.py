@@ -104,6 +104,7 @@ class Window(QMainWindow):
         self.button_record.setCheckable(True)
         self.layout_menu.addWidget(self.button_record)
         self.button_record.clicked.connect(self.record)
+        print(self.button_record.styleSheet())
 
         # Création du bouton play
         self.button_play.setMaximumSize(200, 16777215)
@@ -227,8 +228,9 @@ class Window(QMainWindow):
         if self.button_record.isChecked():
             self.button_record.setStyleSheet("background-color: red")
             self.backend.record("BMC")
+
         else:
-            self.button_record.setStyleSheet("background-color: grey")
+            self.button_record.setStyleSheet("background-color: lightGrey")
             self.backend.record("EMC")
 
     @pyqtSlot()
