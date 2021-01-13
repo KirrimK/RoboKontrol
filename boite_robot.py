@@ -340,7 +340,7 @@ class BoiteRobot(QWidget):
         self.layout_name_delete.addWidget(self.label_name)
         self.button_delete.setMaximumSize(150, 25)
         self.button_delete.setStyleSheet(QPUSHBUTTON)
-        self.button_delete.setText("Oublier")
+        self.button_delete.setText("Eteindre")
         self.button_delete.clicked.connect(lambda: self.remove_box_robot())
         self.layout_name_delete.addWidget(self.button_delete)
         self.layout_box_robot.addLayout(self.layout_name_delete)
