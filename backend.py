@@ -251,7 +251,7 @@ class Backend:
         eqp_unit = eqp.get_unit()
         return (eqp_type, eqp_state, eqp_last_updt, eqp_last_cmd, eqp_unit)
 
-    def record(self, flag):
+    def record(self, flag, path = None):
         """Permet de déclencher/arrêter l'enregistrement des messages depuis l'interface
 
         Entrées:
@@ -283,7 +283,7 @@ class Backend:
             delb = False
             if "D" in flag:
                 delb = True
-            self.radio.register_stop(save, delb, msgs, cmds)
+            self.radio.register_stop(save, delb, msgs, cmds, path)
 
     def record_state(self):
         """Revoie dans quelle mode d'enregistrement la radio se trouve
