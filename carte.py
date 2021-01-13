@@ -135,22 +135,6 @@ class MapView(QtWidgets.QWidget):
             new_size[1] = -(int(new_size[1])//resize_factor)
         return new_size, new_pos
 
-    def updt_key_binding(self, config_path):
-        """Mise à jour des raccourcis clavier
-
-        Entrée:
-            - config_path (str): le chemin du fichier xml de config des touches
-        """
-        self.key_binding = {}
-        try:
-            root = ET.parse(config_path).getroot()
-            self.UP_KEY = int(root.attrib.get('UP_KEY'))
-            self.UP_KEY = int(root.attrib.get('UP_KEY'))
-            self.UP_KEY = int(root.attrib.get('UP_KEY'))
-            self.UP_KEY = int(root.attrib.get('UP_KEY'))
-        except:
-            pass
-            
     def keyPressEvent(self, event):
         """Une touche du clavier est pressée"""
         #self.key_binding={}
@@ -170,10 +154,10 @@ class MapView(QtWidgets.QWidget):
             if event.text() == robot_down_key:
                 cmd_pos=[robot_pos[0], robot_pos[1] - incr, None]
             if event.text() == robot_left_key:
-                cmd_pos=[robot_pos[0], robot_pos[1] - incr, None]      
+                cmd_pos=[robot_pos[0], robot_pos[1] - incr, None]
             if event.text() == robot_right_key:
                 cmd_pos=[robot_pos[0], robot_pos[1] + incr, None]
-            self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)        
+            self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)
         else:
             pass
 
@@ -214,7 +198,7 @@ class MapView(QtWidgets.QWidget):
         """Quand la souris est bougée sur la fenêtre"""
         self.mouse_pos = event.localPos()
         self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
-        
+
         #☺if self.selected_robot is not None:
           #  if events.button and Qt.LeftButton:
            #     pos_cmd=[0,0,0]
@@ -243,8 +227,7 @@ class MapView(QtWidgets.QWidget):
             new_pos[1] = (int(-new_pos[1] + height + 2) -
                          self.map_margin//resize_factor)*resize_factor
         return new_pos
-    
-    
+
 #def angle(dist_x,dist_y):
     #return atan(dist_y/dist_x)
     #def DragMoveEvent(self,event):
@@ -257,4 +240,3 @@ class MapView(QtWidgets.QWidget):
     #    self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
     #    angle_cmd= angle(self.relative_mpos.x-self.relative_entermpos.x,self.relative_mpos.y-self.relative_entermpos.y)
     #
-                  

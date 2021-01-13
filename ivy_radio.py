@@ -1,6 +1,6 @@
 """Module ivy_radio.py - module de gestion des communications via Ivy-python"""
 
-from time import sleep, time, gmtime
+from time import time, gmtime
 from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
 from annuaire import Actionneur
 
@@ -24,31 +24,31 @@ DESCR_CMD = "ActuatorsRequest {}"
 
 MSG = '(.*)'
 
-def temps (t):
+def temps (timestamp):
     """Input : t (float) : value given by time()
 
     Output : a formated string that gives a more explicit time than t
 
-    /!\ Cette fonction est à l'heure d'hiver."""
-    i = gmtime(t+1*3600)
-    return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (i.tm_year, i.tm_mon, i.tm_mday,
-                                            i.tm_hour, i.tm_min, i.tm_sec) +'{:.3}'.format (t%1)[1:]
+    !!! Cette fonction est à l'heure d'hiver."""
+    itm = gmtime(timestamp+1*3600)
+    return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (itm.tm_year, itm.tm_mon,
+            itm.tm_mday, itm.tm_hour, itm.tm_min, itm.tm_sec) +'{:.3}'.format (timestamp%1)[1:]
 
 class Radio :
     """Classe de l'objet qui est connecté au channel Ivy
 
     Attributs :
     _ backend (backend.Backend) : objet faisant le lien entre l'annuaire et la radio
-    _ cmdsBuffer (list) : Stocke les commandes envoyées sous forme de tuple (timestamp, commande)
-    _ msgsBuffer (list) : Stocke tous les messages sous forme de tuple (timestamp, sender, message)
+    _ cmds_buffer (list) : Stocke les commandes envoyées sous forme de tuple (timestamp, commande)
+    _ msgs_buffer (list) : Stocke tous les messages sous forme de tuple (timestamp, sender, message)
     _ record_msgs (bool) : Condition d'enregistrement de tous les messages
     _ record_cmds (bool) : Condition d'enregistrement des commandes envoyées
     _ bus (str) : Utile pour faire tourner Ivy
     _ nom (str) : Stocke l'IVYAPPNAME"""
     def __init__ (self):
         self.backend = None
-        self.cmdsBuffer = []
-        self.msgsBuffer = []
+        self.cmds_buffer = []
+        self.msgs_buffer = []
         self.record_msgs = False
         self.record_cmds = False
         IvyInit (IVYAPPNAME,IVYAPPNAME+" is ready!")
@@ -73,11 +73,11 @@ class Radio :
 
     def on_msg (self, sender, message):
         """Input fait par IvyBindMsg ('(.*)')
-        Stocke les messages sous forme de tupple dans msgsBuffer
+        Stocke les messages sous forme de tupple dans msgs_buffer
         si le booléen self.record_msgs est True
         Vérifie si l'expéditeur est enregistré et l'enregistre si ce n'est pas fait."""
         if self.record_msgs :
-            self.msgsBuffer.append ((time(),str(sender), message))
+            self.msgs_buffer.append ((time(),str(sender), message))
 
     def register_stop (self, save = True, del_buffers = True, *args):
         """Arrête un enregistrement, supprime optionellemnt le tampon,
@@ -96,10 +96,10 @@ class Radio :
                 #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
                 with open (path,'a') as fichier :
                     fichier.write ('Jour\t\tHeure\t\tExpediteur\t\tMessage\n\n')
-                    for ligne in self.msgsBuffer :
+                    for ligne in self.msgs_buffer :
                         fichier.write (temps (ligne[0])+'\t'+ligne[1]+'\t'+ligne[2]+'\n')
             if del_buffers :
-                self.msgsBuffer = []
+                self.msgs_buffer = []
         if 'cmds' in args :
             self.record_cmds = False
             if save :
@@ -107,10 +107,10 @@ class Radio :
                 #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
                 with open (path,'a') as fichier :
                     fichier.write ('Jour\t\tHeure\t\tCommande\n\n')
-                    for ligne in self.cmdsBuffer :
+                    for ligne in self.cmds_buffer :
                         fichier.write (temps (ligne[0])+'\t'+ligne[1]+'\n')
             if del_buffers :
-                self.cmdsBuffer = []
+                self.cmds_buffer = []
      #REACTIONS AUX REGEXPS
 
     def on_posreg (self, sender, rid, x, y, theta):
@@ -122,7 +122,7 @@ class Radio :
                 self.send_cmd (DESCR_CMD.format (rid))
             self.backend.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
 
-    def on_actudecl (self, sender, rid, aid, minV, maxV, step, droits, unit = None):
+    def on_actudecl (self, sender, rid, aid, minv, maxv, step, droits, unit = None):
         """Fonction appelée automatiquement par IvyBind. Ajoute l'actionnneur aid sur le robot rid.
         Si le robot rid n'est pas connu, il est ajouté.
         Si aid est le nom d'un capteur déjà présent sur le robot, la valeur est gardée.
@@ -137,19 +137,19 @@ class Radio :
             _ unit (str) : Unité de la valeur."""
         if self.backend is not None:
             if droits == 'RW':
-                Val = False
-                Binaire = False
-                if float (minV) + float (step) >= float (maxV) :
-                    Binaire = True
+                val = False
+                binaire = False
+                if float (minv) + float (step) >= float (maxv) :
+                    binaire = True
                 if self.backend.annu.find (rid,aid) is not None :
-                    Val = True
+                    val = True
                     valeur = self.backend.annu.find (rid,aid).get_state () [0]
-                if Binaire :
+                if binaire :
                     self.backend.annu.find (rid).create_eqp (aid, "Binaire")
                 else :
                     self.backend.annu.find (rid).create_eqp (aid, "Actionneur",
-                                                            float(minV), float(maxV), float(step), unit)
-                if Val:
+                                                        float(minv), float(maxv), float(step), unit)
+                if val:
                     self.backend.annu.find (rid,aid).set_state (valeur)
             elif droits == 'READ':
                 add = False
@@ -160,7 +160,7 @@ class Radio :
                     add = True
                     val = self.backend.annu.find (rid, aid).get_state() [0]
                 if add:
-                    self.backend.annu.find (rid).create_eqp (aid, "Capteur", minV, maxV, step, unit)
+                    self.backend.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
                     self.backend.annu.find (rid, aid).set_state (val)
 
 
@@ -176,7 +176,7 @@ class Radio :
             _ valeur (str) : Valeur transmise par le capteur."""
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
-                self.backend.track_robot (rid)                
+                self.backend.track_robot (rid)
                 self.send_cmd (DESCR_CMD.format (rid))
             if not self.backend.annu.find (rid).check_eqp (sid):
                 self.backend.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
@@ -186,9 +186,9 @@ class Radio :
         """Envoie du texte vers le bus Ivy et le stocke optionnellement sur les tampons
         Input : _ cmd (str) : Le message à envoyer"""
         if self.record_cmds :
-            self.cmdsBuffer.append ((time(),cmd))
+            self.cmds_buffer.append ((time(),cmd))
         if self.record_msgs :
-            self.msgsBuffer.append ((time(),'Commande de l\'interface',cmd))
+            self.msgs_buffer.append ((time(),'Commande de l\'interface',cmd))
         IvySendMsg (cmd)
 
 
