@@ -23,7 +23,7 @@ QT_CENTER, QT_RIGHT, QT_LEFT, QT_TOP = Qt.AlignCenter, Qt.AlignRight, Qt.AlignLe
 class Equipement(QWidget):
     """ Définit l'affichage d'un équipement attaché à un robot
         Arguments (cf annuaire.py):
-            - variety (str): actionneur(envoie des commandes et reçoit des messages) ou capteur (reçoit des messages)
+            - variety (str): actionneur(envoie des commandes et reçoit des messages: "R&W") ou capteur (reçoit des messages: "R")
             - kind (str): définit le type d'affichage (QtWidget) de l'équipement (discret, binaire,
                         multiple,complexe, led, valeur, bar)
             - parent_layout (QLayout): layout dans lequel sera ajouté l'affichage de l'équipement
@@ -183,7 +183,7 @@ class Equipement(QWidget):
     def add_equipement(self):
         """ Ajoute l'équipement dans la bon layout parent selon qu'il est actionneur ou capteur"""
 
-        if self.variety == "ACTIONNEUR":
+        if self.variety == "R&W":
             self.parent_layout.addItem(self.spacerItem_equipement)
             self.label_command.setText("None")
             self.label_command.setFixedSize(75, 30)
@@ -191,7 +191,7 @@ class Equipement(QWidget):
             self.label_last_command.setText("Dern. Cmd:")
             self.gridLayout_equipement.addWidget(self.label_last_command, 1, 0, 1, 1, QT_LEFT)
 
-        if self.variety == "CAPTEUR":
+        if self.variety == "R":
             self.parent_layout.addItem(self.spacerItem_equipement)
 
         # Ajoute l'affichage de l'équipement dans le parent layout
@@ -350,7 +350,7 @@ class BoiteRobot(QWidget):
         self.layout_name_delete.addWidget(self.label_name)
         self.button_delete.setMaximumSize(150, 25)
         self.button_delete.setStyleSheet(QPUSHBUTTON)
-        self.button_delete.setText("Oublier")
+        self.button_delete.setText("Eteindre")
 
         self.emergencyButton.setText("Arrêt d'urgence")
         self.emergencyButton.setStyleSheet(QEMERGENCYBUTTON)
@@ -380,8 +380,8 @@ class BoiteRobot(QWidget):
         self.label_positionCommand.setText("Dern. PosCmd:")
         self.layout_last_command.addWidget(self.label_positionCommand)
         self.QLineEdit_positionCommand = QLineEdit()
-        self.QLineEdit_positionCommand.setText("None")
-        self.QLineEdit_positionCommand.setInputMask("nnnn : nnnn : nnn")
+        self.QLineEdit_positionCommand.setText("1500 : 1000: 000")
+        self.QLineEdit_positionCommand.setInputMask("0000 : 0000 : 000")
         self.QLineEdit_positionCommand.setFixedSize(130, 30)
         self.QLineEdit_positionCommand.editingFinished.connect(self.onEditingFinished)
         self.layout_last_command.addWidget(self.QLineEdit_positionCommand)
@@ -446,11 +446,11 @@ class BoiteRobot(QWidget):
 
             if eqp_type == annuaire.Actionneur:
                 equipements[eqp_name] = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update,
-                                                   "ACTIONNEUR",
+                                                   "R&W",
                                                    "DISCRET", self.layout_box_actuators, self.rid, self.main_window)
 
             if eqp_type == annuaire.Binaire:
-                equipements[eqp_name] = Equipement(eqp_name, value, 0, 1, 1, None, last_update, "ACTIONNEUR", "BINAIRE",
+                equipements[eqp_name] = Equipement(eqp_name, value, 0, 1, 1, None, last_update, "R&W", "BINAIRE",
                                                    self.layout_box_actuators, self.rid, self.main_window)
 
             if eqp_type == annuaire.Capteur:
@@ -460,7 +460,7 @@ class BoiteRobot(QWidget):
                 else:
                     kind = "BAR"
                 equipements[eqp_name] = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update,
-                                                   "CAPTEUR", kind, self.layout_box_sensors, self.rid, self.main_window)
+                                                   "R", kind, self.layout_box_sensors, self.rid, self.main_window)
 
 
         return equipements
@@ -488,7 +488,7 @@ class BoiteRobot(QWidget):
         # Change les capteurs en actionneurs si néccessaire.
         for name in self.current_sensors_list:
             eqpment = equipements[name]
-            if eqpment.variety == "ACTIONNEUR":
+            if eqpment.variety == "R&W":
                 self.current_actuators_list.append(name)
                 eqpment.add_equipement ()
                 self.current_sensors_list.pop(self.current_sensors_list.index(name))
@@ -512,10 +512,11 @@ class BoiteRobot(QWidget):
             # Emission du nouveau ping de l'équipement
             equipement.ping_changed_signal.emit(ping)
 
-
-            if equipement.variety == "ACTIONNEUR":
+            # Ajoute le nomde l'actionneur dans la liste des actionneurs si l'équipement est un actionneur
+            if equipement.variety == "R&W":
                 self.current_actuators_list.append(equipement.name)
-            if equipement.variety == "CAPTEUR":
+            # Ajoute le nom du capteur dans la liste des capteurs si l'équipement est un capteur
+            if equipement.variety == "R":
                 self.current_sensors_list.append(equipement.name)
 
         # Cache la boite Capteurs si jamais aucun capteur n'est attaché au robot
