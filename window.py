@@ -1,6 +1,6 @@
 """Module ui_window.py - Crée la fenêtre comportant l'inspecteur, la carte et la zone de menu"""
 
-import os, sys, subprocess, time, shutil
+import sys
 from carte import MapView
 import externals
 import boite_robot

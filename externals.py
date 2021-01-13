@@ -1,6 +1,10 @@
-"""Module externals.py - gestion de lecture et écriture dans les fichiers + création de sous-process"""
+"""Module externals.py - gestion de lecture et écriture dans les fichiers
+    + création de sous-process"""
 
-import os, subprocess, shutil, time
+import os
+import subprocess
+import shutil
+import time
 import lxml.etree as ET
 
 MODULE_PATH = os.path.dirname(__file__)
