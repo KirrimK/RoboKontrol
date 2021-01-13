@@ -199,12 +199,12 @@ class MapView(QtWidgets.QWidget):
         self.mouse_pos = event.localPos()
         self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
 
-        #☺if self.selected_robot is not None:
-          #  if events.button and Qt.LeftButton:
-           #     pos_cmd=[0,0,0]
-            #    pos_cmd[0]=pos_cmd[0]+(self.relative_mpos[0]-self.relative_init_mpos[0])
-             #   pos_cmd[1]=pos_cmd[1]+self.relative.mpos[1]-self.relative_init_mpos[1]
-              #  self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)
+        if self.selected_robot is not None:
+            if events.button and Qt.LeftButton:
+                pos_cmd=[0,0,0]
+                pos_cmd[0]=pos_cmd[0]+(self.relative_mpos[0]-self.relative_init_mpos[0])
+                pos_cmd[1]=pos_cmd[1]+self.relative.mpos[1]-self.relative_init_mpos[1]
+                self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)
 
     def reverse_mouse_pos(self, qpoint):
         """Calcule la position de la souris relative à la carte"""
