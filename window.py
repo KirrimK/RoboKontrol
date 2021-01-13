@@ -119,11 +119,13 @@ class Window(QMainWindow):
         # Création du bouton arrêt
         self.button_stop.setMaximumSize(200, 16777215)
         self.button_stop.setText("Stop")
+        self.button_stop.clicked.connect (lambda : self.onStopRecordButton ())
         self.layout_menu.addWidget(self.button_stop)
 
         # Création du bouton sauvegarder
         self.button_save.setMaximumSize(200, 16777215)
         self.button_save.setText("Save")
+        self.button_save.clicked.connect (lambda : self.onSaveButton ())
         self.layout_menu.addWidget(self.button_save)
 
         self.layout_menu.addItem(self.spacer_item)
@@ -229,10 +231,21 @@ class Window(QMainWindow):
             self.button_record.setStyleSheet("background-color: red")
             self.backend.record("BMC")
 
-        else:
-            self.button_record.setStyleSheet("background-color: lightGrey")
-            self.backend.record("EMC")
+    @pyqtSlot()
+    def onStopRecordButton (self) :
+        if self.button_record.isChecked():
+            self.button_record.setStyleSheet("background-color: lightgrey")
+            self.backend.record("EMCD")
+            self.button_record.setChecked(False)
 
+    @pyqtSlot()
+    def onSaveButton (self) :
+        path = ''
+        if self.button_record.isChecked():
+            self.button_record.setStyleSheet("background-color: lightgrey")
+            self.backend.record("EMCSD", path)
+            self.button_record.setChecked(False)
+            
     @pyqtSlot()
     def update_window(self):
         """ Initialise la mise à jour de la fenêtre"""
