@@ -249,7 +249,7 @@ class MapView(QtWidgets.QWidget):
                     self.selected_robot = robot
     
     def DragMoveEvent(self,event):
-        """commande du robot en drag and drop"""
+        commande du robot en drag and drop
         speed_cmd=0
         angle_cmd=0
         #spd_cmd=DragStartPosition.manhattanLenght #renvoie une consigne de vitesse avec la distance entre la position actuelle du curseur et sa position de départ
