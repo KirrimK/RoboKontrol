@@ -4,7 +4,6 @@
 import os
 import subprocess
 import shutil
-import time
 import random
 import lxml.etree as ET
 
