@@ -3,7 +3,7 @@
 #TODO: créer settings par défaut, et settings générés localement pour chaque ordinateur,
 # avec vérification de nouveaux paramètres
 
-import os, sys, subprocess, time
+import os, sys, subprocess, time, shutil
 from carte import MapView
 import lxml.etree as ET
 import boite_robot
@@ -239,6 +239,9 @@ class Window(QMainWindow):
         """Exécute un simulateur en parallèle"""
         try:
             if os.path.exists(self.settings_dict["Chemin Simulateur"]):
+                if shutil.which("python3"):
+                    subprocess.Popen(["python3", self.settings_dict["Chemin Simulateur"], str(time.time())])
+                else:
                 subprocess.Popen(["python", self.settings_dict["Chemin Simulateur"], str(time.time())])
         except Exception as exc:
             print(exc)
