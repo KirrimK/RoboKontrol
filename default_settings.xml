@@ -5,6 +5,9 @@
   <setting nom="Chemin Simulateur">
     <field></field>
   </setting>
+  <setting nom="Chemin de Sauvegarde">
+    <field></field>
+  </setting>
   <setting nom="UP_KEY">
     <field>z</field>
   </setting>

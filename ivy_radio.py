@@ -87,12 +87,13 @@ class Radio :
             _ del_buffers (bool) : condition d'effacement du tampon (True par défaut)
             _ args : autres arguments entrés ('all', 'msgs' et/ou 'cmds' (strings))
                 considérés comme un tuple"""
+        path = args [-1]
         if 'all' in args :
             args += ('msgs','cmds')
         if 'msgs' in args :
             self.record_msgs = False
             if save :
-                path = 'messages.txt'
+                path += 'messages.txt'
                 #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
                 with open (path,'a') as fichier :
                     fichier.write ('Jour\t\tHeure\t\tExpediteur\t\tMessage\n\n')
@@ -103,7 +104,7 @@ class Radio :
         if 'cmds' in args :
             self.record_cmds = False
             if save :
-                path = 'commandes.txt'
+                path += 'commandes.txt'
                 #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
                 with open (path,'a') as fichier :
                     fichier.write ('Jour\t\tHeure\t\tCommande\n\n')
