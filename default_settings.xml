@@ -17,4 +17,7 @@
   <setting nom="RIGHT_KEY">
     <field>d</field>
   </setting>
+  <setting nom="Clic Droit Tablette">
+    <field>NON</field>
+  </setting>
 </settings>
