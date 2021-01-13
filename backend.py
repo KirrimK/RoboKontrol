@@ -1,9 +1,9 @@
 """Module backend.py - Gestion jointe de l'annuaire et de la communication par ivy"""
 
+import sys
 from time import sleep, time
 import annuaire
 import ivy_radio as rd
-import sys
 
 class Backend:
     """Un objet faisant le lien entre un Annuaire (module annuaire)
@@ -174,7 +174,8 @@ class Backend:
             if pos[2] is None:
                 self.radio.send_cmd (rd.POS_CMD.format (robot_name, pos[0], pos[1]))
             else:
-                self.radio.send_cmd (rd.POS_ORIENT_CMD.format (robot_name, pos[0], pos[1], pos[2]*3.141592654/180))
+                self.radio.send_cmd (rd.POS_ORIENT_CMD.format (robot_name, pos[0],
+                                                                pos[1], pos[2]*3.141592654/180))
 
     def sendeqpcmd(self, robot_name, eqp_name, state):
         """Envoie une commande d'état à un équipement (qui recoit des commandes)
@@ -236,7 +237,7 @@ class Backend:
         eqp_type = eqp.get_type()
         eqp_state = eqp.get_state()
         eqp_last_updt = eqp.get_last_updt()
-        if eqp_type == annuaire.Actionneur or eqp_type == annuaire.Binaire:
+        if eqp_type in (annuaire.Actionneur, annuaire.Binaire):
             eqp_last_cmd = eqp.get_last_cmd()
         else:
             eqp_last_cmd = None
