@@ -240,7 +240,7 @@ class MapView(QtWidgets.QWidget):
         if event.button() == Qt.LeftButton:
             print("click gauche")
             if self.selected_robot is not None:
-                
+                DragMoveEvent()
         elif event.button() == Qt.RightButton:
             print("click droit")
             self.selected_robot = None
@@ -249,8 +249,12 @@ class MapView(QtWidgets.QWidget):
                     self.selected_robot = robot
     
     def DragMoveEvent(self,event):
+        """commande du robot en drag and drop"""
         speed_cmd=0
+        angle_cmd=0
         #spd_cmd=DragStartPosition.manhattanLenght #renvoie une consigne de vitesse avec la distance entre la position actuelle du curseur et sa position de départ
         pos_cmd=[0,0,0]
-                        
+        self.mouse_pos = event.localPos()
+        self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
+        angle_cmd=                
         
