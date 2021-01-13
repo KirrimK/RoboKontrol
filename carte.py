@@ -211,7 +211,7 @@ class MapView(QtWidgets.QWidget):
         self.mouse_pos = event.localPos()
         self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
 
-    """def reverse_mouse_pos(self, qpoint):
+    def reverse_mouse_pos(self, qpoint):
         """Calcule la position de la souris relative à la carte"""
         qpoint_x = qpoint.x()
         qpoint_y = qpoint.y()
@@ -233,7 +233,7 @@ class MapView(QtWidgets.QWidget):
                          self.map_margin//resize_factor)*resize_factor
         return new_pos
     
-    def DragEnterEvent (self,event):
+    """def DragEnterEvent (self,event):
         """La souris est cliquée et le reste pour le drag"""
         self.mouse_pos = event.localPos()
         self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
