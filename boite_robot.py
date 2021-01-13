@@ -103,7 +103,7 @@ class Equipement(QWidget):
 
     def onPingChangedSignal (self,ping):
         self.lcdNumber_ping_equipement.display(round(ping, 1))
-        print (self.lcdNumber_ping_equipement.value ())
+#        print (self.lcdNumber_ping_equipement.value ())
         self.window.repaint ()
         
 
@@ -114,9 +114,7 @@ class Equipement(QWidget):
         self.gridLayout_equipement.setAlignment(QT_TOP)
 
         self.label_name_equipement.setMaximumSize(100, 25)
-
         if self.unite == "None" or self.unite is None:
-
             self.label_name_equipement.setText(self.name)
         else:
             self.label_name_equipement.setText('{0} ({1}):'.format(self.name, self.unite))
@@ -347,7 +345,7 @@ class BoiteRobot(QWidget):
         self.layout_name_delete.addWidget(self.label_name)
         self.button_delete.setMaximumSize(150, 25)
         self.button_delete.setStyleSheet(QPUSHBUTTON)
-        self.button_delete.setText("Eteindre")
+        self.button_delete.setText("Oublier")
         self.button_delete.clicked.connect(lambda: self.remove_box_robot())
         self.layout_name_delete.addWidget(self.button_delete)
         self.layout_box_robot.addLayout(self.layout_name_delete)
