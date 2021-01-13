@@ -242,7 +242,7 @@ class Window(QMainWindow):
                 if shutil.which("python3"):
                     subprocess.Popen(["python3", self.settings_dict["Chemin Simulateur"], str(time.time())])
                 else:
-                subprocess.Popen(["python", self.settings_dict["Chemin Simulateur"], str(time.time())])
+                    subprocess.Popen(["python", self.settings_dict["Chemin Simulateur"], str(time.time())])
         except Exception as exc:
             print(exc)
 

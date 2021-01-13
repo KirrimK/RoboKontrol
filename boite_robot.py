@@ -99,7 +99,7 @@ class Equipement(QWidget):
         self.ui_setup_equipement()
 
         # Connexion du signal de pin du dernier message reçu màj avec le slot d'affichage du ping du dernier message
-        self.ping_changed_signal.connect(lambda ping: self.lcdNumber_ping_equipement.display(round(ping, 1)))
+        self.ping_changed_signal.connect(lambda ping: self.update_ping(ping))
 
         self.value_changed_signal.connect(lambda val: self.update_equipement(val))
 
@@ -236,11 +236,10 @@ class Equipement(QWidget):
             self.label_command.setText(str(0))
 
     @pyqtSlot()
-    def update_ping(self, last_update):
+    def update_ping(self, ping):
         # Calcul et mise à jour du denier message reçu
-        self.timestamp = time.time()
-        self.ping = abs(self.timestamp - last_update)
-        self.lcdNumber_ping_equipement.display(str(round(self.ping, 1)))
+
+        self.lcdNumber_ping_equipement.display(str(round(ping, 1)))
 
     @pyqtSlot()
     def update_equipement(self, value):
@@ -257,7 +256,7 @@ class Equipement(QWidget):
         if self.kind == "DISCRET" and self.value is not None:
             self.doubleSpinBox_equipement.setValue(self.value)
             self.slider_equipement.setValue(self.value)
-            print ('Updated to {}'.format(self.slider_equipement.value()))
+            # print ('Updated to {}'.format(self.slider_equipement.value()))
 
         if self.kind == "MULTIPLE":
             pass
