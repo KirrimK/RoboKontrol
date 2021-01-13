@@ -239,13 +239,4 @@ class MapView(QtWidgets.QWidget):
         return new_pos
 
 
-    #def DragMoveEvent(self,event):
-    #    """commande du robot en drag and drop"""
-    #    speed_cmd=0
-    #    angle_cmd=0
-    #    #spd_cmd=DragStartPosition.manhattanLenght #renvoie une consigne de vitesse avec la distance entre la position actuelle du curseur et sa position de départ
-    #    pos_cmd=[0,0,0]
-    #    self.mouse_pos = event.localPos()
-    #    self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
-    #    angle_cmd= angle(self.relative_mpos.x-self.relative_entermpos.x,self.relative_mpos.y-self.relative_entermpos.y)
-    #
+  
