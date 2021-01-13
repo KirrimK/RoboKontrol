@@ -113,7 +113,7 @@ class Equipement(QWidget):
 
         self.gridLayout_equipement.setAlignment(QT_TOP)
 
-        self.label_name_equipement.setMaximumSize(100, 25)
+        #self.label_name_equipement.setMaximumSize(100, 25)
         if self.unite == "None" or self.unite is None:
             self.label_name_equipement.setText(self.name)
         else:
@@ -139,7 +139,7 @@ class Equipement(QWidget):
             self.slider_equipement.setSingleStep(self.step)
             self.slider_equipement.valueChanged.connect(lambda: self.onvaluechanged_slider())
             self.layout_discret.addWidget(self.slider_equipement)
-            self.doubleSpinBox_equipement.setFixedSize(50, 30)
+            self.doubleSpinBox_equipement.setFixedSize(75, 30)
             self.doubleSpinBox_equipement.setMaximum(self.max_val)
             self.doubleSpinBox_equipement.setMinimum(self.min_val)
             self.doubleSpinBox_equipement.setSingleStep(self.step)
@@ -195,10 +195,12 @@ class Equipement(QWidget):
         # Ajoute l'affichage de l'équipement dans le parent layout
         self.parent_layout.addLayout(self.gridLayout_equipement)
 
-    def remove_equipement(self):
+    def remove_equipement(self):                            #todo: non testé
         """ Retire l'affichage de l'équipement"""
 
-        self.gridLayout_equipement.hide()
+        for i in reversed(range(self.gridLayout_equipement.count())):
+            self.gridLayout_equipement.itemAt(i).widget().setParent(None)
+
 
     @pyqtSlot()
     def open_led_menu(self):
@@ -300,7 +302,6 @@ class BoiteRobot(QWidget):
         self.groupBox_robot.setMaximumSize(400, 16777215)
         #self.groupBox_robot.setStyleSheet("QGroupBox { background-color: rgb(255, 255, 255); border: 1px solid grey; }")
         self.layout_box_robot = QVBoxLayout(self.groupBox_robot)
-
         # Création des widgets de la boite robot
         self.layout_name_delete = QHBoxLayout()
         self.label_name = QLabel()
@@ -321,9 +322,9 @@ class BoiteRobot(QWidget):
         self.current_equipement_list = []
         self.current_equipement_dic = {}
         self.current_actuators_list = []
-        self.current_actionneurs_dic = {}
+        #self.current_actuators_dic = {}
         self.current_sensors_list = []
-        self.current_capteurs_dic = {}
+        #self.current_sensors_dic = {}
 
         # Configuration des widgets de la boite robot
         self.ui_setup_boite_robot()
@@ -497,11 +498,27 @@ class BoiteRobot(QWidget):
             # Emission du nouveau ping de l'équipement
             equipement.ping_changed_signal.emit(ping)
 
-        # self.layout_box_actuators.update()
+
+            if equipement.variety == "ACTIONNEUR":
+                self.current_actuators_list.append(equipement.name)
+            if equipement.variety == "CAPTEUR":
+                self.current_sensors_list.append(equipement.name)
+
+        # Cache la boite Capteurs si jamais aucun capteur n'est attaché au robot
+        if not self.current_sensors_list:
+            self.groupBox_sensors.hide()
+        else:
+            self.groupBox_sensors.show()
+
+        # Cache la boite Actionneurs si jamais aucun actionneur n'est attaché au robot
+        if not self.current_actuators_list:
+            self.groupBox_actuators.hide()
+        else:
+            self.groupBox_actuators.show()
 
         #Force le changement d'affichage des boites d'actionneurs et de capteurs.
-        self.groupBox_actuators.repaint ()
-        self.groupBox_sensors.repaint ()
+        self.groupBox_actuators.repaint()
+        self.groupBox_sensors.repaint()
 
     @pyqtSlot()
     def update_boite_robot(self):
