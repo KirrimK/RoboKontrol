@@ -1,4 +1,2 @@
-$ cat .gitignore
-settings.xml
 messages.txt
 commands.txt
