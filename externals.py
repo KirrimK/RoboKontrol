@@ -63,7 +63,7 @@ def settings_to_file(path, settings):
 
 def exec_simu(st_dict):
     """Exécute un simulateur en parallèle"""
-    char_seq = [ chr(random.randint(65, 90)) for _ in range(0, 10)]
+    char_seq = [ chr(random.randint(65, 90)) for _ in range(0, 7)]
     rbt_name = "".join(char_seq)
     try:
         if os.path.exists(st_dict["Chemin Simulateur"]):

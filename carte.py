@@ -5,7 +5,7 @@ import lxml.etree as ET
 
 from PyQt5 import QtWidgets #, QtGui
 from PyQt5.QtCore import Qt, QTimer, QRect, QPoint
-from PyQt5.QtGui import QBrush, QColor, QPainter#, QPen
+from PyQt5.QtGui import QBrush, QColor, QPainter, QFont#, QPen
 
 ROBOT_COLOR = 'green'
 SELECT_COLOR = 'red'
@@ -74,6 +74,9 @@ class MapView(QtWidgets.QWidget):
             span_angle = 6 * 16
             painter.drawPie(outer_rect, start_angle, span_angle)
             painter.drawEllipse(robot_rect)
+            font = QFont()
+            font.setPointSize(8)
+            painter.setFont(font)
             painter.drawText(robot_rect, Qt.AlignCenter, robot)
         #paint mouse pos dans un coin
         height = self.geometry().height()
