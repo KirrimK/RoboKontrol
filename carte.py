@@ -208,7 +208,7 @@ class MapView(QtWidgets.QWidget):
         """Quand la souris est bougée sur la fenêtre"""
         self.mouse_pos = event.localPos()
         self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
-
+        """drag and drop """
         if self.selected_robot is not None:
             if event.button == Qt.LeftButton:
                 pos_cmd=[0,0,None]
