@@ -5,12 +5,14 @@ import lxml.etree as ET
 
 from PyQt5 import QtWidgets #, QtGui
 from PyQt5.QtCore import Qt, QTimer, QRect, QPoint
-from PyQt5.QtGui import QBrush, QColor, QPainter#, QPen
+from PyQt5.QtGui import QBrush, QColor, QPainter, QFont#, QPen
 
 ROBOT_COLOR = 'green'
-SELECT_COLOR = 'red'
+SELECT_COLOR = 'blue'
+STOPPED_COLOR = 'red'
 ROBOT_BRUSH = QBrush(QColor(ROBOT_COLOR), Qt.SolidPattern)
 SELECTED_RB_BRUSH = QBrush(QColor(SELECT_COLOR), Qt.SolidPattern)
+STOPPED_BRUSH = QBrush(QColor(STOPPED_COLOR), Qt.SolidPattern)
 ROBOT_SIZE = 200
 
 class MapView(QtWidgets.QWidget):
@@ -64,8 +66,13 @@ class MapView(QtWidgets.QWidget):
             mrbsize, mrbpos = self.calc_pos_size(robot_size, robot_pos)
             if self.selected_robot == robot:
                 painter.setBrush(SELECTED_RB_BRUSH)
+            elif bkd_robots[robot].isStopped :
+                painter.setBrush (STOPPED_BRUSH)
             else:
-                painter.setBrush(ROBOT_BRUSH)
+                if robot == 'C3PO' :
+                    painter.setBrush ( QBrush (QColor('gold'), Qt.SolidPattern))
+                else :
+                    painter.setBrush(ROBOT_BRUSH)
             pos_offset = [mrbpos[0] - mrbsize[0]/2, mrbpos[1] - mrbsize[1]/2]
             big_offset = [mrbpos[0] - mrbsize[0], mrbpos[1] - mrbsize[1]]
             robot_rect = QRect(pos_offset[0], pos_offset[1], mrbsize[0], mrbsize[1])
@@ -74,6 +81,9 @@ class MapView(QtWidgets.QWidget):
             span_angle = 6 * 16
             painter.drawPie(outer_rect, start_angle, span_angle)
             painter.drawEllipse(robot_rect)
+            font = QFont()
+            font.setPointSize(8)
+            painter.setFont(font)
             painter.drawText(robot_rect, Qt.AlignCenter, robot)
         #paint mouse pos dans un coin
         height = self.geometry().height()
@@ -135,22 +145,6 @@ class MapView(QtWidgets.QWidget):
             new_size[1] = -(int(new_size[1])//resize_factor)
         return new_size, new_pos
 
-    def updt_key_binding(self, config_path):
-        """Mise à jour des raccourcis clavier
-
-        Entrée:
-            - config_path (str): le chemin du fichier xml de config des touches
-        """
-        self.key_binding = {}
-        try:
-            root = ET.parse(config_path).getroot()
-            self.UP_KEY = int(root.attrib.get('UP_KEY'))
-            self.UP_KEY = int(root.attrib.get('UP_KEY'))
-            self.UP_KEY = int(root.attrib.get('UP_KEY'))
-            self.UP_KEY = int(root.attrib.get('UP_KEY'))
-        except:
-            pass
-            
     def keyPressEvent(self, event):
         """Une touche du clavier est pressée"""
         #self.key_binding={}
@@ -170,10 +164,10 @@ class MapView(QtWidgets.QWidget):
             if event.text() == robot_down_key:
                 cmd_pos=[robot_pos[0], robot_pos[1] - incr, None]
             if event.text() == robot_left_key:
-                cmd_pos=[robot_pos[0], robot_pos[1] - incr, None]      
+                cmd_pos=[robot_pos[0], robot_pos[1] - incr, None]
             if event.text() == robot_right_key:
                 cmd_pos=[robot_pos[0], robot_pos[1] + incr, None]
-            self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)        
+            self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)
         else:
             pass
 
@@ -214,13 +208,13 @@ class MapView(QtWidgets.QWidget):
         """Quand la souris est bougée sur la fenêtre"""
         self.mouse_pos = event.localPos()
         self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
-        
-        #☺if self.selected_robot is not None:
-          #  if events.button and Qt.LeftButton:
-           #     pos_cmd=[0,0,0]
-            #    pos_cmd[0]=pos_cmd[0]+(self.relative_mpos[0]-self.relative_init_mpos[0])
-             #   pos_cmd[1]=pos_cmd[1]+self.relative.mpos[1]-self.relative_init_mpos[1]
-              #  self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)
+
+        if self.selected_robot is not None:
+            if event.button == Qt.LeftButton:
+                pos_cmd=[0,0,0]
+                pos_cmd[0]=pos_cmd[0]+(self.relative_mpos[0]-self.relative_init_mpos[0])
+                pos_cmd[1]=pos_cmd[1]+self.relative.mpos[1]-self.relative_init_mpos[1]
+                self.parent.backend.sendposcmd_robot(self.selected_robot, pos_cmd)
 
     def reverse_mouse_pos(self, qpoint):
         """Calcule la position de la souris relative à la carte"""
@@ -243,8 +237,7 @@ class MapView(QtWidgets.QWidget):
             new_pos[1] = (int(-new_pos[1] + height + 2) -
                          self.map_margin//resize_factor)*resize_factor
         return new_pos
-    
-    
+
 #def angle(dist_x,dist_y):
     #return atan(dist_y/dist_x)
     #def DragMoveEvent(self,event):
@@ -257,4 +250,3 @@ class MapView(QtWidgets.QWidget):
     #    self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
     #    angle_cmd= angle(self.relative_mpos.x-self.relative_entermpos.x,self.relative_mpos.y-self.relative_entermpos.y)
     #
-                  
