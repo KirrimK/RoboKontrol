@@ -104,6 +104,7 @@ class Window(QMainWindow):
         self.button_record.setCheckable(True)
         self.layout_menu.addWidget(self.button_record)
         self.button_record.clicked.connect(self.record)
+        print(self.button_record.styleSheet())
 
         # Création du bouton play
         self.button_play.setMaximumSize(200, 16777215)
@@ -233,7 +234,7 @@ class Window(QMainWindow):
     @pyqtSlot()
     def onStopRecordButton (self) :
         if self.button_record.isChecked():
-            self.button_record.setStyleSheet("background-color: grey")
+            self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCD")
             self.button_record.setChecked(False)
 
@@ -241,10 +242,10 @@ class Window(QMainWindow):
     def onSaveButton (self) :
         path = ''
         if self.button_record.isChecked():
-            self.button_record.setStyleSheet("background-color: grey")
+            self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCSD", path)
             self.button_record.setChecked(False)
-
+            
     @pyqtSlot()
     def update_window(self):
         """ Initialise la mise à jour de la fenêtre"""
