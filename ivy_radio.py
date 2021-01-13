@@ -153,15 +153,15 @@ class Radio :
                     self.backend.annu.find (rid,aid).set_state (valeur)
             elif droits == 'READ':
                 add = False
-                if not self.backend.annu.find (rid).check_eqp (sid):
+                if not self.backend.annu.find (rid).check_eqp (aid):
                     add = True
                     val = None
-                elif self.backend.annu.find (rid, sid).get_type () is not Actionneur :
+                elif self.backend.annu.find (rid, aid).get_type () is not Actionneur :
                     add = True
-                    val = self.backend.annu.find (rid, sid).get_state() [0]
+                    val = self.backend.annu.find (rid, aid).get_state() [0]
                 if add:
-                    self.backend.annu.find (rid).create_eqp (sid, "Capteur", minV, maxV, step, unit)
-                    self.backend.annu.find (rid, sid).set_state (val)
+                    self.backend.annu.find (rid).create_eqp (aid, "Capteur", minV, maxV, step, unit)
+                    self.backend.annu.find (rid, aid).set_state (val)
 
 
     def on_captreg (self, sender, rid, sid, valeur):

@@ -68,8 +68,8 @@ class MapView(QtWidgets.QWidget):
             big_offset = [mrbpos[0] - mrbsize[0], mrbpos[1] - mrbsize[1]]
             robot_rect = QRect(pos_offset[0], pos_offset[1], mrbsize[0], mrbsize[1])
             outer_rect = QRect(big_offset[0], big_offset[1], 2*mrbsize[0], 2*mrbsize[1])
-            start_angle = (robot_pos[2] - 1) * 16
-            span_angle = 2 * 16
+            start_angle = (robot_pos[2] - 3) * 16
+            span_angle = 6 * 16
             painter.drawPie(outer_rect, start_angle, span_angle)
             painter.drawEllipse(robot_rect)
             painter.drawText(robot_rect, Qt.AlignCenter, robot)
