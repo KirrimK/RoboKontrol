@@ -99,7 +99,14 @@ class Equipement(QWidget):
         self.ui_setup_equipement()
 
         # Connexion du signal de pin du dernier message reçu màj avec le slot d'affichage du ping du dernier message
-        self.ping_changed_signal.connect(lambda ping: self.lcdNumber_ping_equipement.display(round(ping, 1)))
+        self.ping_changed_signal.connect(self.onPingChangedSignal )
+
+    def onPingChangedSignal (self,ping):
+        self.lcdNumber_ping_equipement.display(round(ping, 1))
+        print (self.lcdNumber_ping_equipement.value ())
+        self.window.repaint ()
+        
+
 
     def ui_setup_equipement(self):
         """ Configure l'ensemble des widgets de l'équipement"""
