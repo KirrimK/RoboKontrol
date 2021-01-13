@@ -1,13 +1,16 @@
 """Module ivy_radio.py - module de gestion des communications via Ivy-python"""
-
+#TODO : Modifier fichier d'enregistrement (plusieurs + timestamps)
 from time import time, gmtime
 from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
 from annuaire import Actionneur
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt5.QtWidgets import QWidget
 
 IVYAPPNAME = 'Radio'
 
 	#Informations
 """Le premier groupe de capture est le nom du robot"""
+
 ACTU_DECL = 'ActuatorDecl (.+) (.+) (.+) (.+) (.+) (.+) (.*)'
 POS_REG = 'PosReport (.+) (.+) (.+) (.+)'
 CAPT_REG = 'ActuatorReport (.+) (.+) (.+)'
@@ -32,9 +35,23 @@ def temps (timestamp):
     !!! Cette fonction est à l'heure d'hiver."""
     itm = gmtime(timestamp+1*3600)
     return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (itm.tm_year, itm.tm_mon,
-            itm.tm_mday, itm.tm_hour, itm.tm_min, itm.tm_sec) +'{:.3}'.format (timestamp%1)[1:]
+            itm.tm_mday, itm.tm_hour, itm.tm_min, itm.tm_sec) +'{:.3}'.format (timestamp%1)[1:]    
+
+
+class WidgetRadio (QWidget):
+    PosRegSignal = pyqtSignal (list)
+    CaptRegSignal = pyqtSignal (list)
+    ActuDeclSignal = pyqtSignal (list)
+    def __init__ (self, radio):
+        super().__init__()
+        self.radio = radio
+        self.PosRegSignal.connect (lambda liste : self.radio.onPosRegSignal (liste))
+        self.CaptRegSignal.connect (lambda liste : self.radio.onCaptRegSignal (liste))
+        self.ActuDeclSignal.connect (lambda liste : self.radio.onActuDeclSignal (liste))
+        
 
 class Radio :
+
     """Classe de l'objet qui est connecté au channel Ivy
 
     Attributs :
@@ -47,6 +64,8 @@ class Radio :
     _ nom (str) : Stocke l'IVYAPPNAME"""
     def __init__ (self):
         self.backend = None
+        self.app = None
+        self.widget = None
         self.cmds_buffer = []
         self.msgs_buffer = []
         self.record_msgs = False
@@ -54,10 +73,19 @@ class Radio :
         IvyInit (IVYAPPNAME,IVYAPPNAME+" is ready!")
         self.bus = "127.255.255.255:2010"
         self.nom = IVYAPPNAME
+        
         IvyBindMsg (self.on_posreg, POS_REG)
+        
         IvyBindMsg (self.on_msg, MSG)
+        
         IvyBindMsg (self.on_captreg, CAPT_REG)
+        
         IvyBindMsg (self.on_actudecl, ACTU_DECL)
+
+    def launchQt (self):
+        self.widget = WidgetRadio (self)
+        
+        
 
     #ENREGISTREMENT
 
@@ -88,13 +116,14 @@ class Radio :
             _ args : autres arguments entrés ('all', 'msgs' et/ou 'cmds' (strings))
                 considérés comme un tuple"""
         path = args [-1]
-        if path [-1] != "/":
-            path += "/"
         if 'all' in args :
             args += ('msgs','cmds')
         if 'msgs' in args :
             self.record_msgs = False
             if save :
+                if path != "":
+                    if path [-1] != "/":
+                        path += "/"
                 with open (path+'messages.txt','a') as fichier :
                     fichier.write ('Jour\t\tHeure\t\tExpediteur\t\tMessage\n\n')
                     for ligne in self.msgs_buffer :
@@ -104,6 +133,9 @@ class Radio :
         if 'cmds' in args :
             self.record_cmds = False
             if save :
+                if path != "":
+                    if path [-1] != "/":
+                        path += "/"
                 with open (path+ 'commandes.txt','a') as fichier :
                     fichier.write ('Jour\t\tHeure\t\tCommande\n\n')
                     for ligne in self.cmds_buffer :
@@ -112,16 +144,24 @@ class Radio :
                 self.cmds_buffer = []
      #REACTIONS AUX REGEXPS
 
-    def on_posreg (self, sender, rid, x, y, theta):
+    def on_posreg (self, sender, *args):
+        self.widget.PosRegSignal.emit ([i for i in args])
+
+    def onPosRegSignal (self, liste ):
         """Input fait par IvyBindMsg
         Transmet les valeurs envoyées par le robot vers l'annuaire"""
+        rid, x, y, theta = liste [0], liste [1], liste [2], liste [3]
         if self.backend is not None:
             if not self.backend.annu.check_robot (rid):
                 self.backend.track_robot (rid)
                 self.send_cmd (DESCR_CMD.format (rid))
             self.backend.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
 
-    def on_actudecl (self, sender, rid, aid, minv, maxv, step, droits, unit = None):
+    def on_actudecl (self, sender, *args):
+        self.widget.ActuDeclSignal.emit ([i for i in args])
+        
+    def onActuDeclSignal (self, liste):
+        rid, aid, minv, maxv, step, droits, unit = liste [0], liste [1], liste [2], liste [3], liste [4], liste [5], liste [6]
         """Fonction appelée automatiquement par IvyBind. Ajoute l'actionnneur aid sur le robot rid.
         Si le robot rid n'est pas connu, il est ajouté.
         Si aid est le nom d'un capteur déjà présent sur le robot, la valeur est gardée.
@@ -163,7 +203,11 @@ class Radio :
                     self.backend.annu.find (rid, aid).set_state (val)
 
 
-    def on_captreg (self, sender, rid, sid, valeur):
+    def on_captreg (self, sender, *args):
+        self.widget.CaptRegSignal.emit ([i for i in args])
+        
+    def onCaptRegSignal (self, liste):
+        rid, sid, valeur = liste [0], liste [1], liste [2]
         """Fonction appelée automatiquement par IvyBind.
         Change la valeur du capteur sid sur le robot rid.
         Si aucun robot rid n'est connu, le robot est ajouté.
