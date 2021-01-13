@@ -8,9 +8,11 @@ from PyQt5.QtCore import Qt, QTimer, QRect, QPoint
 from PyQt5.QtGui import QBrush, QColor, QPainter, QFont#, QPen
 
 ROBOT_COLOR = 'green'
-SELECT_COLOR = 'red'
+SELECT_COLOR = 'blue'
+STOPPED_COLOR = 'red'
 ROBOT_BRUSH = QBrush(QColor(ROBOT_COLOR), Qt.SolidPattern)
 SELECTED_RB_BRUSH = QBrush(QColor(SELECT_COLOR), Qt.SolidPattern)
+STOPPED_BRUSH = QBrush(QColor(STOPPED_COLOR), Qt.SolidPattern)
 ROBOT_SIZE = 200
 
 class MapView(QtWidgets.QWidget):
@@ -64,8 +66,13 @@ class MapView(QtWidgets.QWidget):
             mrbsize, mrbpos = self.calc_pos_size(robot_size, robot_pos)
             if self.selected_robot == robot:
                 painter.setBrush(SELECTED_RB_BRUSH)
+            elif bkd_robots[robot].isStopped :
+                painter.setBrush (STOPPED_BRUSH)
             else:
-                painter.setBrush(ROBOT_BRUSH)
+                if robot == 'C3PO' :
+                    painter.setBrush ( QBrush (QColor('gold'), Qt.SolidPattern))
+                else :
+                    painter.setBrush(ROBOT_BRUSH)
             pos_offset = [mrbpos[0] - mrbsize[0]/2, mrbpos[1] - mrbsize[1]/2]
             big_offset = [mrbpos[0] - mrbsize[0], mrbpos[1] - mrbsize[1]]
             robot_rect = QRect(pos_offset[0], pos_offset[1], mrbsize[0], mrbsize[1])

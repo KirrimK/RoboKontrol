@@ -139,6 +139,9 @@ class Backend:
             _ rid (str) : nom du robot à stopper"""
         if self.radio_started:
             self.radio.send_cmd (rd.STOP_BUTTON_CMD.format (rid))
+        if self.annu.check_robot (rid):
+            self.annu.find (rid).isStopped = True
+        print ('Robot is stopped : {}'.format (self.annu.find (rid).isStopped))
 
     def stopandforget_robot(self, robot_name):
         """Permet d'arrêter le robot en question
@@ -160,35 +163,39 @@ class Backend:
         """
         self.annu.remove_robot(robot_name)
 
-    def sendposcmd_robot(self, robot_name, pos):
+    def sendposcmd_robot(self, rid, pos):
         """Envoie une commande de position au robot désigné
 
         Entrée:
-            - robot_name (str): nom du robot
+            - rid (str): nom du robot
             - pos (float, float, float): "vecteur" position de la destination du robot
                 - [0]: x
                 - [1]: y
                 - [2]: theta (si non spécifié, mettre à None)
         """
-        if self.annu.check_robot(robot_name) and self.radio_started:
+        if self.annu.check_robot(rid) and self.radio_started:
+            if  self.annu.find (rid).isStopped :
+                self.annu.find (rid).isStopped = False
             if pos[2] is None:
-                self.radio.send_cmd (rd.POS_CMD.format (robot_name, pos[0], pos[1]))
+                self.radio.send_cmd (rd.POS_CMD.format (rid, pos[0], pos[1]))
             else:
-                self.radio.send_cmd (rd.POS_ORIENT_CMD.format (robot_name, pos[0],
+                self.radio.send_cmd (rd.POS_ORIENT_CMD.format (rid, pos[0],
                                                                 pos[1], pos[2]*3.141592654/180))
 
-    def sendeqpcmd(self, robot_name, eqp_name, state):
+    def sendeqpcmd(self, rid, eqp_name, state):
         """Envoie une commande d'état à un équipement (qui recoit des commandes)
         connecté à un robot.
 
         Entrée:
-            - robot_name (str): nom du robot
+            - rid (str): nom du robot
             - eqp_name (str): nom de l'équipement
             - state (variable): l'état souhaité (se reférer au type d'equipement)
         """
-        if self.annu.find(robot_name) and self.annu.find(robot_name, eqp_name):
-            self.annu.find(robot_name, eqp_name).updt_cmd()
-            self.radio.send_cmd (rd.ACTUATOR_CMD.format (robot_name, eqp_name, state))
+        if self.annu.find(rid) and self.annu.find(rid, eqp_name):
+            if  self.annu.find (rid).isStopped :
+                self.annu.find (rid).isStopped = False
+            self.annu.find(rid, eqp_name).updt_cmd()
+            self.radio.send_cmd (rd.ACTUATOR_CMD.format (rid, eqp_name, state))
 
     def get_all_robots(self):
         """Retourne la liste de tous les noms des robots
