@@ -187,6 +187,7 @@ class Equipement(QWidget):
             self.parent_layout.addItem(self.spacerItem_equipement)
             self.label_command.setText("None")
             self.label_command.setFixedSize(75, 30)
+            self.label_command.setReadOnly(True)
             self.gridLayout_equipement.addWidget(self.label_command, 1, 1, 1, 1, QT_RIGHT)
             self.label_last_command.setText("Dern. Cmd:")
             self.gridLayout_equipement.addWidget(self.label_last_command, 1, 0, 1, 1, QT_LEFT)
@@ -350,7 +351,7 @@ class BoiteRobot(QWidget):
         self.layout_name_delete.addWidget(self.label_name)
         self.button_delete.setMaximumSize(150, 25)
         self.button_delete.setStyleSheet(QPUSHBUTTON)
-        self.button_delete.setText("Oublier")
+        self.button_delete.setText("Eteindre")
 
         self.emergencyButton.setText("Arrêt d'urgence")
         self.emergencyButton.setStyleSheet(QEMERGENCYBUTTON)
@@ -518,6 +519,8 @@ class BoiteRobot(QWidget):
             # Ajoute le nom du capteur dans la liste des capteurs si l'équipement est un capteur
             if equipement.variety == "R":
                 self.current_sensors_list.append(equipement.name)
+
+            print(equipement.name, value, ping)
 
         # Cache la boite Capteurs si jamais aucun capteur n'est attaché au robot
         if not self.current_sensors_list:
