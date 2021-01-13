@@ -1,5 +1,9 @@
 """Module ivy_radio.py - module de gestion des communications via Ivy-python"""
 #TODO : Modifier fichier d'enregistrement (plusieurs + timestamps)
+
+#TODO: remplacer par des signaux Qt et les connecter
+
+
 from time import time, gmtime
 from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
 from annuaire import Actionneur

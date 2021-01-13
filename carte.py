@@ -1,5 +1,7 @@
 """Module carte.py - gestion de l'affichage sur la carte"""
 
+#couleurs aleat pour distinguer robots
+
 from math import sqrt
 from time import time
 import lxml.etree as ET
