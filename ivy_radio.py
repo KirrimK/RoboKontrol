@@ -93,9 +93,7 @@ class Radio :
         if 'msgs' in args :
             self.record_msgs = False
             if save :
-                path += 'messages.txt'
-                #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
-                with open (path,'a') as fichier :
+                with open (path+'messages.txt','a') as fichier :
                     fichier.write ('Jour\t\tHeure\t\tExpediteur\t\tMessage\n\n')
                     for ligne in self.msgs_buffer :
                         fichier.write (temps (ligne[0])+'\t'+ligne[1]+'\t'+ligne[2]+'\n')
@@ -104,9 +102,7 @@ class Radio :
         if 'cmds' in args :
             self.record_cmds = False
             if save :
-                path += 'commandes.txt'
-                #à modifier avec un appel à une méthode qui demande le chemin à l'utilisateur
-                with open (path,'a') as fichier :
+                with open (path+ 'commandes.txt','a') as fichier :
                     fichier.write ('Jour\t\tHeure\t\tCommande\n\n')
                     for ligne in self.cmds_buffer :
                         fichier.write (temps (ligne[0])+'\t'+ligne[1]+'\n')
