@@ -65,29 +65,29 @@ class Equipement(QWidget):
 
         if self.kind == "BINAIRE":
             self.checkBox_equipement = QCheckBox()
-            self.label_command = QLabel()
+            self.label_command = QLineEdit()
             self.label_last_command = QLabel()
 
         if self.kind == "DISCRET":
             self.layout_discret = QHBoxLayout()
             self.slider_equipement = QSlider(Qt.Horizontal)
             self.doubleSpinBox_equipement = QDoubleSpinBox()
-            self.label_command = QLabel()
+            self.label_command = QLineEdit()
             self.label_last_command = QLabel()
 
         if self.kind == "MULTIPLE":
             self.comboBox_equipement = QComboBox()
-            self.label_command = QLabel()
+            self.label_command = QLineEdit()
             self.label_last_command = QLabel()
 
         if self.kind == "COMPLEXE":
             self.pushButton_equipement = QPushButton()
-            self.label_command = QLabel()
+            self.label_command = QLineEdit()
             self.label_last_command = QLabel()
 
         if self.kind == "LED":
             self.pushButton_led = QPushButton()
-            self.label_command = QLabel()
+            self.label_command = QLineEdit()
             self.label_last_command = QLabel()
 
         if self.kind == "VALEUR":
@@ -102,7 +102,7 @@ class Equipement(QWidget):
         # Connexion du signal de pin du dernier message reçu màj avec le slot d'affichage du ping du dernier message
         self.ping_changed_signal.connect(self.onPingChangedSignal)
 
-    def onPingChangedSignal (self,ping):
+    def onPingChangedSignal (self, ping):
         self.lcdNumber_ping_equipement.display(str(round(ping, 1)))
         #print (self.lcdNumber_ping_equipement.value ())
         self.window.repaint ()
@@ -122,11 +122,11 @@ class Equipement(QWidget):
         self.gridLayout_equipement.addWidget(self.label_name_equipement, 0, 0, 1, 1, QT_LEFT)
 
         self.label_message_equipement.setText("Dern. Msg (ms) : {}".format (round (self.ping,1)))
-        self.gridLayout_equipement.addWidget(self.label_message_equipement, 1, 0, 1, 1, QT_LEFT)
+        self.gridLayout_equipement.addWidget(self.label_message_equipement, 2, 0, 1, 1, QT_LEFT)
         self.lcdNumber_ping_equipement.setMaximumSize(QSize(75, 25))
         self.lcdNumber_ping_equipement.setStyleSheet(QLCD_STYLE)
         self.lcdNumber_ping_equipement.setFixedSize(QLCD_SIZE2)
-        self.gridLayout_equipement.addWidget(self.lcdNumber_ping_equipement, 1, 1, 1, 1, QT_RIGHT)
+        self.gridLayout_equipement.addWidget(self.lcdNumber_ping_equipement, 2, 1, 1, 1, QT_RIGHT)
 
         if self.kind == "BINAIRE":
             self.checkBox_equipement.setText("")
@@ -186,9 +186,10 @@ class Equipement(QWidget):
         if self.variety == "ACTIONNEUR":
             self.parent_layout.addItem(self.spacerItem_equipement)
             self.label_command.setText("None")
-            self.gridLayout_equipement.addWidget(self.label_command, 2, 1, 1, 1, QT_RIGHT)
+            self.label_command.setFixedSize(75, 30)
+            self.gridLayout_equipement.addWidget(self.label_command, 1, 1, 1, 1, QT_RIGHT)
             self.label_last_command.setText("Dern. Cmd:")
-            self.gridLayout_equipement.addWidget(self.label_last_command, 2, 0, 1, 1, QT_LEFT)
+            self.gridLayout_equipement.addWidget(self.label_last_command, 1, 0, 1, 1, QT_LEFT)
 
         if self.variety == "CAPTEUR":
             self.parent_layout.addItem(self.spacerItem_equipement)
@@ -198,10 +199,11 @@ class Equipement(QWidget):
 
     def remove_equipement(self):                            #todo: non testé
         """ Retire l'affichage de l'équipement"""
-
-        for i in reversed(range(self.gridLayout_equipement.count())):
-            self.gridLayout_equipement.itemAt(i).widget().setParent(None)
-
+        try:
+            for i in reversed(range(self.gridLayout_equipement.count())):
+                self.gridLayout_equipement.itemAt(i).widget().setParent(None)
+        except AttributeError:
+            pass
 
     @pyqtSlot()
     def open_led_menu(self):
@@ -378,8 +380,8 @@ class BoiteRobot(QWidget):
         self.label_positionCommand.setText("Dern. PosCmd:")
         self.layout_last_command.addWidget(self.label_positionCommand)
         self.QLineEdit_positionCommand = QLineEdit()
-        self.QLineEdit_positionCommand.setInputMask("0000 : 0000 : 000")
-        self.QLineEdit_positionCommand.setText("1500 : 1000 : 000")
+        self.QLineEdit_positionCommand.setText("None")
+        self.QLineEdit_positionCommand.setInputMask("nnnn : nnnn : nnn")
         self.QLineEdit_positionCommand.setFixedSize(130, 30)
         self.QLineEdit_positionCommand.editingFinished.connect(self.onEditingFinished)
         self.layout_last_command.addWidget(self.QLineEdit_positionCommand)
