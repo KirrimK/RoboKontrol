@@ -1,6 +1,6 @@
 """Module ui_window.py - Crée la fenêtre comportant l'inspecteur, la carte et la zone de menu"""
 
-import sys
+import os, sys, subprocess, time
 from carte import MapView
 import lxml.etree as ET
 import boite_robot
@@ -47,6 +47,7 @@ class Window(QMainWindow):
         self.button_stop = QPushButton()
         self.button_save = QPushButton()
         self.spacerItem = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.button_simu = QPushButton()
         self.button_settings = QPushButton()
         self.button_help = QPushButton()
         self.map_view = QGraphicsView()
@@ -123,6 +124,12 @@ class Window(QMainWindow):
 
         self.layout_menu.addItem(self.spacerItem)
 
+        # Création du bouton Simulateur
+
+        self.layout_menu.addWidget(self.button_simu)
+        self.button_simu.setText("Créer Simu")
+        self.button_simu.clicked.connect(self.exec_simu)
+
         # Création du bouton configuration
         self.button_settings.setText("Configuration")
         self.layout_menu.addWidget(self.button_settings)
@@ -151,6 +158,7 @@ class Window(QMainWindow):
     def act_settings(self):
         """Effectuer les actions liées aux paramètres"""
         self.map_view.updt_map_data(self.settings_dict["Fichier de Carte"])
+        
 
     def show_settings(self):
         """ Ouvre un popup (QDialog) Configuration
@@ -223,6 +231,14 @@ class Window(QMainWindow):
         new_robots = self.backend.get_all_robots()
         self.update_robots(new_robots)
         self.list_robot_changed_signal.emit(self.current_robots_list)
+    
+    def exec_simu(self):
+        """Exécute un simulateur en parallèle"""
+        try:
+            if os.path.exists(self.settings_dict["Chemin Simulateur"]):
+                subprocess.Popen(["python", self.settings_dict["Chemin Simulateur"], str(time.time())])
+        except Exception as exc:
+            print(exc)
 
 @pyqtSlot()
 def show_help():
