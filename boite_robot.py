@@ -100,7 +100,7 @@ class Equipement(QWidget):
         self.ui_setup_equipement()
 
         # Connexion du signal de pin du dernier message reçu màj avec le slot d'affichage du ping du dernier message
-        self.ping_changed_signal.connect(self.onPingChangedSignal )
+        self.ping_changed_signal.connect(self.onPingChangedSignal)
 
     def onPingChangedSignal (self,ping):
         self.lcdNumber_ping_equipement.display(str(round(ping, 1)))
@@ -118,7 +118,7 @@ class Equipement(QWidget):
         if self.unite == "None" or self.unite is None:
             self.label_name_equipement.setText(self.name)
         else:
-            self.label_name_equipement.setText('{0} ({1}):'.format(self.name, self.unite))
+            self.label_name_equipement.setText('{0} ({1})'.format(self.name, self.unite))
         self.gridLayout_equipement.addWidget(self.label_name_equipement, 0, 0, 1, 1, QT_LEFT)
 
         self.label_message_equipement.setText("Dern. Msg (ms) : {}".format (round (self.ping,1)))
@@ -130,7 +130,7 @@ class Equipement(QWidget):
 
         if self.kind == "BINAIRE":
             self.checkBox_equipement.setText("")
-            self.checkBox_equipement.stateChanged.connect(self.oncheckbox_toggled)
+            self.checkBox_equipement.stateChanged.connect(lambda: self.oncheckbox_toggled())
             self.gridLayout_equipement.addWidget(self.checkBox_equipement, 0, 1, 1, 1, QT_CENTER)
 
         if self.kind == "DISCRET":
@@ -138,13 +138,13 @@ class Equipement(QWidget):
             self.slider_equipement.setMinimum(self.min_val)
             self.slider_equipement.setMaximum(self.max_val)
             self.slider_equipement.setSingleStep(self.step)
-            self.slider_equipement.valueChanged.connect(self.onvaluechanged_slider)
+            self.slider_equipement.valueChanged.connect(lambda: self.onvaluechanged_slider())
             self.layout_discret.addWidget(self.slider_equipement)
             self.doubleSpinBox_equipement.setFixedSize(75, 30)
             self.doubleSpinBox_equipement.setMaximum(self.max_val)
             self.doubleSpinBox_equipement.setMinimum(self.min_val)
             self.doubleSpinBox_equipement.setSingleStep(self.step)
-            self.doubleSpinBox_equipement.valueChanged.connect(self.onvaluechanged)
+            self.doubleSpinBox_equipement.valueChanged.connect(lambda: self.onvaluechanged())
             self.layout_discret.addWidget(self.doubleSpinBox_equipement)
             self.gridLayout_equipement.addLayout(self.layout_discret, 0, 1, 1, 1, QT_RIGHT)
 
@@ -153,12 +153,12 @@ class Equipement(QWidget):
 
         if self.kind == "COMPLEXE":
             self.pushButton_equipement.setText(self.info_actionneur[0])
-            self.pushButton_equipement.clicked.connect(self.open_actionneur_complexe)
+            self.pushButton_equipement.clicked.connect(lambda: self.open_actionneur_complexe())
             self.gridLayout_equipement.addWidget(self.pushButton_equipement, 0, 1, 1, 1, QT_RIGHT)
 
         if self.kind == "LED":
             self.pushButton_led.setText('Choisir la couleur')
-            self.pushButton_led.clicked.connect(self.open_led_menu)
+            self.pushButton_led.clicked.connect(lambda: self.open_led_menu())
             self.gridLayout_equipement.addWidget(self.pushButton_led, 0, 1, 1, 1, QT_RIGHT)
 
         if self.kind == "VALEUR":
@@ -229,7 +229,7 @@ class Equipement(QWidget):
         """ Affiche et envoie vers backend la dernière commande d'un actionneur discret"""
         self.backend.sendeqpcmd(self.rid, self.name, self.doubleSpinBox_equipement.value())
         self.label_command.setText(str(self.slider_equipement.value()))
-        self.doubleSpinBox_equipement.setValue((self.slider_equipement.value()))
+        self.doubleSpinBox_equipement.setValue(self.slider_equipement.value())
 
     @pyqtSlot()
     def oncheckbox_toggled(self):
@@ -325,9 +325,9 @@ class BoiteRobot(QWidget):
         self.current_equipement_list = []
         self.current_equipement_dic = {}
         self.current_actuators_list = []
-        #self.current_actuators_dic = {}
+
         self.current_sensors_list = []
-        #self.current_sensors_dic = {}
+
 
         # Configuration des widgets de la boite robot
         self.ui_setup_boite_robot()
@@ -350,10 +350,10 @@ class BoiteRobot(QWidget):
         self.button_delete.setStyleSheet(QPUSHBUTTON)
         self.button_delete.setText("Oublier")
 
-        self.emergencyButton.setText ("Arrêt d'urgence")
-        self.emergencyButton.setStyleSheet (QEMERGENCYBUTTON)
+        self.emergencyButton.setText("Arrêt d'urgence")
+        self.emergencyButton.setStyleSheet(QEMERGENCYBUTTON)
         self.emergencyButton.setMaximumSize(250, 25)
-        self.emergencyButton.clicked.connect (lambda : self.backend.emergency_stop_robot (self.rid))
+        self.emergencyButton.clicked.connect(lambda: self.backend.emergency_stop_robot(self.rid))
         
         self.button_delete.clicked.connect(self.remove_box_robot)
         self.layout_name_delete.addWidget(self.button_delete)
