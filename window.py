@@ -1,5 +1,8 @@
 """Module ui_window.py - Crée la fenêtre comportant l'inspecteur, la carte et la zone de menu"""
 
+#TODO: créer settings par défaut, et settings générés localement pour chaque ordinateur,
+# avec vérification de nouveaux paramètres
+
 import os, sys, subprocess, time
 from carte import MapView
 import lxml.etree as ET
