@@ -1,6 +1,7 @@
 """Module carte.py - gestion de l'affichage sur la carte"""
 
 from math import sqrt
+from time import time
 import lxml.etree as ET
 
 from PyQt5 import QtWidgets #, QtGui
@@ -10,9 +11,11 @@ from PyQt5.QtGui import QBrush, QColor, QPainter, QFont#, QPen
 ROBOT_COLOR = 'green'
 SELECT_COLOR = 'blue'
 STOPPED_COLOR = 'red'
+CLICK_COLOR = 'white'
 ROBOT_BRUSH = QBrush(QColor(ROBOT_COLOR), Qt.SolidPattern)
 SELECTED_RB_BRUSH = QBrush(QColor(SELECT_COLOR), Qt.SolidPattern)
 STOPPED_BRUSH = QBrush(QColor(STOPPED_COLOR), Qt.SolidPattern)
+CLICK_BRUSH = QBrush(QColor(CLICK_COLOR), Qt.Dense7Pattern)
 ROBOT_SIZE = 200
 
 class MapView(QtWidgets.QWidget):
@@ -31,6 +34,9 @@ class MapView(QtWidgets.QWidget):
         self.selected_robot = None
         self.mouse_pos_init = QPoint(0, 0)
         self.relative_init_mspos = [0, 0]
+        self.last_press = time()
+        self.clicking = False
+        self.time_clicked = 0
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.repaint)
@@ -48,6 +54,10 @@ class MapView(QtWidgets.QWidget):
     def paint(self):
         """Dessin de la map et des robots"""
         painter = QPainter(self)
+        if self.clicking:
+            self.time_clicked = time() - self.last_press
+        else:
+            self.time_clicked = 0
 
         #paint map
 
@@ -67,11 +77,11 @@ class MapView(QtWidgets.QWidget):
             if self.selected_robot == robot:
                 painter.setBrush(SELECTED_RB_BRUSH)
             elif bkd_robots[robot].isStopped :
-                painter.setBrush (STOPPED_BRUSH)
+                painter.setBrush(STOPPED_BRUSH)
             else:
                 if robot == 'C3PO' :
-                    painter.setBrush ( QBrush (QColor('gold'), Qt.SolidPattern))
-                else :
+                    painter.setBrush(QBrush (QColor('gold'), Qt.SolidPattern))
+                else:
                     painter.setBrush(ROBOT_BRUSH)
             pos_offset = [mrbpos[0] - mrbsize[0]/2, mrbpos[1] - mrbsize[1]/2]
             big_offset = [mrbpos[0] - mrbsize[0], mrbpos[1] - mrbsize[1]]
@@ -85,11 +95,15 @@ class MapView(QtWidgets.QWidget):
             font.setPointSize(8)
             painter.setFont(font)
             painter.drawText(robot_rect, Qt.AlignCenter, robot)
+        #si en cours de click, afficher une petite ellipse qui se remplit
+        if self.clicking and self.parent.settings_dict["Clic Droit Tablette"] == "OUI":
+            ell_rect = QRect(self.mouse_pos.x() - 25, self.mouse_pos.y() - 25, 50, 50)
+            painter.setBrush(CLICK_BRUSH)
+            painter.drawPie(ell_rect, 0, 360/1.5*self.time_clicked*16)
         #paint mouse pos dans un coin
         height = self.geometry().height()
         rlp = self.relative_mspos
         painter.drawText(0, height-20, "x: {} y: {}".format(int(rlp[0]), int(rlp[1])))
-
 
     def updt_map_data(self, config_path):
         """Mise à jour des objets à dessiner sur la map
@@ -174,11 +188,12 @@ class MapView(QtWidgets.QWidget):
     def mousePressEvent(self, event):
         """La souris est cliquée"""
         self.mouse_pos = event.localPos()
-        self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
+        self.relative_mspos = self.reverse_pos(self.mouse_pos)
         if event.button() == Qt.LeftButton:
-            print("click gauche")
+            self.last_press = time()
+            self.clicking = True
             self.mouse_pos_init = event.localPos()
-            self.relative_init_mspos = self.reverse_mouse_pos(self.mouse_pos)
+            self.relative_init_mspos = self.reverse_pos(self.mouse_pos)
             if self.selected_robot is not None:
                 cmd_pos = [0, 0, None]
                 cmd_pos[0] = self.relative_mspos[0]
@@ -190,7 +205,6 @@ class MapView(QtWidgets.QWidget):
                 qle_poscmd.setText("{} : {} : 000".format(cmd_x_le, cmd_y_le))
                 self.selected_robot = None
         elif event.button() == Qt.RightButton:
-            print("click droit")
             self.selected_robot = None
             for robot in self.parent.backend.annu.robots:
                 if self.distance(robot) < ROBOT_SIZE:
@@ -204,10 +218,19 @@ class MapView(QtWidgets.QWidget):
                     (self.relative_mspos[1] - rb_y)**2)
         return dist
 
+    def mouseReleaseEvent(self, event):
+        """Quand la souris est relachée"""
+        self.clicking = False
+        if self.time_clicked > 1.5 and self.parent.settings_dict["Clic Droit Tablette"] == "OUI":
+            self.selected_robot = None
+            for robot in self.parent.backend.annu.robots:
+                if self.distance(robot) < ROBOT_SIZE:
+                    self.selected_robot = robot
+
     def mouseMoveEvent(self, event):
         """Quand la souris est bougée sur la fenêtre"""
         self.mouse_pos = event.localPos()
-        self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
+        self.relative_mspos = self.reverse_pos(self.mouse_pos)
         """drag and drop """
         if self.selected_robot is not None:
             if event.button == Qt.LeftButton:
@@ -216,7 +239,7 @@ class MapView(QtWidgets.QWidget):
                 pos_cmd[1]=pos_cmd[1]+self.relative.mpos[1]-self.relative_init_mpos[1]
                 self.parent.backend.sendposcmd_robot(self.selected_robot, pos_cmd)
 
-    def reverse_mouse_pos(self, qpoint):
+    def reverse_pos(self, qpoint):
         """Calcule la position de la souris relative à la carte"""
         qpoint_x = qpoint.x()
         qpoint_y = qpoint.y()
@@ -239,13 +262,4 @@ class MapView(QtWidgets.QWidget):
         return new_pos
 
 
-    #def DragMoveEvent(self,event):
-    #    """commande du robot en drag and drop"""
-    #    speed_cmd=0
-    #    angle_cmd=0
-    #    #spd_cmd=DragStartPosition.manhattanLenght #renvoie une consigne de vitesse avec la distance entre la position actuelle du curseur et sa position de départ
-    #    pos_cmd=[0,0,0]
-    #    self.mouse_pos = event.localPos()
-    #    self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
-    #    angle_cmd= angle(self.relative_mpos.x-self.relative_entermpos.x,self.relative_mpos.y-self.relative_entermpos.y)
-    #
+  
