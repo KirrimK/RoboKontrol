@@ -1,6 +1,6 @@
 """Module carte.py - gestion de l'affichage sur la carte"""
 
-from math import sqrt,atan,copysign
+from math import sqrt
 import lxml.etree as ET
 
 from PyQt5 import QtWidgets #, QtGui
@@ -204,7 +204,7 @@ class MapView(QtWidgets.QWidget):
 
         if self.selected_robot is not None:
             if event.button == Qt.LeftButton:
-                pos_cmd=[0,0,0]
+                pos_cmd=[0,0,None]
                 pos_cmd[0]=pos_cmd[0]+(self.relative_mpos[0]-self.relative_init_mpos[0])
                 pos_cmd[1]=pos_cmd[1]+self.relative.mpos[1]-self.relative_init_mpos[1]
                 self.parent.backend.sendposcmd_robot(self.selected_robot, pos_cmd)
@@ -231,8 +231,7 @@ class MapView(QtWidgets.QWidget):
                          self.map_margin//resize_factor)*resize_factor
         return new_pos
 
-#def angle(dist_x,dist_y):
-    #return atan(dist_y/dist_x)
+
     #def DragMoveEvent(self,event):
     #    """commande du robot en drag and drop"""
     #    speed_cmd=0
