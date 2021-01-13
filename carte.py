@@ -27,6 +27,8 @@ class MapView(QtWidgets.QWidget):
         self.mouse_pos = QPoint(0, 0)
         self.relative_mspos = [0, 0]
         self.selected_robot = None
+        self.mouse_pos_init = QPoint(0, 0)
+        self.relative_init_mspos = [0, 0]
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.repaint)
@@ -181,6 +183,8 @@ class MapView(QtWidgets.QWidget):
         self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
         if event.button() == Qt.LeftButton:
             print("click gauche")
+            self.mouse_pos_init = event.localPos()
+            self.relative_init_mspos = self.reverse_mouse_pos(self.mouse_pos)
             if self.selected_robot is not None:
                 cmd_pos = [0, 0, None]
                 cmd_pos[0] = self.relative_mspos[0]
@@ -210,11 +214,12 @@ class MapView(QtWidgets.QWidget):
         """Quand la souris est bougée sur la fenêtre"""
         self.mouse_pos = event.localPos()
         self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
+        
         #☺if self.selected_robot is not None:
           #  if events.button and Qt.LeftButton:
            #     pos_cmd=[0,0,0]
-            #    pos_cmd[0]=pos_cmd[0]+copysign(incr,self.mouse_pos.x-self.mouse_posinit.x)#copysign renvoie incr avec le signe de la distance entre les position initiales et actuelles du curseur
-             #   pos_cmd[1]=pos_cmd[1]+copysign(incr,self.mouse_pos.y-self.mouse_posinit.y)
+            #    pos_cmd[0]=pos_cmd[0]+(self.relative_mpos[0]-self.relative_init_mpos[0])
+             #   pos_cmd[1]=pos_cmd[1]+self.relative.mpos[1]-self.relative_init_mpos[1]
               #  self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)
 
     def reverse_mouse_pos(self, qpoint):

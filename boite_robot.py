@@ -105,8 +105,6 @@ class Equipement(QWidget):
         self.lcdNumber_ping_equipement.display(str(round(ping, 1)))
 #        print (self.lcdNumber_ping_equipement.value ())
         self.window.repaint ()
-        
-
 
         self.value_changed_signal.connect(lambda val: self.update_equipement(val))
 
@@ -241,11 +239,10 @@ class Equipement(QWidget):
             self.label_command.setText(str(0))
 
     @pyqtSlot()
-    def update_ping(self, last_update):
+    def update_ping(self, ping):
         # Calcul et mise à jour du denier message reçu
-        self.timestamp = time.time()
-        self.ping = abs(self.timestamp - last_update)
-        self.lcdNumber_ping_equipement.display(str(round(self.ping, 1)))
+
+        self.lcdNumber_ping_equipement.display(str(round(ping, 1)))
 
     @pyqtSlot()
     def update_equipement(self, value):
@@ -262,7 +259,7 @@ class Equipement(QWidget):
         if self.kind == "DISCRET" and self.value is not None:
             self.doubleSpinBox_equipement.setValue(self.value)
             self.slider_equipement.setValue(self.value)
-            print ('Updated to {}'.format(self.slider_equipement.value()))
+            # print ('Updated to {}'.format(self.slider_equipement.value()))
 
         if self.kind == "MULTIPLE":
             pass

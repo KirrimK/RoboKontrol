@@ -1,8 +1,8 @@
 """Module ui_window.py - Crée la fenêtre comportant l'inspecteur, la carte et la zone de menu"""
 
-import os, sys, subprocess, time, shutil
+import sys
 from carte import MapView
-import file_io
+import externals
 import boite_robot
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QScrollArea, QGroupBox, QPushButton, QSpacerItem
 from PyQt5.QtWidgets import QDialog, QGraphicsView, QSizePolicy, QMessageBox, QApplication, QMainWindow, QFrame, QLabel, QLineEdit
@@ -71,7 +71,7 @@ class Window(QMainWindow):
         # Connexion du signal de mise à jour de la liste des robots présents avec le slot de maj des robots affichés
         self.list_robot_changed_signal.connect(lambda l: self.update_robots(l))
 
-        self.settings_dict = file_io.get_settings()
+        self.settings_dict = externals.get_settings()
         self.act_settings()
 
     def ui_setup_map(self):
@@ -128,7 +128,7 @@ class Window(QMainWindow):
 
         self.layout_menu.addWidget(self.button_simu)
         self.button_simu.setText("Créer Simu")
-        self.button_simu.clicked.connect(self.exec_simu)
+        self.button_simu.clicked.connect(lambda :externals.exec_simu(self.settings_dict))
 
         # Création du bouton configuration
         self.button_settings.setText("Configuration")
@@ -174,7 +174,7 @@ class Window(QMainWindow):
             """Mise à jour des paramètres"""
             for setting_nm in self.settings_dict:
                 self.settings_dict[setting_nm] = field_dict[setting_nm].text()
-            file_io.set_settings(self.settings_dict)
+            externals.set_settings(self.settings_dict)
 
         update_btn = QPushButton("Sauvegarder")
         setting.layout.addWidget(update_btn)
@@ -230,17 +230,6 @@ class Window(QMainWindow):
         new_robots = self.backend.get_all_robots()
         self.update_robots(new_robots)
         self.list_robot_changed_signal.emit(self.current_robots_list)
-    
-    def exec_simu(self):
-        """Exécute un simulateur en parallèle"""
-        try:
-            if os.path.exists(self.settings_dict["Chemin Simulateur"]):
-                if shutil.which("python3"):
-                    subprocess.Popen(["python3", self.settings_dict["Chemin Simulateur"], str(time.time())])
-                else:
-                    subprocess.Popen(["python", self.settings_dict["Chemin Simulateur"], str(time.time())])
-        except Exception as exc:
-            print(exc)
 
 @pyqtSlot()
 def show_help():
