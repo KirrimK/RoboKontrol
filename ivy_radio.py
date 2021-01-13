@@ -88,6 +88,8 @@ class Radio :
             _ args : autres arguments entrés ('all', 'msgs' et/ou 'cmds' (strings))
                 considérés comme un tuple"""
         path = args [-1]
+        if path [-1] != "/":
+            path += "/"
         if 'all' in args :
             args += ('msgs','cmds')
         if 'msgs' in args :
