@@ -1,11 +1,8 @@
 """Module ui_window.py - Crée la fenêtre comportant l'inspecteur, la carte et la zone de menu"""
 
-#TODO: créer settings par défaut, et settings générés localement pour chaque ordinateur,
-# avec vérification de nouveaux paramètres
-
 import os, sys, subprocess, time, shutil
 from carte import MapView
-import lxml.etree as ET
+import file_io
 import boite_robot
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QScrollArea, QGroupBox, QPushButton, QSpacerItem
 from PyQt5.QtWidgets import QDialog, QGraphicsView, QSizePolicy, QMessageBox, QApplication, QMainWindow, QFrame, QLabel, QLineEdit
@@ -74,7 +71,7 @@ class Window(QMainWindow):
         # Connexion du signal de mise à jour de la liste des robots présents avec le slot de maj des robots affichés
         self.list_robot_changed_signal.connect(lambda l: self.update_robots(l))
 
-        self.settings_dict = load_from_file("settings.xml")
+        self.settings_dict = file_io.get_settings()
         self.act_settings()
 
     def ui_setup_map(self):
@@ -161,7 +158,6 @@ class Window(QMainWindow):
     def act_settings(self):
         """Effectuer les actions liées aux paramètres"""
         self.map_view.updt_map_data(self.settings_dict["Fichier de Carte"])
-        
 
     def show_settings(self):
         """ Ouvre un popup (QDialog) Configuration
@@ -178,7 +174,7 @@ class Window(QMainWindow):
             """Mise à jour des paramètres"""
             for setting_nm in self.settings_dict:
                 self.settings_dict[setting_nm] = field_dict[setting_nm].text()
-            to_file(self.settings_dict)
+            file_io.set_settings(self.settings_dict)
 
         update_btn = QPushButton("Sauvegarder")
         setting.layout.addWidget(update_btn)
@@ -242,7 +238,7 @@ class Window(QMainWindow):
                 if shutil.which("python3"):
                     subprocess.Popen(["python3", self.settings_dict["Chemin Simulateur"], str(time.time())])
                 else:
-                subprocess.Popen(["python", self.settings_dict["Chemin Simulateur"], str(time.time())])
+                    subprocess.Popen(["python", self.settings_dict["Chemin Simulateur"], str(time.time())])
         except Exception as exc:
             print(exc)
 
@@ -257,33 +253,6 @@ def show_help():
             list_aide.append(line)
     aide.setText("".join(list_aide))
     aide.exec_()
-
-def load_from_file(file_path):
-    """Récupérer les paramètres à partir d'un fichier"""
-    settings = {}
-    try:
-        root = ET.parse(file_path).getroot()
-        for setting in root.findall('setting'):
-            nom = setting.attrib.get('nom')
-            field = setting.find("field").text
-            settings[nom] = field
-    except Exception as exc:
-        print(exc)
-    return settings
-
-def to_file(settings):
-    """Sauvegarde des évènements Evt dans un fichier (*.xml)
-    (génération par xml ElementTree)"""
-    root = ET.Element("settings")
-    for obj in settings:
-        obj_xml = ET.Element("setting")
-        obj_xml.set('nom', obj)
-        field = ET.SubElement(obj_xml, "field")
-        field.text = settings[obj]
-        root.append(obj_xml)
-    tree = ET.ElementTree(root)
-    with open("settings.xml", "wb") as save:
-        tree.write(save, pretty_print=True)
 
 def main(backend):
     """ Création la fenêtre principale """

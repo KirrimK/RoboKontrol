@@ -1,9 +1,9 @@
 <settings>
   <setting nom="Fichier de Carte">
-    <field>map_sail_the_world.xml</field>
+    <field></field>
   </setting>
   <setting nom="Chemin Simulateur">
-    <field>/run/media/remyb/Data/Programmation/2020 - 2021/Cours ENAC/python/Projet_Info_2020/robotSim/simu_robot.py</field>
+    <field></field>
   </setting>
   <setting nom="UP_KEY">
     <field>z</field>
