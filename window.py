@@ -130,7 +130,7 @@ class Window(QMainWindow):
         # Création du bouton Simulateur
 
         self.layout_menu.addWidget(self.button_simu)
-        self.button_simu.setText("Créer Simu")
+        self.button_simu.setText("Nv. Instance Simu.")
         self.button_simu.clicked.connect(lambda :externals.exec_simu(self.settings_dict))
 
         # Création du bouton configuration
