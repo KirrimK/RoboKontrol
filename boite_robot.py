@@ -351,6 +351,7 @@ class BoiteRobot(QWidget):
 
         self.emergencyButton.setText ("Arrêt d'urgence")
         self.emergencyButton.setStyleSheet (QEMERGENCYBUTTON)
+        self.emergencyButton.setMaximumSize(250, 25)
         self.emergencyButton.clicked.connect (lambda : self.backend.emergency_stop_robot (self.rid))
         
         self.button_delete.clicked.connect(self.remove_box_robot)

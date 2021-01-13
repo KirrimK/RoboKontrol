@@ -5,6 +5,7 @@ import os
 import subprocess
 import shutil
 import time
+import random
 import lxml.etree as ET
 
 MODULE_PATH = os.path.dirname(__file__)
@@ -63,11 +64,13 @@ def settings_to_file(path, settings):
 
 def exec_simu(st_dict):
     """Exécute un simulateur en parallèle"""
+    char_seq = [ chr(random.randint(65, 90)) for _ in range(0, 10)]
+    rbt_name = "".join(char_seq)
     try:
         if os.path.exists(st_dict["Chemin Simulateur"]):
             if shutil.which("python3"):
-                subprocess.Popen(["python3", st_dict["Chemin Simulateur"], str(time.time())])
+                subprocess.Popen(["python3", st_dict["Chemin Simulateur"], rbt_name])
             else:
-                subprocess.Popen(["python", st_dict["Chemin Simulateur"], str(time.time())])
+                subprocess.Popen(["python", st_dict["Chemin Simulateur"], rbt_name])
     except Exception as exc:
         print(exc)

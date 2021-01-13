@@ -87,8 +87,8 @@ class Window(QMainWindow):
         et les boites robots de la classe BoiteRobot de boite_robot """
 
         self.inspector_scroll_area.setWidgetResizable(True)
-        self.inspector_scroll_area.setMinimumSize(QSize(410, 0))
-        self.inspector_scroll_area.setMaximumSize(QSize(410, 16777215))
+        self.inspector_scroll_area.setMinimumSize(QSize(425, 0))
+        self.inspector_scroll_area.setMaximumSize(QSize(425, 16777215))
         self.inspector_scroll_area.setFrameShape(QFrame.NoFrame)
         self.inspector_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scroll_area = QWidget()
