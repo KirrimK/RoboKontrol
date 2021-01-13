@@ -107,7 +107,7 @@ class Equipement(QWidget):
         self.gridLayout_equipement.setAlignment(QT_TOP)
 
         self.label_name_equipement.setMaximumSize(100, 25)
-        if self.unite is None:
+        if self.unite == "None":
             self.label_name_equipement.setText(self.name)
         else:
             self.label_name_equipement.setText('{0} ({1}):'.format(self.name, self.unite))

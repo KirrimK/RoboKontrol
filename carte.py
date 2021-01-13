@@ -173,13 +173,14 @@ class MapView(QtWidgets.QWidget):
                 cmd_pos=[robot_pos[0], robot_pos[1] + incr, None]
             self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)        
         else:
-            pass           
-        
+            pass
+
     def mousePressEvent(self, event):
         """La souris est cliquée"""
         self.mouse_pos = event.localPos()
         self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
         if event.button() == Qt.LeftButton:
+            print("click gauche")
             if self.selected_robot is not None:
                 cmd_pos = [0, 0, None]
                 cmd_pos[0] = self.relative_mspos[0]
@@ -191,6 +192,7 @@ class MapView(QtWidgets.QWidget):
                 qle_poscmd.setText("{} : {} : 000".format(cmd_x_le, cmd_y_le))
                 self.selected_robot = None
         elif event.button() == Qt.RightButton:
+            print("click droit")
             self.selected_robot = None
             for robot in self.parent.backend.annu.robots:
                 if self.distance(robot) < ROBOT_SIZE:
