@@ -108,6 +108,8 @@ class Equipement(QWidget):
         
 
 
+        self.value_changed_signal.connect(lambda val: self.update_equipement(val))
+
     def ui_setup_equipement(self):
         """ Configure l'ensemble des widgets de l'équipement"""
 
@@ -166,7 +168,7 @@ class Equipement(QWidget):
             self.gridLayout_equipement.addWidget(self.lcdNumber_equipement, 0, 1, 1, 1, QT_RIGHT)
 
             # Connexion du signal de màj de la valeur avec la slot d'affichage de la valeur'
-            self.value_changed_signal.connect(lambda val: self.lcdNumber_equipement.display(int(val)))
+            # self.value_changed_signal.connect(lambda val: self.lcdNumber_equipement.display(int(val)))
 
         if self.kind == "BAR":
             self.progressBar_equipement = QProgressBar()
@@ -177,7 +179,7 @@ class Equipement(QWidget):
             self.gridLayout_equipement.addWidget(self.progressBar_equipement, 0, 1, 1, 1, QT_RIGHT)
 
             # Connexion du signal de màj de la bar de progression avec la slot d'affichage de la valeur'
-            self.value_changed_signal.connect(lambda val: self.progressBar_equipement.setValue(int(val)))
+            # self.value_changed_signal.connect(lambda val: self.progressBar_equipement.setValue(int(val)))
 
     def add_equipement(self):
         """ Ajoute l'équipement dans la bon layout parent selon qu'il est actionneur ou capteur"""
@@ -185,9 +187,9 @@ class Equipement(QWidget):
         if self.variety == "ACTIONNEUR":
             self.parent_layout.addItem(self.spacerItem_equipement)
             self.label_command.setText("None")
-            self.gridLayout_equipement.addWidget(self.label_command, 2, 1, 1, 1, QT_LEFT)
+            self.gridLayout_equipement.addWidget(self.label_command, 2, 1, 1, 1, QT_RIGHT)
             self.label_last_command.setText("Dern. Cmd:")
-            self.gridLayout_equipement.addWidget(self.label_last_command, 2, 0, 1, 1, QT_RIGHT)
+            self.gridLayout_equipement.addWidget(self.label_last_command, 2, 0, 1, 1, QT_LEFT)
 
         if self.variety == "CAPTEUR":
             self.parent_layout.addItem(self.spacerItem_equipement)
@@ -249,7 +251,7 @@ class Equipement(QWidget):
     def update_equipement(self, value):
         """ Met à jour l'équipement suivant son type"""
 
-        self.ping_changed_signal.emit(self.ping)
+        # self.ping_changed_signal.emit(self.ping)
 
         if self.kind == "BINAIRE":
             if self.value == 0:
@@ -274,7 +276,7 @@ class Equipement(QWidget):
         if self.kind == "VALEUR":
             if self.value is not None:
                 # Emission de signal de màj de la valeur de l'équipement
-                self.value_changed_signal.emit(self.value)
+                self.lcdNumber_equipement.display(value)
 
         if self.kind == "BAR" and self.value is not None:
             self.progressBar_equipement.setValue(int(value))
@@ -370,6 +372,7 @@ class BoiteRobot(QWidget):
         self.QLineEdit_positionCommand = QLineEdit()
         self.QLineEdit_positionCommand.setInputMask("0000 : 0000 : 000")
         self.QLineEdit_positionCommand.setText("1500 : 1000 : 000")
+        self.QLineEdit_positionCommand.setFixedSize(130, 30)
         self.QLineEdit_positionCommand.editingFinished.connect(lambda: self.onEditingFinished())
         self.layout_last_command.addWidget(self.QLineEdit_positionCommand)
         self.layout_box_robot.addLayout(self.layout_last_command)
