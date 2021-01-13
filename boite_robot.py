@@ -102,7 +102,7 @@ class Equipement(QWidget):
         self.ping_changed_signal.connect(self.onPingChangedSignal )
 
     def onPingChangedSignal (self,ping):
-        self.lcdNumber_ping_equipement.display(round(ping, 1))
+        self.lcdNumber_ping_equipement.display(str(round(ping, 1)))
 #        print (self.lcdNumber_ping_equipement.value ())
         self.window.repaint ()
         
@@ -122,7 +122,7 @@ class Equipement(QWidget):
             self.label_name_equipement.setText('{0} ({1}):'.format(self.name, self.unite))
         self.gridLayout_equipement.addWidget(self.label_name_equipement, 0, 0, 1, 1, QT_LEFT)
 
-        self.label_message_equipement.setText("Dern. Msg (ms)")
+        self.label_message_equipement.setText("Dern. Msg (ms) : {}".format (round (self.ping,1)))
         self.gridLayout_equipement.addWidget(self.label_message_equipement, 1, 0, 1, 1, QT_LEFT)
         self.lcdNumber_ping_equipement.setMaximumSize(QSize(75, 25))
         self.lcdNumber_ping_equipement.setStyleSheet(QLCD_STYLE)
@@ -477,13 +477,11 @@ class BoiteRobot(QWidget):
 
         # Change les capteurs en actionneurs si néccessaire.
         for name in self.current_sensors_list:
-            if type(equipements[name]) == annuaire.Actionneur:
-                actuator = equipements[name]
+            equipement = equipements[name]
+            if equipement.variety == "Actionneur":
                 self.current_actuators_list.append(name)
                 self.current_sensors_list.pop(self.current_sensors_list.index(name))
-                actuator.add_actuator()
                 sensor = self.current_equipement_dic[name]
-                sensor.remove_capteur()
 
         # Met à jour la liste et le dictionnaire des capteurs présents
         self.current_equipement_list = equipements_list
@@ -505,7 +503,6 @@ class BoiteRobot(QWidget):
         # self.layout_box_actuators.update()
 
         #Force le changement d'affichage des boites d'actionneurs et de capteurs.
-        #equipement.lcdNumber_equipement.repaint ()
         self.groupBox_actuators.repaint ()
         self.groupBox_sensors.repaint ()
 
