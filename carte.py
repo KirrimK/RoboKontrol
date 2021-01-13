@@ -1,6 +1,6 @@
 """Module carte.py - gestion de l'affichage sur la carte"""
 
-from math import sqrt
+from math import sqrt,atan
 import lxml.etree as ET
 
 from PyQt5 import QtWidgets #, QtGui
@@ -235,8 +235,8 @@ class MapView(QtWidgets.QWidget):
     
     #def DragEnterEvent (self,event):
     #    """La souris est cliquée et le reste pour le drag"""
-    #    self.mouse_pos = event.localPos()
-    #    self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
+    #    self.enter_mouse_pos = event.localPos()
+    #    self.relative_entermspos = self.reverse_mouse_pos(self.enter_mouse_pos)
     #    if event.button() == Qt.LeftButton:
     #        print("click gauche")
     #        if self.selected_robot is not None:
@@ -247,7 +247,8 @@ class MapView(QtWidgets.QWidget):
     #        for robot in self.parent.backend.annu.robots:
     #            if self.distance(robot) < ROBOT_SIZE:
     #                self.selected_robot = robot
-    
+#def angle(dist_x,dist_y):
+    #return atan(dist_y/dist_x)
     #def DragMoveEvent(self,event):
     #    """commande du robot en drag and drop"""
     #    speed_cmd=0
@@ -256,4 +257,6 @@ class MapView(QtWidgets.QWidget):
     #    pos_cmd=[0,0,0]
     #    self.mouse_pos = event.localPos()
     #    self.relative_mspos = self.reverse_mouse_pos(self.mouse_pos)
-    #    angle_cmd=                
+    #    angle_cmd= angle(self.relative_mpos.x-self.relative_entermpos.x,self.relative_mpos.y-self.relative_entermpos.y)
+    #
+                  
