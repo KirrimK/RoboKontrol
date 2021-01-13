@@ -99,7 +99,12 @@ class Equipement(QWidget):
         self.ui_setup_equipement()
 
         # Connexion du signal de pin du dernier message reçu màj avec le slot d'affichage du ping du dernier message
-        self.ping_changed_signal.connect(lambda ping: self.lcdNumber_ping_equipement.display(round(ping, 1)))
+        self.ping_changed_signal.connect(self.onPingChangedSignal )
+
+    def onPingChangedSignal (self,ping):
+        self.lcdNumber_ping_equipement.display(str(round(ping, 1)))
+#        print (self.lcdNumber_ping_equipement.value ())
+        self.window.repaint ()
 
         self.value_changed_signal.connect(lambda val: self.update_equipement(val))
 
@@ -109,15 +114,13 @@ class Equipement(QWidget):
         self.gridLayout_equipement.setAlignment(QT_TOP)
 
         self.label_name_equipement.setMaximumSize(100, 25)
-
         if self.unite == "None" or self.unite is None:
-
             self.label_name_equipement.setText(self.name)
         else:
             self.label_name_equipement.setText('{0} ({1}):'.format(self.name, self.unite))
         self.gridLayout_equipement.addWidget(self.label_name_equipement, 0, 0, 1, 1, QT_LEFT)
 
-        self.label_message_equipement.setText("Dern. Msg (ms)")
+        self.label_message_equipement.setText("Dern. Msg (ms) : {}".format (round (self.ping,1)))
         self.gridLayout_equipement.addWidget(self.label_message_equipement, 1, 0, 1, 1, QT_LEFT)
         self.lcdNumber_ping_equipement.setMaximumSize(QSize(75, 25))
         self.lcdNumber_ping_equipement.setStyleSheet(QLCD_STYLE)
@@ -236,11 +239,10 @@ class Equipement(QWidget):
             self.label_command.setText(str(0))
 
     @pyqtSlot()
-    def update_ping(self, last_update):
+    def update_ping(self, ping):
         # Calcul et mise à jour du denier message reçu
-        self.timestamp = time.time()
-        self.ping = abs(self.timestamp - last_update)
-        self.lcdNumber_ping_equipement.display(str(round(self.ping, 1)))
+
+        self.lcdNumber_ping_equipement.display(str(round(ping, 1)))
 
     @pyqtSlot()
     def update_equipement(self, value):
@@ -257,7 +259,7 @@ class Equipement(QWidget):
         if self.kind == "DISCRET" and self.value is not None:
             self.doubleSpinBox_equipement.setValue(self.value)
             self.slider_equipement.setValue(self.value)
-            print ('Updated to {}'.format(self.slider_equipement.value()))
+            # print ('Updated to {}'.format(self.slider_equipement.value()))
 
         if self.kind == "MULTIPLE":
             pass
@@ -342,7 +344,7 @@ class BoiteRobot(QWidget):
         self.layout_name_delete.addWidget(self.label_name)
         self.button_delete.setMaximumSize(150, 25)
         self.button_delete.setStyleSheet(QPUSHBUTTON)
-        self.button_delete.setText("Eteindre")
+        self.button_delete.setText("Oublier")
         self.button_delete.clicked.connect(lambda: self.remove_box_robot())
         self.layout_name_delete.addWidget(self.button_delete)
         self.layout_box_robot.addLayout(self.layout_name_delete)
@@ -472,13 +474,11 @@ class BoiteRobot(QWidget):
 
         # Change les capteurs en actionneurs si néccessaire.
         for name in self.current_sensors_list:
-            if type(equipements[name]) == annuaire.Actionneur:
-                actuator = equipements[name]
+            equipement = equipements[name]
+            if equipement.variety == "Actionneur":
                 self.current_actuators_list.append(name)
                 self.current_sensors_list.pop(self.current_sensors_list.index(name))
-                actuator.add_actuator()
                 sensor = self.current_equipement_dic[name]
-                sensor.remove_capteur()
 
         # Met à jour la liste et le dictionnaire des capteurs présents
         self.current_equipement_list = equipements_list
@@ -500,7 +500,6 @@ class BoiteRobot(QWidget):
         # self.layout_box_actuators.update()
 
         #Force le changement d'affichage des boites d'actionneurs et de capteurs.
-        #equipement.lcdNumber_equipement.repaint ()
         self.groupBox_actuators.repaint ()
         self.groupBox_sensors.repaint ()
 
