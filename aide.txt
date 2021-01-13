@@ -1,1 +1,2 @@
----------------------------------------    
+---------------------------------------
+Pour envoyer une commande de posoition à un robot, vous pouvez faire un clic droit dessus, puis faire un clic droit sur la carte.
