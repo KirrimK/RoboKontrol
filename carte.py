@@ -6,8 +6,8 @@ from math import sqrt
 from time import time
 import lxml.etree as ET
 
-from PyQt5 import QtWidgets , QtSvg
-from PyQt5.QtCore import Qt, QTimer, QRect, QPoint
+from PyQt5 import QtSvg
+from PyQt5.QtCore import Qt, QTimer, QRect, QPoint, pyqtSignal
 from PyQt5.QtGui import QBrush, QColor, QPainter, QFont#, QPen
 
 ROBOT_COLOR = 'green'
@@ -21,6 +21,9 @@ CLICK_BRUSH = QBrush(QColor(CLICK_COLOR), Qt.Dense7Pattern)
 ROBOT_SIZE = 200
 
 class MapView(QtSvg.QSvgWidget):
+
+    # Création d'un signal de sélection du robot sur la map
+    selected_robot_signal = pyqtSignal(str)
 
     """Un widget permettant de visualiser la carte et les robots dessus"""
     def __init__(self, parent):
@@ -119,7 +122,7 @@ class MapView(QtSvg.QSvgWidget):
         """Mise à jour des objets à dessiner sur la map
 
         Entrée:
-            - config_path (str): le chemin du fichier xml de config map
+            - config_path (str): le chemin du fichier xml ou svg de config map
         """
         self.map_is_svg = (config_path[-4:] == ".svg")
         self.map_data = []
@@ -184,7 +187,7 @@ class MapView(QtSvg.QSvgWidget):
         robot_down_key = self.parent.settings_dict["DOWN_KEY"]
         robot_left_key = self.parent.settings_dict["LEFT_KEY"]
         robot_right_key = self.parent.settings_dict["RIGHT_KEY"]
-        incr=1
+        incr=10
         cmd_pos=[0,0,None]
         if self.selected_robot is not None:
             selec_rob = bkd_robots[self.selected_robot]
@@ -225,6 +228,7 @@ class MapView(QtSvg.QSvgWidget):
             for robot in self.parent.backend.annu.robots:
                 if self.distance(robot) < ROBOT_SIZE:
                     self.selected_robot = robot
+                    self.selected_robot_signal.emit(robot)
 
     def distance(self, rb_nm):
         """Calcule la distance entre la souris et un robot"""

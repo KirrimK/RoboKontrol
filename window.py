@@ -1,17 +1,14 @@
 """Module ui_window.py - Crée la fenêtre comportant l'inspecteur, la carte et la zone de menu"""
 
 import sys
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QScrollArea
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 from PyQt5.QtWidgets import QGroupBox, QPushButton, QSpacerItem
-from PyQt5.QtWidgets import QDialog, QGraphicsView, QSizePolicy, QMessageBox
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFrame, QLabel, QLineEdit
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QTimer, QSize, QRect
+from PyQt5.QtWidgets import QDialog, QSizePolicy, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, QTimer, QSize
 from carte import MapView
+from inspecteur import Inspecteur
 import externals
-import boite_robot
-
-QPUSHBUTTON = "background-color: grey; border 2px solid rgb(113, 113, 113);border-width: 2px; " \
-              "border-radius: 10px;  color: rgb(0,0,0) "
 
 
 class Window(QMainWindow):
@@ -23,23 +20,17 @@ class Window(QMainWindow):
     def __init__(self, backend):
 
         super().__init__()
-        self.main_window = QWidget()
-        self.main_window.setObjectName("main_window")
-        self.main_window.resize(1091, 782)
-        self.main_window.setWindowTitle("Form")
+        self.window = QWidget()
+        self.window.setObjectName("main_window")
+        self.window.resize(1091, 782)
+        self.window.setWindowTitle("Form")
 
         # Récupération de l'objet backend
         self.backend = backend
 
-        self.boite_robot = boite_robot.BoiteRobot
-
         # Création des widgets de la fenêtre
-        self.layout_window = QVBoxLayout(self.main_window)
+        self.layout_window = QVBoxLayout(self.window)
         self.layout_map_inspector = QHBoxLayout()
-        self.inspector_scroll_area = QScrollArea()
-        self.scroll_area = QWidget(self.inspector_scroll_area)
-        self.inspector_scroll_area.setWidget(self.scroll_area)
-        self.layout_inspector = QVBoxLayout(self.scroll_area)
         self.menu_area = QGroupBox()
         self.layout_menu = QHBoxLayout(self.menu_area)
         self.button_record = QPushButton()
@@ -51,17 +42,18 @@ class Window(QMainWindow):
         self.button_simu = QPushButton()
         self.button_settings = QPushButton()
         self.button_help = QPushButton()
-        self.map_view = QGraphicsView()
+
+        # Création de la liste des noms des robots présents
+        self.current_robots_list = []
+        self.current_robots_dic = {}
 
         # Configuration des widgets de la fenêtre
         self.ui_setup_menu_area()
         self.ui_setup_map()
-        self.ui_setup_inspecteur()
+        self.ui_setup_inspector()
+        self.layout_window.addLayout(self.layout_map_inspector)
 
-        # Création de la liste des noms des robots présents
-        self.current_robots_list = []
         # Création du dictionnaire des robots présents (k=nom, v=boite robot)
-        self.current_robots_dic = {}
 
         # Création de timer
         self.timer = QTimer(self)
@@ -71,7 +63,7 @@ class Window(QMainWindow):
 
         # Connexion du signal de mise à jour de la liste des robots présents
         # avec le slot de maj des robots affichés
-        self.list_robot_changed_signal.connect(lambda l: self.update_robots(l))
+        self.list_robot_changed_signal.connect(lambda l: self.inspecteur.update_robots(l))
 
         self.settings_dict = externals.get_settings()
         self.act_settings()
@@ -82,19 +74,10 @@ class Window(QMainWindow):
         self.map_view.setMinimumSize(QSize(0, 250))
         self.layout_map_inspector.addWidget(self.map_view)
 
-    def ui_setup_inspecteur(self):
-        """Crée  la QScrollBar qui contient un bouton 'Ajouter' (QPushButton)
-        et les boites robots de la classe BoiteRobot de boite_robot """
-
-        self.inspector_scroll_area.setWidgetResizable(True)
-        self.inspector_scroll_area.setMinimumSize(QSize(425, 0))
-        self.inspector_scroll_area.setMaximumSize(QSize(425, 16777215))
-        self.inspector_scroll_area.setFrameShape(QFrame.NoFrame)
-        self.inspector_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scroll_area = QWidget()
-        self.scroll_area.setGeometry(QRect(0, 0, 410, 16777215))
-        self.layout_map_inspector.addWidget(self.inspector_scroll_area)
-        self.layout_window.addLayout(self.layout_map_inspector)
+    def ui_setup_inspector(self):
+        """ Crée l'inspecteur (QTabWidget) et l'affiche dans la fenêtre"""
+        self.inspecteur = Inspecteur(self)
+        self.layout_map_inspector.addWidget(self.inspecteur)
 
     def ui_setup_menu_area(self):
         """ Création de la zone menu"""
@@ -104,7 +87,6 @@ class Window(QMainWindow):
         self.button_record.setCheckable(True)
         self.layout_menu.addWidget(self.button_record)
         self.button_record.clicked.connect(self.record)
-        print(self.button_record.styleSheet())
 
         # Création du bouton play
         self.button_play.setMaximumSize(200, 16777215)
@@ -131,7 +113,6 @@ class Window(QMainWindow):
         self.layout_menu.addItem(self.spacer_item)
 
         # Création du bouton Simulateur
-
         self.layout_menu.addWidget(self.button_simu)
         self.button_simu.setText("Nv. Instance Simu.")
         self.button_simu.clicked.connect(lambda :externals.exec_simu(self.settings_dict))
@@ -148,21 +129,6 @@ class Window(QMainWindow):
 
         self.layout_window.addWidget(self.menu_area)
 
-    def add_robot(self, nom_robot):
-        """ Ajoute le robot dont le nom est placé en paramètre
-        sous forme d'une boite robot dans la zone inspecteur """
-        self.boite_robot = boite_robot.BoiteRobot(str(nom_robot), self)
-        self.current_robots_dic[self.boite_robot.rid] = self.boite_robot
-        self.layout_inspector.addWidget(self.boite_robot.groupBox_robot, 0, Qt.AlignTop)
-
-    def remove_robot(self, nom_robot):
-        """ Supprime de l'inspecteur la boite robot associée
-        au robot dont le nom est placé en paramètre """
-        deleted_robot = self.current_robots_dic.pop(nom_robot)
-        deleted_robot.remove_box_robot()
-        # Envoie l'information que le robot a été oublié (via le bouton oublier)
-        self.backend.stopandforget_robot(nom_robot)
-
     def act_settings(self):
         """Effectuer les actions liées aux paramètres"""
         self.map_view.updt_map_data(self.settings_dict["Fichier de Carte"])
@@ -170,7 +136,7 @@ class Window(QMainWindow):
     def show_settings(self):
         """ Ouvre un popup (QDialog) Configuration
         permettant la modification des réglages d'enregistrement"""
-        setting = QDialog(self.main_window)
+        setting = QDialog(self.window)
         setting.setWindowTitle("Configuration")
         setting.setMinimumSize(500, 400)
         setting.layout = QVBoxLayout(setting)
@@ -203,27 +169,6 @@ class Window(QMainWindow):
         setting.exec_()
 
     @pyqtSlot()
-    def update_robots(self, new_robots):
-        """ Met à jour la liste des robots présents
-        et initialise la mise à jour de toutes les boites robots """
-
-        # new_robots = self.backend.get_all_robots()
-
-        # Ajoute les nouveaux robots
-        for robot in set(new_robots) - set(self.current_robots_list):
-            self.add_robot(robot)
-
-        # Supprime les robots qui ne sont plus présents
-        for robot in set(self.current_robots_list) - set(new_robots):
-            self.remove_robot(robot)
-
-        for robot in self.current_robots_dic.values():
-            robot.update_boite_robot()
-
-        # Met à jour la liste des robots présents
-        self.current_robots_list = new_robots
-
-    @pyqtSlot()
     def record(self):
         """ Enregistre des messages et commandes
         et arrête l'enregistrement lorsque cliquer une seconde fois """
@@ -240,7 +185,7 @@ class Window(QMainWindow):
 
     @pyqtSlot()
     def onSaveButton (self) :
-        path = ''
+        path = self.settings_dict["Chemin de Sauvegarde"]
         if self.button_record.isChecked():
             self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCSD", path)
@@ -250,8 +195,10 @@ class Window(QMainWindow):
     def update_window(self):
         """ Initialise la mise à jour de la fenêtre"""
         new_robots = self.backend.get_all_robots()
-        self.update_robots(new_robots)
+
+        self.inspecteur.update_robots(new_robots)
         self.list_robot_changed_signal.emit(self.current_robots_list)
+
 
 @pyqtSlot()
 def show_help():
@@ -263,11 +210,11 @@ def show_help():
     aide.setText("".join(list_aide))
     aide.exec_()
 
+
 def main(backend):
     """ Création la fenêtre principale """
     app = QApplication(sys.argv)
-    backend.radio.app = app
-    backend.radio.launchQt ()
+    backend.launchQt ()
     window = Window(backend)
-    window.main_window.show()
+    window.window.show()
     sys.exit(app.exec_())
