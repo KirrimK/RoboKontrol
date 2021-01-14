@@ -110,11 +110,11 @@ class Radio :
                         path += "/"
                 timestamp_deb = time()
                 with open ('{}messages{}.txt'.format (path, int (timestamp_deb)),'a') as fichier :
-                    fichier.write ('{}\nJour\t\tHeure\t\tExpediteur\t\tMessage\n\n'.format (timestamp_deb))
+                    fichier.write ('{}\n\nTemps (ms)\tExpediteur\t\t\tMessage\n'.format (timestamp_deb))
                     for (i, ligne) in enumerate (self.msgs_buffer) :
                         if i == 0:
                             PremierTemps = ligne [0]
-                        fichier.write (temps (ligne[0], PremierTemps)+'\t'+ligne[1]+'\t'+ligne[2]+'\n')
+                        fichier.write (temps (ligne[0], PremierTemps)+'\t\t'+ligne[1]+'\t\t'+ligne[2]+'\n')
             if del_buffers :
                 self.msgs_buffer = []
         if 'cmds' in args :
@@ -125,11 +125,11 @@ class Radio :
                         path += "/"
                 tps = time ()
                 with open ('{}commandes{}.txt'.format (path, int(tps)),'a') as fichier :
-                    fichier.write ('{}\nJour\t\tHeure\t\tCommande\n\n'.format (temps_deb(tps)))
+                    fichier.write ('{}\n\nTemps (ms)\tCommande\n'.format (temps_deb(tps)))
                     for ligne in self.cmds_buffer :
                         if i == 0:
                             PremierTemps = ligne [0]
-                        fichier.write (temps (ligne[0], PremierTemps)+'\t'+ligne[1]+'\n')
+                        fichier.write (temps (ligne[0], PremierTemps)+'\t\t'+ligne[1]+'\n')
             if del_buffers :
                 self.cmds_buffer = []
      #REACTIONS AUX REGEXPS

@@ -185,7 +185,7 @@ class Window(QMainWindow):
 
     @pyqtSlot()
     def onSaveButton (self) :
-        path = ''
+        path = self.settings_dict["Chemin de Sauvegarde"]
         if self.button_record.isChecked():
             self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCSD", path)
