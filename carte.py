@@ -7,7 +7,7 @@ from time import time
 import lxml.etree as ET
 
 from PyQt5 import QtWidgets #, QtGui
-from PyQt5.QtCore import Qt, QTimer, QRect, QPoint
+from PyQt5.QtCore import Qt, QTimer, QRect, QPoint, pyqtSignal
 from PyQt5.QtGui import QBrush, QColor, QPainter, QFont#, QPen
 
 ROBOT_COLOR = 'green'
@@ -21,6 +21,9 @@ CLICK_BRUSH = QBrush(QColor(CLICK_COLOR), Qt.Dense7Pattern)
 ROBOT_SIZE = 200
 
 class MapView(QtWidgets.QWidget):
+
+    # Création d'un signal de sélection du robot sur la map
+    selected_robot_signal = pyqtSignal(str)
 
     """Un widget permettant de visualiser la carte et les robots dessus"""
     def __init__(self, parent):
@@ -211,6 +214,7 @@ class MapView(QtWidgets.QWidget):
             for robot in self.parent.backend.annu.robots:
                 if self.distance(robot) < ROBOT_SIZE:
                     self.selected_robot = robot
+                    self.selected_robot_signal.emit(robot)
 
     def distance(self, rb_nm):
         """Calcule la distance entre la souris et un robot"""

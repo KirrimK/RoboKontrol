@@ -1,7 +1,7 @@
 """ inspecteur.py - Définit l'affichage de l'inspecteur contenant les infomations des robots"""
 
 from PyQt5.QtWidgets import QTabWidget
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from tab_robot import TabRobot
 
 
@@ -9,12 +9,20 @@ class Inspecteur(QTabWidget):
     """ Définit l'objet inspecteur (QTabWidget) qui comport les onglets robots (QGroupBox)
     et qui les relie à backend avec des signaux """
 
+    # Création d'un signal de sélection d'un onglet robot
+    selected_tab_signal = pyqtSignal(str)
+
     def __init__(self, window):
         super().__init__()
         self.window = window
         self.backend = self.window.backend
 
+        self.window.map_view.selected_robot_signal.connect(lambda rid: self.setCurrentIndex(self.window.current_robots_list.index(rid)))
+
         self.ui_setup_tab()
+
+    def update_selected_robot(self, rid):
+        self.window.map_view.selected_robot = rid
 
     def ui_setup_tab(self):
         """ Configure l'inspecteur"""
@@ -35,6 +43,9 @@ class Inspecteur(QTabWidget):
         # Initialise la mise à jours des robots
         for value in self.window.current_robots_dic.values():
             value.update_tab_robot()
+
+        if self.window.current_robots_list:
+            self.selected_tab_signal.emit(self.window.current_robots_list[self.currentIndex()])
 
     def add_robot(self, rid):
         """ Ajoute le robot dont le nom est placé en paramètre
