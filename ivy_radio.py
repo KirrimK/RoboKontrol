@@ -1,7 +1,5 @@
 """Module ivy_radio.py - module de gestion des communications via Ivy-python"""
-#TODO : Modifier fichier d'enregistrement (plusieurs + timestamps)
-
-#TODO: remplacer par des signaux Qt et les connecter
+#TODO : Gérer les messages reçus entre le lancement de la radio et le lancement de l'applications
 
 
 from time import time, gmtime
@@ -137,18 +135,26 @@ class Radio :
     def on_posreg (self, sender, *args):
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant la position"""
-        self.backend.widget.PosRegSignal.emit ([i for i in args])
+        if self.backend.widget is not None :
+            self.backend.widget.PosRegSignal.emit ([i for i in args])
+        else:
+            self.backend.premiersMessages.append (('pos',[i for i in args]))
 
     def on_actudecl (self, sender, *args):
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant la description d'un equipement"""
-        self.backend.widget.ActuDeclSignal.emit ([i for i in args])
-        
+        if self.backend.widget is not None :
+            self.backend.widget.ActuDeclSignal.emit ([i for i in args])
+        else :
+            self.backend.premiersMessages.append (('actdcl',[i for i in args]))
     
     def on_captreg (self, sender, *args):
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant un retour de capteur"""
-        self.backend.widget.CaptRegSignal.emit ([i for i in args])
+        if self.backend.widget is not None :
+            self.backend.widget.CaptRegSignal.emit ([i for i in args])
+        else :
+            self.backend.premiersMessages.append (('actrep',[i for i in args]))
 
     def send_cmd (self,cmd):
         """Envoie du texte vers le bus Ivy et le stocke optionnellement sur les tampons

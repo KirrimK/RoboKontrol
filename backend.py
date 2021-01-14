@@ -38,6 +38,7 @@ class Backend:
     def __init__(self, annu=None, radio=None, print_flag=0):
         self.runs = False
         self.radio_started = False
+        self.premiersMessages = []
         self.print_flag = print_flag
         self.start_time = 0
         self.runned_time = 0
@@ -55,6 +56,13 @@ class Backend:
         
         Initialise l'attribut self.widget"""
         self.widget = WidgetBackend (self)
+        for message in self.premiersMessages :
+            if message [0] == 'pos' :
+                self.widget.PosRegSignal.emit (message [1])
+            elif message  [0] == 'actdcl':
+                self.widget.ActuDeclSignal.emit (message [1])
+            else :
+                self.widget.CaptRegSignal.emit (message [1])
 
     def __str__(self, erase_flag=False):
         if not erase_flag:
