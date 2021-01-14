@@ -1,5 +1,5 @@
 <settings>
-  <setting nom="Fichier de Carte">
+  <setting nom="Fichier Carte">
     <field>data/fondTable21.svg</field>
   </setting>
   <setting nom="Chemin Simulateur">

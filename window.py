@@ -132,7 +132,7 @@ class Window(QMainWindow):
     def act_settings(self):
         """Effectuer les actions liées aux paramètres"""
         dim_crte = self.settings_dict["Dimensions Carte"].split("x")
-        self.map_view.updt_map_data(self.settings_dict["Fichier de Carte"], int(dim_crte[0]), int(dim_crte[1]))
+        self.map_view.updt_map_data(self.settings_dict["Fichier Carte"], int(dim_crte[0]), int(dim_crte[1]))
 
     def show_settings(self):
         """ Ouvre un popup (QDialog) Configuration
