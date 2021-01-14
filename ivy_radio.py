@@ -1,6 +1,4 @@
 """Module ivy_radio.py - module de gestion des communications via Ivy-python"""
-#TODO : Gérer les messages reçus entre le lancement de la radio et le lancement de l'applications
-
 
 from time import time, gmtime
 from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
