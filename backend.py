@@ -54,7 +54,8 @@ class Backend:
         """Méthode appelée après le lancement de l'application
         Les Widgets ne peuvent exister que s'il y a une application Qt
         
-        Initialise l'attribut self.widget"""
+        Initialise l'attribut self.widget
+        Réagit aux messages reçus avant le lancement de l'application Qt"""
         self.widget = WidgetBackend (self)
         for message in self.premiersMessages :
             if message [0] == 'pos' :
