@@ -106,7 +106,7 @@ class Radio :
                         path += "/"
                 timestamp_deb = time()
                 with open ('{}messages{}.txt'.format (path, int (timestamp_deb)),'a') as fichier :
-                    fichier.write ('{}\n\nTemps (ms)\tExpediteur\t\t\tMessage\n'.format (timestamp_deb))
+                    fichier.write ('{}\n\nTemps (ms)\tExpediteur\t\t\tMessage\n'.format (temps_deb (timestamp_deb)))
                     for (i, ligne) in enumerate (self.msgs_buffer) :
                         if i == 0:
                             PremierTemps = ligne [0]
