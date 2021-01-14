@@ -6,7 +6,7 @@ from math import sqrt
 from time import time
 import lxml.etree as ET
 
-from PyQt5 import QtWidgets #, QtGui
+from PyQt5 import QtSvg
 from PyQt5.QtCore import Qt, QTimer, QRect, QPoint, pyqtSignal
 from PyQt5.QtGui import QBrush, QColor, QPainter, QFont#, QPen
 
@@ -20,7 +20,7 @@ STOPPED_BRUSH = QBrush(QColor(STOPPED_COLOR), Qt.SolidPattern)
 CLICK_BRUSH = QBrush(QColor(CLICK_COLOR), Qt.Dense7Pattern)
 ROBOT_SIZE = 200
 
-class MapView(QtWidgets.QWidget):
+class MapView(QtSvg.QSvgWidget):
 
     # Création d'un signal de sélection du robot sur la map
     selected_robot_signal = pyqtSignal(str)
@@ -29,9 +29,13 @@ class MapView(QtWidgets.QWidget):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
+        self.map_is_svg = False
         self.map_data = []
-        self.map_width = 10
-        self.map_height = 10
+        self.width = self.geometry().width()
+        self.height = self.geometry().height()
+        self.svg_data = None
+        self.map_width = 2000
+        self.map_height = 3000
         self.map_margin = 0
 
         self.mouse_pos = QPoint(0, 0)
@@ -45,7 +49,7 @@ class MapView(QtWidgets.QWidget):
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.repaint)
-        self.timer.start(50)
+        self.timer.start(200)
 
         self.setMouseTracking(True)
         self.key_binding={}
@@ -58,6 +62,8 @@ class MapView(QtWidgets.QWidget):
 
     def paint(self):
         """Dessin de la map et des robots"""
+        self.width = self.geometry().width()
+        self.height = self.geometry().height()
         painter = QPainter(self)
         if self.clicking:
             self.time_clicked = time() - self.last_press
@@ -65,13 +71,15 @@ class MapView(QtWidgets.QWidget):
             self.time_clicked = 0
 
         #paint map
-
-        for rect in self.map_data:
-            size = rect[3]
-            pos = rect[4]
-            size, pos = self.calc_pos_size(size, pos)
-            painter.setBrush(QBrush(QColor(rect[2]), Qt.SolidPattern))
-            painter.drawRect(pos[0], pos[1], size[0], size[1])
+        if not self.map_is_svg:
+            for rect in self.map_data:
+                size = rect[3]
+                pos = rect[4]
+                size, pos = self.calc_pos_size(size, pos)
+                painter.setBrush(QBrush(QColor(rect[2]), Qt.SolidPattern))
+                painter.drawRect(pos[0], pos[1], size[0], size[1])
+        else:
+            self.svg_data.render(painter)
 
         #paint robots
         bkd_robots = self.parent.backend.annu.robots
@@ -116,23 +124,29 @@ class MapView(QtWidgets.QWidget):
         Entrée:
             - config_path (str): le chemin du fichier xml ou svg de config map
         """
+        self.map_is_svg = (config_path[-4:] == ".svg")
         self.map_data = []
-        try:
-            root = ET.parse(config_path).getroot()
-            self.map_width = int(root.attrib.get('width'))
-            self.map_height = int(root.attrib.get('height'))
-            self.map_margin = int(root.attrib.get('margin'))
-            for rect in root.findall('rect'):
-                nom = rect.attrib.get('nom')
-                color = rect.find("color").text
-                order = float(rect.find("order").text)
-                size = rect.find("size").text.strip().split("x")
-                pos = rect.find("pos").text.strip().split("x")
-                rect_data = (order, nom, color, size, pos)
-                self.map_data.append(rect_data)
-            self.map_data.sort()
-        except Exception as exc:
-            print(exc)
+        self.map_margin = 0
+        if not self.map_is_svg:
+            try:
+                root = ET.parse(config_path).getroot()
+                self.map_width = int(root.attrib.get('width'))
+                self.map_height = int(root.attrib.get('height'))
+                self.map_margin = int(root.attrib.get('margin'))
+                for rect in root.findall('rect'):
+                    nom = rect.attrib.get('nom')
+                    color = rect.find("color").text
+                    order = float(rect.find("order").text)
+                    size = rect.find("size").text.strip().split("x")
+                    pos = rect.find("pos").text.strip().split("x")
+                    rect_data = (order, nom, color, size, pos)
+                    self.map_data.append(rect_data)
+                self.map_data.sort()
+            except Exception as exc:
+                print(exc)
+        else:
+            self.svg_data = QtSvg.QSvgRenderer(config_path)
+            self.svg_data.setAspectRatioMode(Qt.KeepAspectRatio)
 
     def calc_pos_size(self, size, pos):
         """Calcule les positions et tailles en fonction de la taille du widget"""
