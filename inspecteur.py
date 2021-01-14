@@ -26,7 +26,7 @@ class Inspecteur(QTabWidget):
 
     def ui_setup_tab(self):
         """ Configure l'inspecteur"""
-        self.setMaximumSize(400, 16777215)
+        self.setMaximumSize(440, 16777215)
 
     @pyqtSlot()
     def update_robots(self, new_robots):

@@ -20,9 +20,13 @@ def generate_personal_settings():
         settings_to_file(PERSONAL_FILE_PATH, deflt_st)
     else:
         per_st = settings_from_file(PERSONAL_FILE_PATH)
+        #suppression de paramètres obsolètes
+        per_st =  { key:value for (key, value) in per_st.items() if key in deflt_st.keys()}
+        #ajout de nouveaux paramètres
         new_setts = [key for key in deflt_st if key not in per_st.keys()]
         for sett in new_setts:
             per_st[sett] = deflt_st[sett]
+        #mise à jour du fichier
         settings_to_file(PERSONAL_FILE_PATH, per_st)
 
 def get_settings():

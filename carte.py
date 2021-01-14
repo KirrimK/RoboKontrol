@@ -7,7 +7,7 @@ from time import time
 import lxml.etree as ET
 
 from PyQt5 import QtSvg
-from PyQt5.QtCore import Qt, QTimer, QRect, QPoint, pyqtSignal
+from PyQt5.QtCore import Qt, QTimer, QRect, QPoint, pyqtSignal, QT_VERSION_STR
 from PyQt5.QtGui import QBrush, QColor, QPainter, QFont#, QPen
 
 ROBOT_COLOR = 'green'
@@ -29,14 +29,11 @@ class MapView(QtSvg.QSvgWidget):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
-        self.map_is_svg = False
-        self.map_data = []
         self.width = self.geometry().width()
         self.height = self.geometry().height()
         self.svg_data = None
-        self.map_width = 2000
-        self.map_height = 3000
-        self.map_margin = 0
+        self.map_height = 2000
+        self.map_width = 3000
 
         self.mouse_pos = QPoint(0, 0)
         self.relative_mspos = [0, 0]
@@ -47,9 +44,12 @@ class MapView(QtSvg.QSvgWidget):
         self.clicking = False
         self.time_clicked = 0
 
+        self.qt_is_compatible = (float(QT_VERSION_STR[:4]) >= 5.15)
+        self.svg_scl = False
+
         self.timer = QTimer()
         self.timer.timeout.connect(self.repaint)
-        self.timer.start(200)
+        self.timer.start(50)
 
         self.setMouseTracking(True)
         self.key_binding={}
@@ -71,22 +71,18 @@ class MapView(QtSvg.QSvgWidget):
             self.time_clicked = 0
 
         #paint map
-        if not self.map_is_svg:
-            for rect in self.map_data:
-                size = rect[3]
-                pos = rect[4]
-                size, pos = self.calc_pos_size(size, pos)
-                painter.setBrush(QBrush(QColor(rect[2]), Qt.SolidPattern))
-                painter.drawRect(pos[0], pos[1], size[0], size[1])
-        else:
-            self.svg_data.render(painter)
+        self.svg_data.render(painter)
+
+        #paint map outline (for alignment purposes)
+        maprt_size, maprt_pos = self.calc_pos_size([3000, -2000], [0, 0])
+        painter.drawRect(QRect(maprt_pos[0], maprt_pos[1], maprt_size[0], maprt_size[1]))
 
         #paint robots
         bkd_robots = self.parent.backend.annu.robots
         for robot in bkd_robots:
             robot_pos = [bkd_robots[robot].x, bkd_robots[robot].y, bkd_robots[robot].theta]
             robot_size = [ROBOT_SIZE, ROBOT_SIZE]
-            mrbsize, mrbpos = self.calc_pos_size(robot_size, robot_pos)
+            mrbsize, mrbpos = self.calc_pos_size(robot_size, robot_pos[:2])
             if self.selected_robot == robot:
                 painter.setBrush(SELECTED_RB_BRUSH)
             elif bkd_robots[robot].isStopped :
@@ -100,7 +96,7 @@ class MapView(QtSvg.QSvgWidget):
             big_offset = [mrbpos[0] - mrbsize[0], mrbpos[1] - mrbsize[1]]
             robot_rect = QRect(pos_offset[0], pos_offset[1], mrbsize[0], mrbsize[1])
             outer_rect = QRect(big_offset[0], big_offset[1], 2*mrbsize[0], 2*mrbsize[1])
-            start_angle = (robot_pos[2] - 3) * 16
+            start_angle = (-robot_pos[2] + 3) * 16
             span_angle = 6 * 16
             painter.drawPie(outer_rect, start_angle, span_angle)
             painter.drawEllipse(robot_rect)
@@ -118,64 +114,50 @@ class MapView(QtSvg.QSvgWidget):
         rlp = self.relative_mspos
         painter.drawText(0, height-20, "x: {} y: {}".format(int(rlp[0]), int(rlp[1])))
 
-    def updt_map_data(self, config_path):
+    def updt_map_data(self, config_path, height, width):
         """Mise à jour des objets à dessiner sur la map
 
         Entrée:
-            - config_path (str): le chemin du fichier xml ou svg de config map
+            - config_path (str): le chemin du fichier svg de map
+            - height (int): taille de la carte, en mm
+            - width (int): taille de la carte, en mm
         """
-        self.map_is_svg = (config_path[-4:] == ".svg")
-        self.map_data = []
-        self.map_margin = 0
-        if not self.map_is_svg:
-            try:
-                root = ET.parse(config_path).getroot()
-                self.map_width = int(root.attrib.get('width'))
-                self.map_height = int(root.attrib.get('height'))
-                self.map_margin = int(root.attrib.get('margin'))
-                for rect in root.findall('rect'):
-                    nom = rect.attrib.get('nom')
-                    color = rect.find("color").text
-                    order = float(rect.find("order").text)
-                    size = rect.find("size").text.strip().split("x")
-                    pos = rect.find("pos").text.strip().split("x")
-                    rect_data = (order, nom, color, size, pos)
-                    self.map_data.append(rect_data)
-                self.map_data.sort()
-            except Exception as exc:
-                print(exc)
-        else:
+        self.svg_scl = self.qt_is_compatible and self.parent.settings_dict['SVG Scaling'] == "OUI"
+        self.map_width = height
+        self.map_height = width
+        try:
             self.svg_data = QtSvg.QSvgRenderer(config_path)
-            self.svg_data.setAspectRatioMode(Qt.KeepAspectRatio)
+            if self.svg_scl:
+                self.svg_data.setAspectRatioMode(Qt.KeepAspectRatio)
+        except Exception as exc:
+            print(exc)
 
     def calc_pos_size(self, size, pos):
         """Calcule les positions et tailles en fonction de la taille du widget"""
-        new_pos = [0, 0]
-        new_size = [0, 0]
-        new_pos[0] = int(pos[0])
-        new_pos[1] = int(pos[1])
-        new_size[0] = int(size[0])
-        new_size[1] = int(size[1])
-        width = self.geometry().width()
-        height = self.geometry().height()
-        map_ttl_height = self.map_width + 2 * self.map_margin
-        map_ttl_width = self.map_height + 2 * self.map_margin
-        if map_ttl_width/width >= map_ttl_height/height:
-            resize_factor = map_ttl_width/width
-            new_pos[0] = (int(new_pos[0])//resize_factor + self.map_margin//resize_factor)
-            new_pos[1] = height - (int(new_pos[1])//resize_factor +
-                         self.map_margin//resize_factor + height/2 -
-                         map_ttl_height//resize_factor/2)
-            new_size[0] = (int(new_size[0])//resize_factor)
-            new_size[1] = -(int(new_size[1])//resize_factor)
-        else:
-            resize_factor = map_ttl_height/height
-            new_pos[0] = (int(new_pos[0])//resize_factor +
-                         self.map_margin//resize_factor + width/2 -
-                         map_ttl_width//resize_factor/2)
-            new_pos[1] = height - (int(new_pos[1])//resize_factor + self.map_margin//resize_factor)
-            new_size[0] = (int(new_size[0])//resize_factor)
-            new_size[1] = -(int(new_size[1])//resize_factor)
+        new_pos = pos
+        new_size = size
+        if self.svg_scl: #si le SVG Scaling est activé
+            if self.map_width/self.width >= self.map_height/self.height:
+                resize_factor = self.map_width/self.width
+                new_pos[0] = (int(new_pos[0])//resize_factor)
+                new_pos[1] = (int(new_pos[1])//resize_factor +
+                            self.height/2 - self.map_height//resize_factor/2)
+                new_size[0] = (int(new_size[0])//resize_factor)
+                new_size[1] = -(int(new_size[1])//resize_factor)
+            else:
+                resize_factor = self.map_height/self.height
+                new_pos[0] = (int(new_pos[0])//resize_factor +
+                            self.width/2 - self.map_width//resize_factor/2)
+                new_pos[1] = int(new_pos[1])//resize_factor
+                new_size[0] = (int(new_size[0])//resize_factor)
+                new_size[1] = -(int(new_size[1])//resize_factor)
+        else: #sinon, stretching de base
+            resize_fctwdt = self.map_width/self.width
+            resize_fcthgt = self.map_height/self.height
+            new_pos[0] = (int(new_pos[0])//resize_fctwdt)
+            new_pos[1] = (int(new_pos[1])//resize_fcthgt)
+            new_size[0] = (int(new_size[0])//resize_fctwdt)
+            new_size[1] = -(int(new_size[1])//resize_fcthgt)
         return new_size, new_pos
 
     def keyPressEvent(self, event):
@@ -264,19 +246,20 @@ class MapView(QtSvg.QSvgWidget):
         qpoint_x = qpoint.x()
         qpoint_y = qpoint.y()
         new_pos = [qpoint_x, qpoint_y]
-        width = self.geometry().width()
-        height = self.geometry().height()
-        map_ttl_height = self.map_width + 2 * self.map_margin
-        map_ttl_width = self.map_height + 2 * self.map_margin
-        if map_ttl_width/width >= map_ttl_height/height:
-            resize_factor = map_ttl_width/width
-            new_pos[0] = (int(new_pos[0] - 1) - self.map_margin//resize_factor)*resize_factor
-            new_pos[1] = (int(-new_pos[1] + height + 2) - self.map_margin//resize_factor -
-                         height/2 + map_ttl_height//resize_factor/2)*resize_factor
+        if self.svg_scl:
+            if self.map_width/self.width >= self.map_height/self.height:
+                resize_factor = self.map_width/self.width
+                new_pos[0] = (int(new_pos[0] + 1))*resize_factor
+                new_pos[1] = (int(new_pos[1] + 1) - self.height/2 +
+                                self.map_height//resize_factor/2)*resize_factor
+            else:
+                resize_factor = self.map_height/self.height
+                new_pos[0] = (int(new_pos[0] + 1) - self.width/2 +
+                                self.map_width//resize_factor/2)*resize_factor
+                new_pos[1] = (int(new_pos[1] + 1))*resize_factor
         else:
-            resize_factor = map_ttl_height/height
-            new_pos[0] = (int(new_pos[0] - 1) - self.map_margin//resize_factor -
-                         width/2 + map_ttl_width//resize_factor/2)*resize_factor
-            new_pos[1] = (int(-new_pos[1] + height + 2) -
-                         self.map_margin//resize_factor)*resize_factor
+            resize_fctwdt = self.map_width/self.width
+            resize_fcthgt = self.map_height/self.height
+            new_pos[0] = new_pos[0]*resize_fctwdt - 2
+            new_pos[1] = new_pos[1]*resize_fcthgt - 2
         return new_pos
