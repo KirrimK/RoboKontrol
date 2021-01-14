@@ -214,6 +214,8 @@ def show_help():
 def main(backend):
     """ Création la fenêtre principale """
     app = QApplication(sys.argv)
+    backend.radio.app = app
+    backend.radio.launchQt ()
     window = Window(backend)
     window.window.show()
     sys.exit(app.exec_())
