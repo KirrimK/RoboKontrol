@@ -185,7 +185,7 @@ class Window(QMainWindow):
 
     @pyqtSlot()
     def onSaveButton (self) :
-        path = ''
+        path = self.settings_dict["Chemin de Sauvegarde"]
         if self.button_record.isChecked():
             self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCSD", path)
@@ -214,8 +214,7 @@ def show_help():
 def main(backend):
     """ Création la fenêtre principale """
     app = QApplication(sys.argv)
-    backend.radio.app = app
-    backend.radio.launchQt ()
+    backend.launchQt ()
     window = Window(backend)
     window.window.show()
     sys.exit(app.exec_())

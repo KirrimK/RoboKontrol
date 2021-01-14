@@ -114,7 +114,7 @@ class MapView(QtWidgets.QWidget):
         """Mise à jour des objets à dessiner sur la map
 
         Entrée:
-            - config_path (str): le chemin du fichier xml de config map
+            - config_path (str): le chemin du fichier xml ou svg de config map
         """
         self.map_data = []
         try:
@@ -173,7 +173,7 @@ class MapView(QtWidgets.QWidget):
         robot_down_key = self.parent.settings_dict["DOWN_KEY"]
         robot_left_key = self.parent.settings_dict["LEFT_KEY"]
         robot_right_key = self.parent.settings_dict["RIGHT_KEY"]
-        incr=1
+        incr=10
         cmd_pos=[0,0,None]
         if self.selected_robot is not None:
             selec_rob = bkd_robots[self.selected_robot]
