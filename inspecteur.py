@@ -1,64 +1,60 @@
-""" Module inspecteur.py - Récupère les données sur les robots et effectue les mise à jour """
+""" inspecteur.py - Définit l'affichage de l'inspecteur contenant les infomations des robots"""
 
-from PyQt5 import QtWidgets, QtCore
-import boite_robot
+from PyQt5.QtWidgets import QTabWidget
+from PyQt5.QtCore import pyqtSlot
+from tab_robot import TabRobot
 
-class Inspecteur(QtWidgets.QWidget):
-    """ Définit l'objet inspecteur qui comport les boites robots
+
+class Inspecteur(QTabWidget):
+    """ Définit l'objet inspecteur (QTabWidget) qui comport les onglets robots (QGroupBox)
     et qui les relie à backend avec des signaux """
 
-    def __init__(self, parent_widget, parent_layout, main_window, backend):
+    def __init__(self, window):
         super().__init__()
-        self.backend = backend
-        self.main_window = main_window
-        self.widget_parent = parent_widget
-        self.layout_parent = parent_layout
+        self.window = window
+        self.backend = self.window.backend
 
-        # Création de la liste des noms des robots présents
-        self.current_robots_list = []
-        # Création du dictionnaire des robots présents (k=nom, v=boite robot)
-        self.current_robots_dic = {}
+        self.ui_setup_tab()
 
-        # Création d'un timer
-        self.timer = QtCore.QTimer(self.main_window)
-        # Connexion de ce timer au slot de mise à jour des robots
-        self.timer.timeout.connect(self.update_robot)
-        # Définit la période temporelle (en ms) associée a la fréquence de mise à jour du timer
-        self.timer.start(400)
+    def ui_setup_tab(self):
+        """ Configure l'inspecteur"""
+        self.setMaximumSize(400, 16777215)
 
-    @QtCore.pyqtSlot()
-    def update_robot(self):
+    @pyqtSlot()
+    def update_robots(self, new_robots):
         """ Met à jour la liste des robots présents
         et initialise la mise à jour de toutes les boites robots """
 
-        new_robots = self.backend.get_all_robots()
-
         # Ajoute les nouveaux robots
-        for robot in set(new_robots) - set(self.current_robots_list):
-            self.add_robot(robot)
-
-        # Supprime les robots qui ne sont plus présents
-        for robot in set(self.current_robots_list) - set(new_robots):
-            self.remove_robot(robot)
+        for rid in set(new_robots) - set(self.window.current_robots_list):
+            self.add_robot(rid)
 
         # Met à jour la liste des robots présents
-        self.current_robots_list = new_robots
+        self.window.current_robots_list = new_robots
 
         # Initialise la mise à jours des robots
-        for _, value in self.current_robots_dic.items():
-            value.update_boite_robot()
+        for value in self.window.current_robots_dic.values():
+            value.update_tab_robot()
 
-    def add_robot(self, nom_robot):
+    def add_robot(self, rid):
         """ Ajoute le robot dont le nom est placé en paramètre
         sous forme d'une boite robot dans la zone inspecteur """
-        self.boite_robot = boite_robot.BoiteRobot(self.widget_parent,
-                                        self.layout_parent, str(nom_robot), self)
-        self.current_robots_dic[self.boite_robot.rid] = self.boite_robot
 
-    def remove_robot(self, nom_robot):
+        # Création d'un onglet robot
+        self.tab_robot = TabRobot(rid, self.window)
+        self.window.current_robots_dic[rid] = self.tab_robot
+
+        # Ajout de l'onglet à l'inspecteur
+        self.addTab(self.tab_robot, rid)
+
+    @pyqtSlot()
+    def remove_robot(self, rid):
         """ Supprime de l'inspecteur la boite robot associée
         au robot dont le nom est placé en paramètre """
-        deleted_robot = self.current_robots_dic.pop(nom_robot)
-        deleted_robot.remove_box_robot()
+
+        # Cache l'affichage de l'onglet du robot
+        self.window.current_robots_dic.pop(rid).hide()
+        # Retire l'onglet actuellement sélectionnée
+        self.removeTab(self.currentIndex())
         # Envoie l'information que le robot a été supprimé (via le bouton supprimer)
-        self.backend.stopandforget_robot(nom_robot)
+        self.backend.stopandforget_robot(rid)
