@@ -4,6 +4,21 @@ import sys
 from time import sleep, time
 import annuaire
 import ivy_radio as rd
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt5.QtWidgets import QWidget
+
+class WidgetBackend (QWidget):
+    """Classe implémentée car les signaux Qt doivent être envoyés par des objets Qt
+    Attributs : _radio (Radio) : l'objet parent auquel sont reliés les connections de signal."""
+    PosRegSignal = pyqtSignal (list)
+    CaptRegSignal = pyqtSignal (list)
+    ActuDeclSignal = pyqtSignal (list)
+    def __init__ (self, backend):
+        super().__init__()
+        self.backend = backend
+        self.PosRegSignal.connect (lambda liste : self.backend.onPosRegSignal (liste))
+        self.CaptRegSignal.connect (lambda liste : self.backend.onCaptRegSignal (liste))
+        self.ActuDeclSignal.connect (lambda liste : self.backend.onActuDeclSignal (liste))
 
 class Backend:
     """Un objet faisant le lien entre un Annuaire (module annuaire)
@@ -32,6 +47,14 @@ class Backend:
             self.attach_radio(radio)
         if isinstance(annu, annuaire.Annuaire):
             self.attach_annu(annu)
+        self.widget = None
+
+    def launchQt (self):
+        """Méthode appelée après le lancement de l'application
+        Les Widgets ne peuvent exister que s'il y a une application Qt
+        
+        Initialise l'attribut self.widget"""
+        self.widget = WidgetBackend (self)
 
     def __str__(self, erase_flag=False):
         if not erase_flag:
@@ -118,6 +141,68 @@ class Backend:
         if isinstance(radio, rd.Radio) and self.radio is None:
             self.radio = radio
             self.radio.backend = self
+
+    #Réactions aux signaux Qt
+
+    def onPosRegSignal (self, liste ):
+        """Méthode appelée automatiquement par on_posreg
+        Transmet les valeurs envoyées par le robot vers l'annuaire
+        Input :
+            [rid (str), x (str), y (str), theta (str)] (list)"""
+        rid, x, y, theta = liste [0], liste [1], liste [2], liste [3]
+        if not self.annu.check_robot (rid):
+            self.track_robot (rid)
+            self.radio.send_cmd (rd.DESCR_CMD.format (rid))
+        self.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
+        
+    def onActuDeclSignal (self, liste):
+        """Fonction appelée automatiquement par on_actudecl.
+        Ajoute l'actionnneur aid sur le robot rid.
+        Si aid est le nom d'un capteur déjà présent sur le robot, la valeur est gardée.
+
+        Input : [rid (str), aid (str), minV (str), maxV (str), step (str), droits (str), unit (str)] (list)"""
+        rid, aid, minv, maxv, step, droits, unit = liste [0], liste [1], liste [2], liste [3], liste [4], liste [5], liste [6]
+        if droits == 'RW':
+            val = False
+            binaire = False
+            if float (minv) + float (step) >= float (maxv) :
+                binaire = True
+            if self.annu.find (rid,aid) is not None :
+                val = True
+                valeur = self.annu.find (rid,aid).get_state () [0]
+            if binaire :
+                self.annu.find (rid).create_eqp (aid, "Binaire")
+            else :
+                self.annu.find (rid).create_eqp (aid, "Actionneur",float(minv), float(maxv),
+                                                 float(step), unit)
+            if val:
+                self.annu.find (rid,aid).set_state (valeur)
+        elif droits == 'READ':
+            add = False
+            if not self.annu.find (rid).check_eqp (aid):
+                add, val = True, None
+            elif self.annu.find (rid, aid).get_type () is not annuaire.Actionneur :
+                    add, val = True, self.annu.find (rid, aid).get_state() [0]
+            if add:
+                self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
+                self.annu.find (rid, aid).set_state (val)
+
+
+        
+    def onCaptRegSignal (self, liste):
+        """Fonction appelée automatiquement par on_captreg.
+        Change la valeur du capteur sid sur le robot rid.
+        Si aucun robot rid n'est connu, le robot est ajouté.
+        Si le robot rid n'a pas de capteur sid, le capteur est ajouté.
+        
+        Input : [rid (str), sid (str), valeur (str)] (list)"""
+        rid, sid, valeur = liste [0], liste [1], liste [2]
+        if not self.annu.check_robot (rid):
+            self.track_robot (rid)
+            self.radio.send_cmd (rd.DESCR_CMD.format (rid))
+        if not self.annu.find (rid).check_eqp (sid):
+            self.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
+        self.annu.find (rid,sid).set_state (float (valeur))
 
     def track_robot(self, robot_name):
         """Invoqué lors de la demande de tracking d'un robot via l'interface graphique,
