@@ -14,6 +14,9 @@
   <setting nom="Carte (Scaling)">
     <check>n</check>
   </setting>
+  <setting nom="Carte (Outline)">
+    <check>n</check>
+  </setting>
   <setting nom="Carte (Dimensions)">
     <field>3000x2000</field>
   </setting>
