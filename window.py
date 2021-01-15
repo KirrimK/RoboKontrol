@@ -131,19 +131,31 @@ class Window(QMainWindow):
 
     def act_settings(self):
         """Effectuer les actions liées aux paramètres"""
-        dim_crte = self.settings_dict["Dimensions Carte"].split("x")
-        self.map_view.updt_map_data(self.settings_dict["Fichier Carte"], int(dim_crte[0]), int(dim_crte[1]))
-        if self.settings_dict["Bouton Nv. Simulateur"]:
+        dim_crte = self.settings_dict["Carte (Dimensions)"].split("x")
+        self.map_view.updt_map_data(self.settings_dict["Carte (Fichier)"], int(dim_crte[0]), int(dim_crte[1]))
+        if self.settings_dict["Simulateur (Activer Bouton)"]:
             self.button_simu.show()
         else:
             self.button_simu.hide()
+        if self.settings_dict["Enregistrement/Playback (Activer Bouton)"]:
+            self.button_record.show()
+            self.button_play.show()
+            self.button_pause.show()
+            self.button_stop.show()
+            self.button_save.show()
+        else:
+            self.button_record.hide()
+            self.button_play.hide()
+            self.button_pause.hide()
+            self.button_stop.hide()
+            self.button_save.hide()
 
     def show_settings(self):
         """ Ouvre un popup (QDialog) Configuration
         permettant la modification des réglages d'enregistrement"""
         setting = QDialog(self.window)
         setting.setWindowTitle("Configuration")
-        setting.setMinimumSize(500, 400)
+        setting.setMinimumSize(550, 400)
         setting.layout = QVBoxLayout(setting)
 
         #paramètres d'un setting

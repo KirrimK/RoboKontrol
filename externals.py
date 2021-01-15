@@ -5,6 +5,7 @@ import os
 import subprocess
 import shutil
 import random
+from operator import itemgetter
 import lxml.etree as ET
 
 MODULE_PATH = os.path.dirname(__file__)
@@ -53,7 +54,7 @@ def settings_from_file(file_path):
                 settings[nom] = (check.text == "y")
     except Exception as exc:
         print(exc)
-    return settings
+    return dict(sorted(settings.items(), key=itemgetter(0)))
 
 def settings_to_file(path, settings):
     """Sauvegarde des évènements Evt dans un fichier (*.xml)
@@ -78,10 +79,8 @@ def exec_simu(st_dict):
     char_seq = [ chr(random.randint(65, 90)) for _ in range(0, 7)]
     rbt_name = "".join(char_seq)
     try:
-        if os.path.exists(st_dict["Chemin Simulateur"]):
-            if shutil.which("python3"):
-                subprocess.Popen(["python3", st_dict["Chemin Simulateur"], rbt_name])
-            else:
-                subprocess.Popen(["python", st_dict["Chemin Simulateur"], rbt_name])
+        path = st_dict["Simulateur (Chemin)"]
+        if os.path.exists(path):
+            subprocess.Popen(["python3" if shutil.which("python3") else "python", path, rbt_name])
     except Exception as exc:
         print(exc)

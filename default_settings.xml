@@ -1,23 +1,26 @@
 <settings>
-  <setting nom="Fichier Carte">
+  <setting nom="Carte (Fichier)">
     <field>data/fondTable21.svg</field>
   </setting>
-  <setting nom="Chemin Simulateur">
+  <setting nom="Simulateur (Chemin)">
     <field></field>
   </setting>
-  <setting nom="Chemin de Sauvegarde">
+  <setting nom="Enregistrement/Playback (Chemin Sauvegarde)">
     <field></field>
   </setting>
-  <setting nom="Clic Droit Tablette">
+  <setting nom="Carte (Tactile)">
     <check>n</check>
   </setting>
-  <setting nom="SVG Scaling">
+  <setting nom="Carte (Scaling)">
     <check>n</check>
   </setting>
-  <setting nom="Dimensions Carte">
+  <setting nom="Carte (Dimensions)">
     <field>3000x2000</field>
   </setting>
-  <setting nom="Bouton Nv. Simulateur">
+  <setting nom="Simulateur (Activer Bouton)">
     <check>n</check>
+  </setting>
+  <setting nom="Enregistrement/Playback (Activer Bouton)">
+    <check>y</check>
   </setting>
 </settings>
