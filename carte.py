@@ -4,9 +4,8 @@
 
 from math import sqrt
 from time import time
-import lxml.etree as ET
 
-from PyQt5 import QtSvg
+from PyQt5 import QtSvg, QtWidgets
 from PyQt5.QtCore import Qt, QTimer, QRect, QPoint, pyqtSignal, QT_VERSION_STR
 from PyQt5.QtGui import QBrush, QColor, QPainter, QFont#, QPen
 
@@ -20,12 +19,11 @@ STOPPED_BRUSH = QBrush(QColor(STOPPED_COLOR), Qt.SolidPattern)
 CLICK_BRUSH = QBrush(QColor(CLICK_COLOR), Qt.Dense7Pattern)
 ROBOT_SIZE = 200
 
-class MapView(QtSvg.QSvgWidget):
-
+class MapView(QtWidgets.QWidget):
+    """Un widget permettant de visualiser la carte et les robots dessus"""
     # Création d'un signal de sélection du robot sur la map
     selected_robot_signal = pyqtSignal(str)
 
-    """Un widget permettant de visualiser la carte et les robots dessus"""
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
@@ -233,7 +231,7 @@ class MapView(QtSvg.QSvgWidget):
         """Quand la souris est bougée sur la fenêtre"""
         self.mouse_pos = event.localPos()
         self.relative_mspos = self.reverse_pos(self.mouse_pos)
-        """drag and drop """
+        #drag and drop
         if self.selected_robot is not None:
             if event.button == Qt.LeftButton:
                 pos_cmd=[0,0,None]
@@ -249,14 +247,14 @@ class MapView(QtSvg.QSvgWidget):
         if self.svg_scl:
             if self.map_width/self.width >= self.map_height/self.height:
                 resize_factor = self.map_width/self.width
-                new_pos[0] = (int(new_pos[0] + 1))*resize_factor
-                new_pos[1] = (int(new_pos[1] + 1) - self.height/2 +
+                new_pos[0] = (int(new_pos[0] - 1))*resize_factor
+                new_pos[1] = (int(new_pos[1] - 1) - self.height/2 +
                                 self.map_height//resize_factor/2)*resize_factor
             else:
                 resize_factor = self.map_height/self.height
-                new_pos[0] = (int(new_pos[0] + 1) - self.width/2 +
+                new_pos[0] = (int(new_pos[0] - 1) - self.width/2 +
                                 self.map_width//resize_factor/2)*resize_factor
-                new_pos[1] = (int(new_pos[1] + 1))*resize_factor
+                new_pos[1] = (int(new_pos[1] - 1))*resize_factor
         else:
             resize_fctwdt = self.map_width/self.width
             resize_fcthgt = self.map_height/self.height

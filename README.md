@@ -9,10 +9,6 @@ Développée pour le projet programmation python en première année ingénieur 
 ### Utilisation normale:
 - Cloner le dépôt dans le dossier de votre choix: `git clone https://github.com/KirrimK/Projet_Info_ENAC_1A`
 - Installer les librairies python requises: `pip install ivy-python lxml PyQt5`
-- Pour les installations python >= 3.9, il est nécessaire de modifier le code de la librairie Ivy, qui utilise une fonction obsolète du module Threading de python (car n'ayant pas été mise à jour pour être compatible).
-Naviguer jusqu'au dossier d'installation des librairies python et modifier le fichier `ivy/ivy.py` à la ligne `918` en remplaçant `return self._thread.isAlive()` par `return self._thread.is_alive()`.
-
-L'application peut être utilisée.
 
 ### Développement:
 - Effectuer toutes les étapes ci-dessus.
@@ -25,5 +21,6 @@ L'application peut être utilisée.
 En l'absence de robot, le programme suivant est un simulateur compatible: [https://github.com/Fabien-B/robotSim](https://github.com/Fabien-B/robotSim)
 
 Pour lancer l'application, executer `main.py`.
+
 ### Mode d'emploi
 (TBD)
