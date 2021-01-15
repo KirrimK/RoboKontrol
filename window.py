@@ -133,6 +133,10 @@ class Window(QMainWindow):
         """Effectuer les actions liées aux paramètres"""
         dim_crte = self.settings_dict["Dimensions Carte"].split("x")
         self.map_view.updt_map_data(self.settings_dict["Fichier Carte"], int(dim_crte[0]), int(dim_crte[1]))
+        if self.settings_dict["Bouton Nv. Simulateur"]:
+            self.button_simu.show()
+        else:
+            self.button_simu.hide()
 
     def show_settings(self):
         """ Ouvre un popup (QDialog) Configuration

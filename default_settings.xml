@@ -17,4 +17,7 @@
   <setting nom="Dimensions Carte">
     <field>3000x2000</field>
   </setting>
+  <setting nom="Bouton Nv. Simulateur">
+    <check>n</check>
+  </setting>
 </settings>
