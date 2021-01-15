@@ -45,8 +45,12 @@ def settings_from_file(file_path):
         root = ET.parse(file_path).getroot()
         for setting in root.findall('setting'):
             nom = setting.attrib.get('nom')
-            field = setting.find("field").text
-            settings[nom] = field
+            check = setting.find("check")
+            if check is None:
+                field = setting.find("field").text
+                settings[nom] = field
+            else:
+                settings[nom] = (check.text == "y")
     except Exception as exc:
         print(exc)
     return settings
@@ -58,8 +62,12 @@ def settings_to_file(path, settings):
     for obj in settings:
         obj_xml = ET.Element("setting")
         obj_xml.set('nom', obj)
-        field = ET.SubElement(obj_xml, "field")
-        field.text = settings[obj]
+        if isinstance(settings[obj], bool):
+            field = ET.SubElement(obj_xml, "check")
+            field.text = "y" if settings[obj] else "n"
+        else:
+            field = ET.SubElement(obj_xml, "field")
+            field.text = settings[obj]
         root.append(obj_xml)
     tree = ET.ElementTree(root)
     with open(path, "wb") as save:

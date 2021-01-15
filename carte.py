@@ -109,7 +109,7 @@ class MapView(QtWidgets.QWidget):
             painter.setFont(font)
             painter.drawText(robot_rect, Qt.AlignCenter, robot)
         #si en cours de click, afficher une petite ellipse qui se remplit
-        if self.clicking and self.parent.settings_dict["Clic Droit Tablette"] == "OUI":
+        if self.clicking and self.parent.settings_dict["Clic Droit Tablette"] == True:
             ell_rect = QRect(self.mouse_pos.x() - 25, self.mouse_pos.y() - 25, 50, 50)
             painter.setBrush(CLICK_BRUSH)
             painter.drawPie(ell_rect, 0, 360/1.5*self.time_clicked*16)
@@ -126,7 +126,7 @@ class MapView(QtWidgets.QWidget):
             - height (int): taille de la carte, en mm
             - width (int): taille de la carte, en mm
         """
-        self.svg_scl = self.qt_is_compatible and self.parent.settings_dict['SVG Scaling'] == "OUI"
+        self.svg_scl = self.qt_is_compatible and self.parent.settings_dict['SVG Scaling'] == True
         self.map_width = height
         self.map_height = width
         try:
@@ -227,7 +227,7 @@ class MapView(QtWidgets.QWidget):
     def mouseReleaseEvent(self, event):
         """Quand la souris est relachée"""
         self.clicking = False
-        if self.time_clicked > 1.5 and self.parent.settings_dict["Clic Droit Tablette"] == "OUI":
+        if self.time_clicked > 1.5 and self.parent.settings_dict["Clic Droit Tablette"] == True:
             self.selected_robot = None
             for robot in self.parent.backend.annu.robots:
                 if self.distance(robot) < ROBOT_SIZE:

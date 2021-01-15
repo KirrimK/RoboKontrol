@@ -4,7 +4,7 @@ import sys
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 from PyQt5.QtWidgets import QGroupBox, QPushButton, QSpacerItem
 from PyQt5.QtWidgets import QDialog, QSizePolicy, QMessageBox
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QCheckBox
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QTimer, QSize
 from carte import MapView
 from inspecteur import Inspecteur
@@ -148,7 +148,10 @@ class Window(QMainWindow):
         def updt_settings():
             """Mise à jour des paramètres"""
             for setting_nm in self.settings_dict:
-                self.settings_dict[setting_nm] = field_dict[setting_nm].text()
+                if isinstance(field_dict[setting_nm], QCheckBox):
+                    self.settings_dict[setting_nm] = field_dict[setting_nm].isChecked()
+                else:
+                    self.settings_dict[setting_nm] = field_dict[setting_nm].text()
             externals.set_settings(self.settings_dict)
 
         update_btn = QPushButton("Sauvegarder")
@@ -163,8 +166,12 @@ class Window(QMainWindow):
             label = QLabel(setting_nm)
             box_layout.addWidget(label)
 
-            field_dict[setting_nm] = QLineEdit(setting)
-            field_dict[setting_nm].setText(self.settings_dict[setting_nm])
+            if isinstance(self.settings_dict[setting_nm], bool):
+                field_dict[setting_nm] = QCheckBox(setting)
+                field_dict[setting_nm].setChecked(self.settings_dict[setting_nm])
+            else:
+                field_dict[setting_nm] = QLineEdit(setting)
+                field_dict[setting_nm].setText(self.settings_dict[setting_nm])
             box_layout.addWidget(field_dict[setting_nm])
 
         setting.exec_()
