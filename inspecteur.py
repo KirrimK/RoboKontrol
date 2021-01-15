@@ -14,6 +14,7 @@ class Inspecteur(QTabWidget):
         self.window = window
         self.backend = self.window.backend
 
+        self.window.map_view.selected_robot_signal.connect(lambda rid: self.setCurrentIndex(self.window.current_robots_list.index(rid)))
 
         self.ui_setup_tab()
 
