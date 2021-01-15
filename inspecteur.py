@@ -9,9 +9,6 @@ class Inspecteur(QTabWidget):
     """ Définit l'objet inspecteur (QTabWidget) qui comport les onglets robots (QGroupBox)
     et qui les relie à backend avec des signaux """
 
-    # Création d'un signal de sélection d'un onglet robot
-    selected_tab_signal = pyqtSignal(str)
-
     def __init__(self, window):
         super().__init__()
         self.window = window
@@ -45,7 +42,7 @@ class Inspecteur(QTabWidget):
             value.update_tab_robot()
 
         if self.window.current_robots_list:
-            self.selected_tab_signal.emit(self.window.current_robots_list[self.currentIndex()])
+            self.window.map_view.selected_robot_signal.emit(self.window.current_robots_list[self.currentIndex()])
 
     def add_robot(self, rid):
         """ Ajoute le robot dont le nom est placé en paramètre

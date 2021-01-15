@@ -52,11 +52,17 @@ class MapView(QtWidgets.QWidget):
         self.setMouseTracking(True)
         self.key_binding={}
 
+        self.selected_robot_signal.connect(lambda rid: self.select_robot(rid))
+
         self.show()
 
     def paintEvent(self, event):
         """Evt appellé à chaque fois que le widget est resize ou caché"""
         self.paint()
+
+    def select_robot(self, rid):
+        """ Le robot associé à rid devient le robot sélectionné"""
+        self.selected_robot = rid
 
     def paint(self):
         """Dessin de la map et des robots"""
