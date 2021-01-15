@@ -42,7 +42,8 @@ class MapView(QtWidgets.QWidget):
         self.clicking = False
         self.time_clicked = 0
 
-        self.qt_is_compatible = (float(QT_VERSION_STR[:4]) >= 5.15)
+        version = QT_VERSION_STR.split(".")
+        self.qt_is_compatible = float(version[0]) >= 5 and float(version[1]) >= 15
         self.svg_scl = False
 
         self.timer = QTimer()
