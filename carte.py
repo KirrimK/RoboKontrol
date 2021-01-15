@@ -78,8 +78,9 @@ class MapView(QtWidgets.QWidget):
         self.svg_data.render(painter)
 
         #paint map outline (for alignment purposes)
-        maprt_size, maprt_pos = self.calc_pos_size([3000, -2000], [0, 0])
-        painter.drawRect(QRect(maprt_pos[0], maprt_pos[1], maprt_size[0], maprt_size[1]))
+        if self.parent.settings_dict["Carte (Outline)"]:
+            maprt_size, maprt_pos = self.calc_pos_size([3000, -2000], [0, 0])
+            painter.drawRect(QRect(maprt_pos[0], maprt_pos[1], maprt_size[0], maprt_size[1]))
 
         #paint robots
         bkd_robots = self.parent.backend.annu.robots
@@ -109,7 +110,7 @@ class MapView(QtWidgets.QWidget):
             painter.setFont(font)
             painter.drawText(robot_rect, Qt.AlignCenter, robot)
         #si en cours de click, afficher une petite ellipse qui se remplit
-        if self.clicking and self.parent.settings_dict["Carte (Tactile)"] == True:
+        if self.clicking and self.parent.settings_dict["Carte (Tactile)"]:
             ell_rect = QRect(self.mouse_pos.x() - 25, self.mouse_pos.y() - 25, 50, 50)
             painter.setBrush(CLICK_BRUSH)
             painter.drawPie(ell_rect, 0, 360/1.5*self.time_clicked*16)
@@ -126,15 +127,13 @@ class MapView(QtWidgets.QWidget):
             - height (int): taille de la carte, en mm
             - width (int): taille de la carte, en mm
         """
-        self.svg_scl = self.qt_is_compatible and self.parent.settings_dict['Carte (Scaling)'] == True
+        self.svg_scl = self.qt_is_compatible and self.parent.settings_dict['Carte (Scaling)']
         self.map_width = height
         self.map_height = width
-        try:
-            self.svg_data = QtSvg.QSvgRenderer(config_path)
-            if self.svg_scl:
-                self.svg_data.setAspectRatioMode(Qt.KeepAspectRatio)
-        except Exception as exc:
-            print(exc)
+
+        self.svg_data = QtSvg.QSvgRenderer(config_path)
+        if self.svg_scl:
+            self.svg_data.setAspectRatioMode(Qt.KeepAspectRatio)
 
     def calc_pos_size(self, size, pos):
         """Calcule les positions et tailles en fonction de la taille du widget"""
@@ -227,7 +226,7 @@ class MapView(QtWidgets.QWidget):
     def mouseReleaseEvent(self, event):
         """Quand la souris est relachée"""
         self.clicking = False
-        if self.time_clicked > 1.5 and self.parent.settings_dict["Carte (Tactile)"] == True:
+        if self.time_clicked > 1.5 and self.parent.settings_dict["Carte (Tactile)"]:
             self.selected_robot = None
             for robot in self.parent.backend.annu.robots:
                 if self.distance(robot) < ROBOT_SIZE:
