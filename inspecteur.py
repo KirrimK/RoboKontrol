@@ -14,7 +14,6 @@ class Inspecteur(QTabWidget):
         self.window = window
         self.backend = self.window.backend
 
-        self.window.map_view.selected_robot_signal.connect(lambda rid: self.setCurrentIndex(self.window.current_robots_list.index(rid)))
 
         self.ui_setup_tab()
 
@@ -44,6 +43,10 @@ class Inspecteur(QTabWidget):
         if self.window.current_robots_list:
             self.window.map_view.selected_robot_signal.emit(self.window.current_robots_list[self.currentIndex()])
 
+        else:
+            # Dans le cas d'une liste de robot vide le robot sélectionné devient None
+            self.window.map_view.select_robot(None)
+
     def add_robot(self, rid):
         """ Ajoute le robot dont le nom est placé en paramètre
         sous forme d'une boite robot dans la zone inspecteur """
@@ -60,9 +63,12 @@ class Inspecteur(QTabWidget):
         """ Supprime de l'inspecteur la boite robot associée
         au robot dont le nom est placé en paramètre """
 
-        # Cache l'affichage de l'onglet du robot
-        self.window.current_robots_dic.pop(rid).hide()
-        # Retire l'onglet actuellement sélectionnée
         self.removeTab(self.currentIndex())
+
+        self.window.current_robots_dic.pop(rid).hide()
+
+        # self.window.map_view.selected_robot_signal.emit(self.window.current_robots_list[self.currentIndex()])
+        # Cache l'affichage de l'onglet du robot
+        # Retire l'onglet actuellement sélectionnée
         # Envoie l'information que le robot a été supprimé (via le bouton supprimer)
         self.backend.stopandforget_robot(rid)
