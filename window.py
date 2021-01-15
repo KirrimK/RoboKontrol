@@ -3,7 +3,7 @@
 import sys
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 from PyQt5.QtWidgets import QGroupBox, QPushButton, QSpacerItem
-from PyQt5.QtWidgets import QDialog, QSizePolicy, QMessageBox
+from PyQt5.QtWidgets import QDialog, QSizePolicy, QMessageBox, QFileDialog
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QCheckBox
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QTimer, QSize
 from carte import MapView
@@ -91,6 +91,7 @@ class Window(QMainWindow):
         # Création du bouton play
         self.button_play.setMaximumSize(200, 16777215)
         self.button_play.setText("|>")
+        self.button_play.clicked.connect(self.show_play_dialog)
         self.layout_menu.addWidget(self.button_play)
 
         # Création du bouton pause
@@ -128,6 +129,18 @@ class Window(QMainWindow):
         self.layout_menu.addWidget(self.button_help)
 
         self.layout_window.addWidget(self.menu_area)
+
+    def show_play_dialog(self):
+        """Ouvre un petit popup demandant de choisir un fichier à lire"""
+        file_name = self.get_filename()
+        self.settings_dict["Enregistrement/Playback (Dernière Lecture)"] = file_name
+
+    def get_filename(self):
+        """Obtenir un nom de fichier à partir d'un QFileDialog"""
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        file_name, _ = QFileDialog.getOpenFileName(self, "Choisir un fichier à lire", "", "All Files (*)", options=options)
+        return file_name
 
     def act_settings(self):
         """Effectuer les actions liées aux paramètres"""
@@ -214,7 +227,7 @@ class Window(QMainWindow):
             self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCSD", path)
             self.button_record.setChecked(False)
-            
+
     @pyqtSlot()
     def update_window(self):
         """ Initialise la mise à jour de la fenêtre"""

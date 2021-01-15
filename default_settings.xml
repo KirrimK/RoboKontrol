@@ -8,6 +8,9 @@
   <setting nom="Enregistrement/Playback (Chemin Sauvegarde)">
     <field></field>
   </setting>
+  <setting nom="Enregistrement/Playback (Dernière Lecture)">
+    <field></field>
+  </setting>
   <setting nom="Carte (Tactile)">
     <check>n</check>
   </setting>
