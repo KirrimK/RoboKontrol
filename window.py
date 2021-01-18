@@ -62,11 +62,8 @@ class Window(QMainWindow):
 
         # Création du dictionnaire des robots présents (k=nom, v=boite robot)
 
-        # Création de timer
-        self.timer = QTimer(self)
-        self.timer.start(100)
-        # Connexion du signal timer avec le slot de mise à jour de la fenêtre
-        self.timer.timeout.connect(self.update_window)
+        # Connexion du signal de UpdateTrigger avec le slot de mise à jour de la fenêtre
+        self.backend.widget.UpdateTrigger.connect(self.update_window)
 
         # Connexion du signal de mise à jour de la liste des robots présents
         # avec le slot de maj des robots affichés
@@ -232,7 +229,7 @@ class Window(QMainWindow):
 
     @pyqtSlot()
     def onSaveButton(self):
-        path = self.settings_dict["Chemin de Sauvegarde"]
+        path = self.settings_dict["Enregistrement/Playback (Chemin Sauvegarde)"]
         if self.button_record.isChecked():
             self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCSD", path)

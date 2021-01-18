@@ -13,6 +13,7 @@ class WidgetBackend (QWidget):
     PosRegSignal = pyqtSignal (list)
     CaptRegSignal = pyqtSignal (list)
     ActuDeclSignal = pyqtSignal (list)
+    UpdateTrigger = pyqtSignal (list)
     def __init__ (self, backend):
         super().__init__()
         self.backend = backend
@@ -53,7 +54,7 @@ class Backend:
     def launchQt (self):
         """Méthode appelée après le lancement de l'application
         Les Widgets ne peuvent exister que s'il y a une application Qt
-        
+
         Initialise l'attribut self.widget
         Réagit aux messages reçus avant le lancement de l'application Qt"""
         self.widget = WidgetBackend (self)
@@ -163,7 +164,8 @@ class Backend:
             self.track_robot (rid)
             self.radio.send_cmd (rd.DESCR_CMD.format (rid))
         self.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
-        
+        self.widget.UpdateTrigger.emit([])
+
     def onActuDeclSignal (self, liste):
         """Fonction appelée automatiquement par on_actudecl.
         Ajoute l'actionnneur aid sur le robot rid.
@@ -195,9 +197,8 @@ class Backend:
             if add:
                 self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
                 self.annu.find (rid, aid).set_state (val)
+        self.widget.UpdateTrigger.emit([])
 
-
-        
     def onCaptRegSignal (self, liste):
         """Fonction appelée automatiquement par on_captreg.
         Change la valeur du capteur sid sur le robot rid.
@@ -212,6 +213,7 @@ class Backend:
         if not self.annu.find (rid).check_eqp (sid):
             self.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
         self.annu.find (rid,sid).set_state (float (valeur))
+        self.widget.UpdateTrigger.emit([])
 
     def track_robot(self, robot_name):
         """Invoqué lors de la demande de tracking d'un robot via l'interface graphique,
@@ -223,6 +225,7 @@ class Backend:
             - robot_name (str): nom du robot à tracker
         """
         self.annu.add_robot(annuaire.Robot(robot_name))
+        self.widget.UpdateTrigger.emit([])
 
     def emergency_stop_robot (self, rid):
         """Commande équivalente au boutton d'arrêt d'urgence.
@@ -248,6 +251,7 @@ class Backend:
         self.annu.remove_robot(robot_name)
         if self.radio_started:
             self.radio.send_cmd (rd.KILL_CMD.format (robot_name))
+        self.widget.UpdateTrigger.emit([])
 
     def forget_robot(self, robot_name):
         """Oublie toutes les informations connues sur le robot en question.
@@ -256,6 +260,7 @@ class Backend:
             - robot_name (str): nom du robot
         """
         self.annu.remove_robot(robot_name)
+        self.widget.UpdateTrigger.emit([])
 
     def sendposcmd_robot(self, rid, pos):
         """Envoie une commande de position au robot désigné
