@@ -14,6 +14,7 @@ class WidgetBackend (QWidget):
     CaptRegSignal = pyqtSignal (list)
     ActuDeclSignal = pyqtSignal (list)
     UpdateTrigger = pyqtSignal (list)
+    MapTrigger = pyqtSignal (list)
     def __init__ (self, parent_backend):
         super().__init__()
         self.backend = parent_backend
@@ -165,6 +166,7 @@ class Backend:
             self.radio.send_cmd (rd.DESCR_CMD.format (rid))
         self.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
         self.widget.UpdateTrigger.emit([])
+        self.widget.MapTrigger.emit([])
 
     def onActuDeclSignal (self, liste):
         """Fonction appelée automatiquement par on_actudecl.
@@ -251,6 +253,7 @@ class Backend:
         if self.radio_started:
             self.radio.send_cmd (rd.KILL_CMD.format (robot_name))
         self.widget.UpdateTrigger.emit([])
+        self.widget.MapTrigger.emit([])
 
     def forget_robot(self, robot_name):
         """Oublie toutes les informations connues sur le robot en question.
@@ -260,6 +263,7 @@ class Backend:
         """
         self.annu.remove_robot(robot_name)
         self.widget.UpdateTrigger.emit([])
+        self.widget.MapTrigger.emit([])
 
     def sendposcmd_robot(self, rid, pos):
         """Envoie une commande de position au robot désigné
