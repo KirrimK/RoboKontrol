@@ -1,5 +1,6 @@
 """ tab_robot.py - Définit l'affichage d'un onglet robot"""
 
+from math import pi
 import time
 import annuaire
 from PyQt5.QtWidgets import QLabel, QWidget, QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout,QLineEdit, QLCDNumber, \
@@ -172,7 +173,7 @@ class TabRobot(QWidget):
             # Mise à jour du vecteur position du robot
             self.x = float(new_position[1])
             self.y = float(new_position[2])
-            self.theta = float(new_position[3])
+            self.theta = float(new_position[3])*360/(2*pi)
             # Récupération du timestamp de dernière mise à jour de la position
             self.last_update_pos = float(new_position[4])
 
