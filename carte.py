@@ -4,6 +4,7 @@
 
 from math import sqrt
 from random import randint
+from time import time
 
 from PyQt5 import QtSvg, QtWidgets
 from PyQt5.QtCore import Qt, QRect, QPoint, pyqtSignal, QT_VERSION_STR
@@ -43,6 +44,7 @@ class MapView(QtWidgets.QWidget):
         self.robot_number = 0
         self.old_pos_dict = {}
         self.old_selected = None
+        self.last_repaint = 0
 
         version = QT_VERSION_STR.split(".")
         self.qt_is_compatible = float(version[0]) >= 5 and float(version[1]) >= 15
@@ -63,6 +65,19 @@ class MapView(QtWidgets.QWidget):
         pas activé"""
         new_robot_number = len(self.parent.backend.annu.robots.keys())
         should_repaint = False
+
+        #limitation des repaints à 13 par seconde
+        try:
+            max_period = 1/float(self.parent.settings_dict["Carte (FPS Max)"])
+        except Exception as exc:
+            print(exc)
+            print("Valeur de FPS Max invalide. Mise à 10 FPS par défaut.")
+            max_period = 0.1
+        if time() - self.last_repaint < max_period:
+            should_repaint = False
+            return None
+
+        #les robots ont-ils bougé?
         for robot_nm in self.parent.backend.annu.robots:
             robot = self.parent.backend.annu.robots[robot_nm]
             robot_pos = [robot.x, robot.y, robot.theta]
@@ -72,13 +87,17 @@ class MapView(QtWidgets.QWidget):
             elif self.old_pos_dict.get(robot_nm) != robot_pos:
                 self.old_pos_dict[robot_nm] = robot_pos
                 should_repaint = True
+        #des robots sont-ils apparus ou ont-ils disparus?
         if new_robot_number != self.robot_number:
             self.robot_number = new_robot_number
             should_repaint = True
+        #le robot sélectionné est-il tjrs le même?
         if self.old_selected != self.selected_robot:
             self.old_selected = self.selected_robot
             should_repaint = True
+
         if should_repaint:
+            self.last_repaint = time()
             self.repaint()
 
     def paintEvent(self, event):

@@ -2,6 +2,9 @@
   <setting nom="Carte (Fichier)">
     <field>data/fondTable21.svg</field>
   </setting>
+  <setting nom="Carte (FPS Max)">
+    <field>13</field>
+  </setting>
   <setting nom="Carte (Couleur Sélection)">
     <field>yellow</field>
   </setting>

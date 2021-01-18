@@ -5,7 +5,7 @@ import time
 import annuaire
 from PyQt5.QtWidgets import QLabel, QWidget, QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout,QLineEdit, QLCDNumber, \
      QScrollArea, QFrame, QProgressBar
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QSize, QTimer
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QSize
 from equipement import Equipement
 
 # Customisation
@@ -69,7 +69,7 @@ class TabRobot(QWidget):
         self.layout_box_actuators = QVBoxLayout(self.groupBox_actuators)
         self.layout_box_sensors = QVBoxLayout(self.groupBox_sensors)
         self.label_last_message = QLabel()
-        self.lcdNumber_last_message = QLCDNumber()
+        #self.lcdNumber_last_message = QLCDNumber()
         self.layout_last_command = QHBoxLayout()
         self.label_positionCommand = QLabel()
         self.QLineEdit_positionCommand = QLineEdit()
@@ -84,22 +84,6 @@ class TabRobot(QWidget):
 
         # Configuration des widgets de la boite robot
         self.ui_setup_tab_robot()
-
-        #calcul et mise à jour du temps de message
-        def update_ping():
-            # Calcul du ping position
-            self.timestamp = time.time()
-            self.ping = abs(self.last_update_pos - self.timestamp)
-            self.lcdNumber_last_message.display(self.ping)
-            
-            #calcul des pings equipements (coupé pour le moment car instable)
-            #for eqp in self.current_equipement_dic:
-            #    self.current_equipement_dic[eqp].update_ping()
-        
-        self.ping_timer = QTimer()
-        self.ping_timer.timeout.connect(update_ping)
-        self.ping_timer.start(100)
-
 
         # Connexion du signal de mise à jours des équipements avec le slot de mise à jour de l'ensemble des équipements
         self.list_equipement_changed_signal.connect(self.update_equipements)
@@ -132,11 +116,11 @@ class TabRobot(QWidget):
         self.layout_box_robot.addLayout(self.layout_coord)
 
         # Configuration de l'affichage du dernier message reçu
-        self.label_last_message.setText("Dern. Msg (s):")
-        self.layout_last_message.addWidget(self.label_last_message)
-        self.lcdNumber_last_message.setFixedSize(QLCD_SIZE2)
-        self.layout_last_message.addWidget(self.lcdNumber_last_message)
-        self.layout_box_robot.addLayout(self.layout_last_message)
+        self.label_last_message.setText("Dernière MAJ à : {}".format(time.asctime().split()[3]))
+        #self.layout_last_message.addWidget(self.label_last_message)
+        #self.lcdNumber_last_message.setFixedSize(QLCD_SIZE2)
+        #self.layout_last_message.addWidget(self.lcdNumber_last_message)
+        self.layout_box_robot.addWidget(self.label_last_message, QT_TOP)
 
         # Confiuration de l'envoyeur de commandes de postion
         self.label_positionCommand.setText("Dern. PosCmd:")
@@ -186,6 +170,7 @@ class TabRobot(QWidget):
             self.lcdNumber_x.display(self.x)
             self.lcdNumber_y.display(self.y)
             self.lcdNumber_theta.display(self.theta)
+            self.label_last_message.setText("Dernière MAJ à : {}".format(time.asctime().split()[3]))
 
     def get_equipements(self):
         """ Charge la liste des des équipements du robot et les informations de chaque équipement présent.
