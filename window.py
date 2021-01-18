@@ -14,6 +14,7 @@ WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 2px solid rgb(113, 113
                 "border-radius: 5px;  color: rgb(255, 255, 255)} " \
 
 QSIZE = QSize(100, 30)
+QSIZE_BIG = QSize(160, 30)
 
 
 class Window(QMainWindow):
@@ -123,12 +124,12 @@ class Window(QMainWindow):
         # Création du bouton Simulateur
         self.layout_menu.addWidget(self.button_simu)
         self.button_simu.setFixedSize(QSIZE)
-        self.button_simu.setText("Nv. Instance Simu.")
+        self.button_simu.setText("Nv. Simu.")
         self.button_simu.clicked.connect(lambda: externals.exec_simu(self.settings_dict))
 
         # Création du bouton configuration
         self.button_settings.setText("Configuration")
-        self.button_settings.setFixedSize(QSIZE)
+        self.button_settings.setFixedSize(QSIZE_BIG)
         self.layout_menu.addWidget(self.button_settings)
         self.button_settings.clicked.connect(self.show_settings)
 
