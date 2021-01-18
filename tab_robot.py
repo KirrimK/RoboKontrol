@@ -88,7 +88,6 @@ class TabRobot(QWidget):
 
         # Connexion du signal de mise à jour de la position
         self.backend.widget.PosRegSignal.connect(lambda new_position: self.update_position(new_position))
-        # todo: ajouter timestamp du dernier message de position
 
     def ui_setup_tab_robot(self):
         """ Configure l'ensemble de l'onglet robot"""
@@ -162,8 +161,7 @@ class TabRobot(QWidget):
             self.y = float(new_position[2])
             self.theta = float(new_position[3])
             # Récupération du timestamp de dernière mise à jour de la position
-            self.last_update_pos = self.backend.getdata_robot(self.rid)[2]
-
+            self.last_update_pos = float(new_position[4])
             # Calcul du ping
             self.timestamp = time.time()
             self.ping = abs(self.last_update_pos - self.timestamp)

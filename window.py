@@ -16,6 +16,7 @@ WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 2px solid rgb(113, 113
 QSIZE = QSize(100, 30)
 QSIZE_BIG = QSize(160, 30)
 
+
 class Window(QMainWindow):
     """ Définit la fenêtre principale """
 
