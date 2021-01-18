@@ -48,6 +48,7 @@ class Equipement(QWidget):
         self.timestamp = time.time()
         self.ping = abs(self.timestamp - self.last_update)
         self.backend = self.window.backend
+        self.updated_from_outside = False
 
         if self.permission == "RW":
             if self.min_val == 0 and self.max_val == 1 and self.step ==1:
@@ -224,33 +225,36 @@ class Equipement(QWidget):
 
     @pyqtSlot()
     def open_actionneur_complexe(self):
-        """Ouvre un QDilaog (à compléter) qui change la valeur de l'actionneur"""
+        """Ouvre un QDialog (à compléter) qui change la valeur de l'actionneur"""
 
         self.value = QDialog()
 
     @pyqtSlot()
     def onvaluechanged(self):
         """ Affiche et envoie vers backend la dernière commande d'un actionneur discret"""
-        self.backend.sendeqpcmd(self.rid, self.name, self.doubleSpinBox_equipement.value())
-        self.label_command.setText(str(self.doubleSpinBox_equipement.value()))
-        self.slider_equipement.setValue(int(self.doubleSpinBox_equipement.value()))
+        if not self.updated_from_outside:
+            self.backend.sendeqpcmd(self.rid, self.name, self.doubleSpinBox_equipement.value())
+            self.label_command.setText(str(self.doubleSpinBox_equipement.value()))
+            self.slider_equipement.setValue(int(self.doubleSpinBox_equipement.value()))
 
     @pyqtSlot()
     def onvaluechanged_slider(self):
         """ Affiche et envoie vers backend la dernière commande d'un actionneur discret"""
-        self.backend.sendeqpcmd(self.rid, self.name, self.doubleSpinBox_equipement.value())
-        self.label_command.setText(str(self.slider_equipement.value()))
-        self.doubleSpinBox_equipement.setValue(self.slider_equipement.value())
+        if not self.updated_from_outside:
+            self.backend.sendeqpcmd(self.rid, self.name, self.doubleSpinBox_equipement.value())
+            self.label_command.setText(str(self.slider_equipement.value()))
+            self.doubleSpinBox_equipement.setValue(self.slider_equipement.value())
 
     @pyqtSlot()
     def oncheckbox_toggled(self):
         """ Affiche et renvoie vers backend la dernière commande d'un actionneur binaire"""
-        if self.checkBox_equipement.isChecked():
-            self.backend.sendeqpcmd(self.rid, self.name, 1)
-            self.label_command.setText(str(1))
-        else:
-            self.backend.sendeqpcmd(self.rid, self.name, 0)
-            self.label_command.setText(str(0))
+        if not self.updated_from_outside:
+            if self.checkBox_equipement.isChecked():
+                self.backend.sendeqpcmd(self.rid, self.name, 1)
+                self.label_command.setText(str(1))
+            else:
+                self.backend.sendeqpcmd(self.rid, self.name, 0)
+                self.label_command.setText(str(0))
 
     @pyqtSlot()
     def update_ping(self, last_update):
@@ -269,14 +273,18 @@ class Equipement(QWidget):
             # self.ping_changed_signal.emit(self.ping)
 
             if self.type_widget == "BINAIRE":
+                self.updated_from_outside = True
                 if self.value == 0:
                     self.checkBox_equipement.setChecked(False)
                 if self.value == 1:
                     self.checkBox_equipement.setChecked(True)
+                self.updated_from_outside = False
 
             if self.type_widget == "DISCRET" and self.value is not None:
+                self.updated_from_outside = True
                 self.doubleSpinBox_equipement.setValue(self.value)
                 self.slider_equipement.setValue(self.value)
+                self.updated_from_outside = False
 
             if self.type_widget == "MULTIPLE":
                 pass
@@ -288,9 +296,13 @@ class Equipement(QWidget):
                 self.pushButton_led.setStyleSheet("background: {}".format(self.value))
 
             if self.type_widget == "VALEUR":
+                self.updated_from_outside = True
                 if self.value is not None:
                     # Emission de signal de màj de la valeur de l'équipement
                     self.lcdNumber_equipement.display(self.value)
+                self.updated_from_outside = False
 
             if self.type_widget == "BAR" and self.value is not None:
-                self.progressBar_equipement.setValue(self.value)
+                self.updated_from_outside = True
+                self.progressBar_equipement.setValue(int(self.value))
+                self.updated_from_outside = False
