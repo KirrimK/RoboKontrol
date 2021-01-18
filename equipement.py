@@ -111,6 +111,9 @@ class Equipement(QWidget):
         # Connexion du signal de pin du dernier message reçu màj avec le slot d'affichage du ping du dernier message
         self.ping_changed_signal.connect(self.onPingChangedSignal)
 
+        self.backend.widget.CaptRegSignal.connect(lambda equipement: self.update_equipement(equipement))
+        # todo: ajouter timestamp du dernier message de changement de valeur
+
     def onPingChangedSignal(self, ping):
         self.lcdNumber_ping_equipement.display(str(round(ping, 1)))
         # print(self.lcdNumber_ping_equipement.value ())
@@ -172,7 +175,7 @@ class Equipement(QWidget):
             self.gridLayout_equipement.addWidget(self.lcdNumber_equipement, 0, 1, 1, 1, QT_RIGHT)
 
             # Connexion du signal de màj de la valeur avec la slot d'affichage de la valeur'
-            self.value_changed_signal.connect(lambda val: self.lcdNumber_equipement.display(int(val)))
+            # self.value_changed_signal.connect(lambda val: self.lcdNumber_equipement.display(int(val)))
 
         if self.type_widget == "BAR":
             self.progressBar_equipement = QProgressBar()
@@ -183,7 +186,7 @@ class Equipement(QWidget):
             self.gridLayout_equipement.addWidget(self.progressBar_equipement, 0, 1, 1, 1, QT_RIGHT)
 
             # Connexion du signal de màj de la bar de progression avec la slot d'affichage de la valeur'
-            self.value_changed_signal.connect(lambda val: self.progressBar_equipement.setValue(int(val)))
+            # self.value_changed_signal.connect(lambda val: self.progressBar_equipement.setValue(int(val)))
 
     def add_equipement(self):
         """ Ajoute l'équipement dans la bon layout parent selon qu'il est actionneur ou capteur"""
@@ -257,34 +260,37 @@ class Equipement(QWidget):
         self.lcdNumber_ping_equipement.display(str(round(self.ping, 1)))
 
     @pyqtSlot()
-    def update_equipement(self, value):
+    def update_equipement(self, equipement):
         """ Met à jour l'équipement suivant son type"""
 
-        # self.ping_changed_signal.emit(self.ping)
+        if equipement[0] == self.rid and equipement[1] == self.name:
 
-        if self.type_widget == "BINAIRE":
-            if self.value == 0:
-                self.checkBox_equipement.setChecked(False)
-            if self.value == 1:
-                self.checkBox_equipement.setChecked(True)
+            self.value = float(equipement[2])
+            # self.ping_changed_signal.emit(self.ping)
 
-        if self.type_widget == "DISCRET" and self.value is not None:
-            self.doubleSpinBox_equipement.setValue(self.value)
-            self.slider_equipement.setValue(self.value)
+            if self.type_widget == "BINAIRE":
+                if self.value == 0:
+                    self.checkBox_equipement.setChecked(False)
+                if self.value == 1:
+                    self.checkBox_equipement.setChecked(True)
 
-        if self.type_widget == "MULTIPLE":
-            pass
+            if self.type_widget == "DISCRET" and self.value is not None:
+                self.doubleSpinBox_equipement.setValue(self.value)
+                self.slider_equipement.setValue(self.value)
 
-        if self.type_widget == "COMPLEXE":
-            pass
+            if self.type_widget == "MULTIPLE":
+                pass
 
-        if self.type_widget == "LED":
-            self.pushButton_led.setStyleSheet("background: {}".format(self.value))
+            if self.type_widget == "COMPLEXE":
+                pass
 
-        if self.type_widget == "VALEUR":
-            if self.value is not None:
-                # Emission de signal de màj de la valeur de l'équipement
-                self.lcdNumber_equipement.display(value)
+            if self.type_widget == "LED":
+                self.pushButton_led.setStyleSheet("background: {}".format(self.value))
 
-        if self.type_widget == "BAR" and self.value is not None:
-            self.progressBar_equipement.setValue(int(value))
+            if self.type_widget == "VALEUR":
+                if self.value is not None:
+                    # Emission de signal de màj de la valeur de l'équipement
+                    self.lcdNumber_equipement.display(self.value)
+
+            if self.type_widget == "BAR" and self.value is not None:
+                self.progressBar_equipement.setValue(self.value)
