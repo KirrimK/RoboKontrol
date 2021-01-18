@@ -240,16 +240,6 @@ class TabRobot(QWidget):
 
         # Emission pour chaque équipement de la nouvelle valeur et du nouveau ping
         for equipement in self.current_equipement_dic.values():
-            # Récupération de la nouvelle valeur
-            value = equipement.value
-            # Calcul du ping
-            last_update = equipement.last_update
-            ping = abs(time.time() - last_update)
-            if equipement.value is not None:
-                # Emission de la nouvelle valeur de l'équipement
-                equipement.value_changed_signal.emit(value)
-            # Emission du nouveau ping de l'équipement
-            equipement.ping_changed_signal.emit(ping)
 
             # Ajoute le nom de l'actionneur dans la liste des actionneurs si l'équipement est un actionneur
             if equipement.permission == "RW":
@@ -271,23 +261,31 @@ class TabRobot(QWidget):
             self.groupBox_actuators.show()
 
         # Mise à jour de la batterie si elle est déclarée
-        if self.battery_value is not None and self.battery_step != 0:
-            self.layout_name_delete.addWidget(self.progressbar_battery)
-            n = (float(self.battery_max)-float(self.battery_min))/float(self.battery_step)
-            v = (float(self.battery_value)-float(self.battery_min))/float(self.battery_step)
-            value = (v/n)*100
-            self.progressbar_battery.setRange(0, 100)
-            self.progressbar_battery.setValue(int(value))
-            self.progressbar_battery.setFormat("%.01f %%" % value)
-            self.progressbar_battery.setAlignment(QT_CENTER)
-            if value < 10:
-                self.progressbar_battery.setStyleSheet(QPROGRESSBAR_LOW)
-            elif value < 30:
-                self.progressbar_battery.setStyleSheet(QPROGRESSBAR_MEDIUM)
+        self.update_battery()
 
         # Force le changement d'affichage des boites d'actionneurs et de capteurs.
         self.groupBox_actuators.repaint()
         self.groupBox_sensors.repaint()
+
+    def update_battery(self):
+        """ Met à jour l'affichage de la batterie si celle ci est déclarée """
+        try:
+            if self.battery_value is not None and self.battery_step != 0:
+                self.layout_name_delete.addWidget(self.progressbar_battery)
+                n = (float(self.battery_max)-float(self.battery_min))/float(self.battery_step)
+                v = (float(self.battery_value)-float(self.battery_min))/float(self.battery_step)
+                value = (v/n)*100
+                self.progressbar_battery.setRange(0, 100)
+                self.progressbar_battery.setValue(int(value))
+                self.progressbar_battery.setFormat("%.01f %%" % value)
+                self.progressbar_battery.setAlignment(QT_CENTER)
+                if value < 10:
+                    self.progressbar_battery.setStyleSheet(QPROGRESSBAR_LOW)
+                elif value < 30:
+                    self.progressbar_battery.setStyleSheet(QPROGRESSBAR_MEDIUM)
+        except TypeError:
+            print(self.battery_min, self.battery_max, self.battery_step)
+
 
     @pyqtSlot()
     def update_tab_robot(self):

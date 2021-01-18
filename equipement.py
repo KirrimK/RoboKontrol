@@ -23,11 +23,6 @@ class Equipement(QWidget):
             - window (QWidget): fenêtre principale de l'application
             """
 
-    # Création du signal de mise à jour de la valeur de l'équipement
-    value_changed_signal = pyqtSignal(float)
-    # Création du signal de mise à jour de la valeur de dernier message reçu
-    ping_changed_signal = pyqtSignal(float)
-
     def __init__(self, name, value, min_val, max_val, step, unite, last_update, permission, parent_layout, rid: str,
                  window):
         super(Equipement, self).__init__()
@@ -120,7 +115,7 @@ class Equipement(QWidget):
             self.label_name_equipement.setText('{0} ({1})'.format(self.name, self.unite))
         self.gridLayout_equipement.addWidget(self.label_name_equipement, 0, 0, 1, 1, QT_LEFT)
 
-        self.label_message_equipement.setText("Dern. Msg (ms):")
+        self.label_message_equipement.setText("Dern. Msg (s):")
         self.gridLayout_equipement.addWidget(self.label_message_equipement, 2, 0, 1, 1, QT_LEFT)
         self.lcdNumber_ping_equipement.setMaximumSize(QSize(75, 25))
         self.lcdNumber_ping_equipement.setFixedSize(QLCD_SIZE2)
@@ -164,19 +159,14 @@ class Equipement(QWidget):
             self.lcdNumber_equipement.setMinimumSize(150, 30)
             self.gridLayout_equipement.addWidget(self.lcdNumber_equipement, 0, 1, 1, 1, QT_RIGHT)
 
-            # Connexion du signal de màj de la valeur avec la slot d'affichage de la valeur'
-            # self.value_changed_signal.connect(lambda val: self.lcdNumber_equipement.display(int(val)))
-
         if self.type_widget == "BAR":
             self.progressBar_equipement = QProgressBar()
             self.progressBar_equipement.setRange(int(self.min_val), int(self.max_val))
             self.progressBar_equipement.setStyleSheet(QPROGRESSBAR)
             self.progressBar_equipement.setAlignment(QT_CENTER)
+            self.progressBar_equipement.setFormat("%v")
             self.progressBar_equipement.setFixedSize(150, 30)
             self.gridLayout_equipement.addWidget(self.progressBar_equipement, 0, 1, 1, 1, QT_RIGHT)
-
-            # Connexion du signal de màj de la bar de progression avec la slot d'affichage de la valeur'
-            # self.value_changed_signal.connect(lambda val: self.progressBar_equipement.setValue(int(val)))
 
     def add_equipement(self):
         """ Ajoute l'équipement dans la bon layout parent selon qu'il est actionneur ou capteur"""
