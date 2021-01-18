@@ -65,24 +65,20 @@ class MapView(QtWidgets.QWidget):
         """ Le robot associé à rid devient le robot sélectionné"""
         self.selected_robot = rid
 
-    def paint(self):
-        """Dessin de la map et des robots"""
-        self.width = self.geometry().width()
-        self.height = self.geometry().height()
-        painter = QPainter(self)
-        if self.clicking:
-            self.time_clicked = time() - self.last_press
-        else:
-            self.time_clicked = 0
+    def paint_mouse_pos(self, painter):
+        """Dessin des coordonnées de la souris dans un coin de la carte"""
+        #si en cours de click, afficher une petite ellipse qui se remplit
+        if self.clicking and self.parent.settings_dict["Carte (Tactile)"]:
+            ell_rect = QRect(self.mouse_pos.x() - 25, self.mouse_pos.y() - 25, 50, 50)
+            painter.setBrush(CLICK_BRUSH)
+            painter.drawPie(ell_rect, 0, 360/1.5*self.time_clicked*16)
+        #paint mouse pos dans un coin
+        height = self.geometry().height()
+        rlp = self.relative_mspos
+        painter.drawText(0, height-20, "x: {} y: {}".format(int(rlp[0]), int(rlp[1])))
 
-        #paint map
-        self.svg_data.render(painter)
-
-        #paint map outline (for alignment purposes)
-        if self.parent.settings_dict["Carte (Outline)"]:
-            maprt_size, maprt_pos = self.calc_pos_size([3000, -2000], [0, 0])
-            painter.drawRect(QRect(maprt_pos[0], maprt_pos[1], maprt_size[0], maprt_size[1]))
-
+    def paint_robots(self, painter):
+        """Dessin des robots sur la carte"""
         #paint robots
         bkd_robots = self.parent.backend.annu.robots
         for robot in bkd_robots:
@@ -110,15 +106,30 @@ class MapView(QtWidgets.QWidget):
             font.setPointSize(8)
             painter.setFont(font)
             painter.drawText(robot_rect, Qt.AlignCenter, robot)
-        #si en cours de click, afficher une petite ellipse qui se remplit
-        if self.clicking and self.parent.settings_dict["Carte (Tactile)"]:
-            ell_rect = QRect(self.mouse_pos.x() - 25, self.mouse_pos.y() - 25, 50, 50)
-            painter.setBrush(CLICK_BRUSH)
-            painter.drawPie(ell_rect, 0, 360/1.5*self.time_clicked*16)
-        #paint mouse pos dans un coin
-        height = self.geometry().height()
-        rlp = self.relative_mspos
-        painter.drawText(0, height-20, "x: {} y: {}".format(int(rlp[0]), int(rlp[1])))
+
+    def paint_map(self, painter):
+        """Dessin de la carte"""
+        #paint map
+        self.svg_data.render(painter)
+
+        #paint map outline (for alignment purposes)
+        if self.parent.settings_dict["Carte (Outline)"]:
+            maprt_size, maprt_pos = self.calc_pos_size([3000, -2000], [0, 0])
+            painter.drawRect(QRect(maprt_pos[0], maprt_pos[1], maprt_size[0], maprt_size[1]))
+
+    def paint(self):
+        """Dessin de la map et des robots"""
+        self.width = self.geometry().width()
+        self.height = self.geometry().height()
+        painter = QPainter(self)
+        if self.clicking:
+            self.time_clicked = time() - self.last_press
+        else:
+            self.time_clicked = 0
+
+        self.paint_map(painter)
+        self.paint_robots(painter)
+        self.paint_mouse_pos(painter)
 
     def updt_map_data(self, config_path, height, width):
         """Mise à jour des objets à dessiner sur la map
