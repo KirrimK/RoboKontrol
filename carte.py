@@ -39,9 +39,6 @@ class MapView(QtWidgets.QWidget):
         self.selected_robot = None
         self.mouse_pos_init = QPoint(0, 0)
         self.relative_init_mspos = [0, 0]
-        self.last_press = time()
-        self.clicking = False
-        self.time_clicked = 0
 
         self.color_dict = {}
 
@@ -65,14 +62,6 @@ class MapView(QtWidgets.QWidget):
     def select_robot(self, rid):
         """ Le robot associé à rid devient le robot sélectionné"""
         self.selected_robot = rid
-
-    def paint_mouse_pos(self, painter):
-        """Dessin des coordonnées de la souris dans un coin de la carte"""
-        #si en cours de click, afficher une petite ellipse qui se remplit
-        if self.clicking and self.parent.settings_dict["Carte (Tactile)"]:
-            ell_rect = QRect(self.mouse_pos.x() - 25, self.mouse_pos.y() - 25, 50, 50)
-            painter.setBrush(CLICK_BRUSH)
-            painter.drawPie(ell_rect, 0, 360/1.5*self.time_clicked*16)
 
     def paint_robots(self, painter):
         """Dessin des robots sur la carte"""
@@ -125,14 +114,9 @@ class MapView(QtWidgets.QWidget):
         self.width = self.geometry().width()
         self.height = self.geometry().height()
         painter = QPainter(self)
-        if self.clicking:
-            self.time_clicked = time() - self.last_press
-        else:
-            self.time_clicked = 0
 
         self.paint_map(painter)
         self.paint_robots(painter)
-        self.paint_mouse_pos(painter)
 
     def updt_map_data(self, config_path, height, width):
         """Mise à jour des objets à dessiner sur la map
@@ -209,8 +193,6 @@ class MapView(QtWidgets.QWidget):
         self.mouse_pos = event.localPos()
         self.relative_mspos = self.reverse_pos(self.mouse_pos)
         if event.button() == Qt.LeftButton:
-            self.last_press = time()
-            self.clicking = True
             self.mouse_pos_init = event.localPos()
             self.relative_init_mspos = self.reverse_pos(self.mouse_pos)
             if self.selected_robot is not None:
@@ -238,14 +220,8 @@ class MapView(QtWidgets.QWidget):
                     (self.relative_mspos[1] - rb_y)**2)
         return dist
 
-    def mouseReleaseEvent(self, event):
-        """Quand la souris est relachée"""
-        self.clicking = False
-        if self.time_clicked > 1.5 and self.parent.settings_dict["Carte (Tactile)"]:
-            self.selected_robot = None
-            for robot in self.parent.backend.annu.robots:
-                if self.distance(robot) < ROBOT_SIZE:
-                    self.selected_robot = robot
+    #def mouseReleaseEvent(self, event):
+    #    """Quand la souris est relachée"""
 
     def mouseMoveEvent(self, event):
         """Quand la souris est bougée sur la fenêtre"""

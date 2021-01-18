@@ -14,9 +14,6 @@
   <setting nom="Enregistrement/Playback (Dernière Lecture)">
     <field></field>
   </setting>
-  <setting nom="Carte (Tactile)">
-    <check>n</check>
-  </setting>
   <setting nom="Carte (Scaling)">
     <check>n</check>
   </setting>
