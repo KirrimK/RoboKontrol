@@ -87,10 +87,13 @@ class TabRobot(QWidget):
 
         #calcul et mise à jour du temps de message
         def update_ping():
-            # Calcul du ping
+            # Calcul du ping position
             self.timestamp = time.time()
             self.ping = abs(self.last_update_pos - self.timestamp)
             self.lcdNumber_last_message.display(self.ping)
+            #calcul des pings equipements
+            for eqp in self.current_equipement_dic:
+                self.current_equipement_dic[eqp].update_ping()
         
         self.ping_timer = QTimer()
         self.ping_timer.timeout.connect(update_ping)

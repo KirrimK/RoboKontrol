@@ -64,17 +64,6 @@ class Equipement(QWidget):
         self.label_message_equipement = QLabel()
         self.lcdNumber_ping_equipement = QLCDNumber()
 
-        #calcul et mise à jour régulière du ping
-        def update_ping():
-            self.timestamp = time.time()
-            self.ping = abs(self.timestamp - self.last_update)
-            ping = int(self.ping * 10)/10
-            self.lcdNumber_ping_equipement.display(ping)
-
-        self.ping_timer = QTimer()
-        self.ping_timer.timeout.connect(update_ping)
-        self.ping_timer.start(50)
-
         if self.type_widget == "BINAIRE":
             self.layout_binaire = QHBoxLayout()
             self.checkBox_equipement = QCheckBox()
@@ -114,6 +103,12 @@ class Equipement(QWidget):
         self.ui_setup_equipement()
 
         self.backend.widget.CaptRegSignal.connect(lambda current_state: self.update_equipement(current_state))
+
+    #calcul et mise à jour régulière du ping
+    def update_ping(self):
+        self.timestamp = time.time()
+        self.ping = abs(self.timestamp - self.last_update)
+        self.lcdNumber_ping_equipement.display(self.ping)
 
     def ui_setup_equipement(self):
         """ Configure l'ensemble des widgets de l'équipement"""
