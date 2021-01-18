@@ -128,6 +128,7 @@ class TabRobot(QWidget):
         self.QLineEdit_positionCommand.setInputMask("0000 : 0000 : 000")
         self.QLineEdit_positionCommand.setFixedSize(220, 25)
         self.QLineEdit_positionCommand.editingFinished.connect(self.onEditingFinished)
+        self.QLineEdit_positionCommand.setAlignment(QT_CENTER)
         self.layout_last_command.addWidget(self.QLineEdit_positionCommand)
         self.layout_box_robot.addLayout(self.layout_last_command)
 
