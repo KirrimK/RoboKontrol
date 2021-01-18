@@ -99,7 +99,7 @@ class MapView(QtWidgets.QWidget):
             span_angle = 6 * 16
             old_pen = painter.pen()
             if self.selected_robot == robot:
-                painter.setPen(QPen(Qt.green, 4, Qt.SolidLine))
+                painter.setPen(QPen(QColor(self.parent.settings_dict["Carte (Couleur Sélection)"]), 4, Qt.SolidLine))
             if bkd_robots[robot].isStopped:
                 painter.setPen(QPen(Qt.red, 4, Qt.SolidLine))
             painter.drawPie(outer_rect, start_angle, span_angle)
