@@ -9,11 +9,7 @@ Développée pour le projet programmation python en première année ingénieur 
 ### Utilisation normale:
 - Cloner le dépôt dans le dossier de votre choix: `git clone https://github.com/KirrimK/Projet_Info_ENAC_1A`
 - Installer les librairies python requises: `pip install ivy-python lxml PyQt5`
-
-### Développement:
-- Effectuer toutes les étapes ci-dessus.
-- Installer les librairies python requises pour effectuer les tests: `pip install pytest pytest-cov`
-- Les tests peuvent être effectués en lançant la commande suivante dans le dossier du projet: `pytest --cov=./ --cov-branch`
+- Sous Linux, il peut être nécessaire d'installer le paquet QtSvg séparément: `sudo apt-get install python3-pyqt5.qtsvg` (sous Ubuntu)
 
 ## Utilisation:
 
