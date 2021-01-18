@@ -14,9 +14,9 @@ class WidgetBackend (QWidget):
     CaptRegSignal = pyqtSignal (list)
     ActuDeclSignal = pyqtSignal (list)
     UpdateTrigger = pyqtSignal (list)
-    def __init__ (self, backend):
+    def __init__ (self, parent_backend):
         super().__init__()
-        self.backend = backend
+        self.backend = parent_backend
         self.PosRegSignal.connect (lambda liste : self.backend.onPosRegSignal (liste))
         self.CaptRegSignal.connect (lambda liste : self.backend.onCaptRegSignal (liste))
         self.ActuDeclSignal.connect (lambda liste : self.backend.onActuDeclSignal (liste))
@@ -171,8 +171,10 @@ class Backend:
         Ajoute l'actionnneur aid sur le robot rid.
         Si aid est le nom d'un capteur déjà présent sur le robot, la valeur est gardée.
 
-        Input : [rid (str), aid (str), minV (str), maxV (str), step (str), droits (str), unit (str)] (list)"""
-        rid, aid, minv, maxv, step, droits, unit = liste [0], liste [1], liste [2], liste [3], liste [4], liste [5], liste [6]
+        Input : [rid (str), aid (str), minV (str), maxV (str),
+                step (str), droits (str), unit (str)] (list)"""
+        rid, aid, minv, maxv = liste [0], liste [1], liste [2], liste [3]
+        step, droits, unit = liste [4], liste [5], liste [6]
         if droits == 'RW':
             binaire = False
             if float (minv) + float (step) >= float (maxv) :
