@@ -3,15 +3,16 @@
 import time
 import annuaire
 from PyQt5.QtWidgets import QLabel, QWidget, QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout,QLineEdit, QLCDNumber, \
-     QScrollArea, QFrame
+     QScrollArea, QFrame, QProgressBar
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QSize
 from equipement import Equipement
 
 # Customisation
-QLCD_STYLE = "QLCDNumber{background-color: grey;border: 2px solid rgb(113, 113, 113);border-width: 2px; " \
-             "border-radius: 10px;  color: rgb(255, 255, 255)} "
-QPUSHBUTTON = ""
-QEMERGENCYBUTTON = "QPushButton{background-color : rgb(255, 0, 0)}"
+QEMERGENCYBUTTON = "QPushButton{background-color : rgb(255, 0,0); border : 1px; border: 2px solid rgb(170,0,0)}"
+QPROGRESSBAR_FULL = "QProgressBar{background-color : grey; border : 1px; border: 2px solid grey; border-radius: 5px} QProgressBar::chunk{background-color: green; border-radius: 5px;}"
+QPROGRESSBAR_MEDIUM = "QProgressBar{background-color : grey; border : 1px; border: 2px solid grey; border-radius: 5px} QProgressBar::chunk{background-color: orange; border-radius: 5px;}"
+QPROGRESSBAR_LOW = "QProgressBar{background-color : grey; border : 1px; border: 2px solid grey; border-radius: 5px} QProgressBar::chunk{background-color: red; border-radius: 5px;}"
+
 # QtWidgets size
 QLCD_SIZE1, QLCD_SIZE2 = QSize(60, 20), QSize(80, 20)
 # Alignment
@@ -35,6 +36,11 @@ class TabRobot(QWidget):
         self.timestamp = time.time()
         self.backend = self.window.backend
 
+        self.battery_value = None
+        self.battery_min = None
+        self.battery_max = None
+        self.battery_step = None
+
         # Création de la boite robot (QGroupBox)
         self.layout_tab_robot = QVBoxLayout(self)
         self.groupBox_robots = QWidget()
@@ -51,10 +57,8 @@ class TabRobot(QWidget):
         self.scroll_area.setWidget(self.groupBox_robots)
         self.layout_tab_robot.addWidget(self.scroll_area)
 
-
         # Création des widgets de la boite robot
         self.layout_name_delete = QHBoxLayout()
-        self.label_name = QLabel()
         self.button_delete = QPushButton()
         self.layout_coord = QHBoxLayout()
         self.layout_last_message = QHBoxLayout()
@@ -68,18 +72,16 @@ class TabRobot(QWidget):
         self.label_positionCommand = QLabel()
         self.QLineEdit_positionCommand = QLineEdit()
         self.emergencyButton = QPushButton()
+        self.progressbar_battery = QProgressBar()
 
         # Liste des équipements attachés au robot
         self.current_equipement_list = []
         self.current_equipement_dic = {}
         self.current_actuators_list = []
-
         self.current_sensors_list = []
 
         # Configuration des widgets de la boite robot
         self.ui_setup_tab_robot()
-
-        self.QLineEdit_position_command = None
 
         # Connexion du signal de mise à jours des équipements avec le slot de mise à jour de l'ensemble des équipements
         self.list_equipement_changed_signal.connect(self.update_equipements)
@@ -87,13 +89,10 @@ class TabRobot(QWidget):
     def ui_setup_tab_robot(self):
         """ Configure l'ensemble de l'onglet robot"""
 
-        # Configuration de l'affichage du nom robot et du bouton oublier
-        self.label_name.setMinimumSize(0, 30)
-        # self.label_name.setMaximumSize(100, 30)
-        self.label_name.setText(self.rid)
-        self.layout_name_delete.addWidget(self.label_name)
+        self.progressbar_battery.setStyleSheet(QPROGRESSBAR_FULL)
+        self.progressbar_battery.setFixedSize(150, 30)
+
         self.button_delete.setMaximumSize(150, 25)
-        self.button_delete.setStyleSheet(QPUSHBUTTON)
         self.button_delete.setText("Eteindre")
         self.button_delete.clicked.connect(lambda: self.remove_box_robot())
 
@@ -115,7 +114,6 @@ class TabRobot(QWidget):
         self.label_last_message.setText("Dern. Msg (s):")
         self.layout_last_message.addWidget(self.label_last_message)
         self.lcdNumber_last_message.setFixedSize(QLCD_SIZE2)
-        self.lcdNumber_last_message.setStyleSheet(QLCD_STYLE)
         self.layout_last_message.addWidget(self.lcdNumber_last_message)
         self.layout_box_robot.addLayout(self.layout_last_message)
 
@@ -148,7 +146,6 @@ class TabRobot(QWidget):
         self.layout_coord.addWidget(self.label_coord)
         self.lcdNumber_coord = QLCDNumber()
         self.lcdNumber_coord.setFixedSize(QLCD_SIZE1)
-        self.lcdNumber_coord.setStyleSheet(QLCD_STYLE)
         self.layout_coord.addWidget(self.lcdNumber_coord)
         return self.lcdNumber_coord
 
@@ -183,26 +180,22 @@ class TabRobot(QWidget):
             eqp_type = eqp[0]
             eqp_value = eqp[1]
             last_update = eqp[2]
-            # eqp_last_cmd = eqp[3]
             unit = eqp[4]
             value, min_val, max_val, step = eqp_value
 
-            if eqp_type == annuaire.Actionneur:
-                equipements[eqp_name] = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update, "R&W",
-                                                   "DISCRET", self.layout_box_actuators, self.rid, self.window)
+            if eqp_name == "Batterie":
+                self.battery_value = value
+                self.battery_min = min_val
+                self.battery_max = max_val
+                self.battery_step = step
 
-            if eqp_type == annuaire.Binaire:
-                equipements[eqp_name] = Equipement(eqp_name, value, 0, 1, 1, None, last_update, "R&W", "BINAIRE",
+            elif eqp_type == annuaire.Actionneur or eqp_type == annuaire.Binaire:
+                equipements[eqp_name] = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update, "RW",
                                                    self.layout_box_actuators, self.rid, self.window)
 
-            if eqp_type == annuaire.Capteur:
-
-                if min_val is None or max_val is None or step is None:
-                    kind = "VALEUR"
-                else:
-                    kind = "BAR"
-                equipements[eqp_name] = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update,
-                                                   "R", kind, self.layout_box_sensors, self.rid, self.window)
+            elif eqp_type == annuaire.Capteur:
+                equipements[eqp_name] = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update, "R",
+                                                   self.layout_box_sensors, self.rid, self.window)
 
         return equipements
 
@@ -229,12 +222,12 @@ class TabRobot(QWidget):
         # Change les capteurs en actionneurs si néccessaire.
         for name in self.current_sensors_list:
             eqpment = equipements[name]
-            if eqpment.variety == "R&W":
+            if eqpment.permission == "RW":
                 self.current_actuators_list.append(name)
-                eqpment.add_equipement ()
+                eqpment.add_equipement()
                 self.current_sensors_list.pop(self.current_sensors_list.index(name))
                 sensor = self.current_equipement_dic[name]
-                sensor.remove_equipement ()
+                sensor.remove_equipement()
 
         # Met à jour la liste et le dictionnaire des capteurs présents
         self.current_equipement_list = equipements_list
@@ -254,13 +247,11 @@ class TabRobot(QWidget):
             equipement.ping_changed_signal.emit(ping)
 
             # Ajoute le nom de l'actionneur dans la liste des actionneurs si l'équipement est un actionneur
-            if equipement.variety == "R&W":
+            if equipement.permission == "RW":
                 self.current_actuators_list.append(equipement.name)
             # Ajoute le nom du capteur dans la liste des capteurs si l'équipement est un capteur
-            if equipement.variety == "R":
+            if equipement.permission == "R":
                 self.current_sensors_list.append(equipement.name)
-
-            # print(equipement.name, value, ping)
 
         # Cache la boite Capteurs si jamais aucun capteur n'est attaché au robot
         if not self.current_sensors_list:
@@ -273,6 +264,21 @@ class TabRobot(QWidget):
             self.groupBox_actuators.hide()
         else:
             self.groupBox_actuators.show()
+
+        # Mise à jour de la batterie si elle est déclarée
+        if self.battery_value is not None and self.battery_step != 0:
+            self.layout_name_delete.addWidget(self.progressbar_battery)
+            n = (float(self.battery_max)-float(self.battery_min))/float(self.battery_step)
+            v = (float(self.battery_value)-float(self.battery_min))/float(self.battery_step)
+            value = (v/n)*100
+            self.progressbar_battery.setRange(0, 100)
+            self.progressbar_battery.setValue(int(value))
+            self.progressbar_battery.setFormat("%.01f %%" % value)
+            self.progressbar_battery.setAlignment(QT_CENTER)
+            if value < 10:
+                self.progressbar_battery.setStyleSheet(QPROGRESSBAR_LOW)
+            elif value < 30:
+                self.progressbar_battery.setStyleSheet(QPROGRESSBAR_MEDIUM)
 
         # Force le changement d'affichage des boites d'actionneurs et de capteurs.
         self.groupBox_actuators.repaint()
