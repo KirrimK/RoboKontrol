@@ -10,6 +10,11 @@ from carte import MapView
 from inspecteur import Inspecteur
 import externals
 
+WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 2px solid rgb(113, 113, 113);border-width: 2px; " \
+                "border-radius: 5px;  color: rgb(255, 255, 255)} " \
+
+QSIZE = QSize(100, 30)
+
 
 class Window(QMainWindow):
     """ Définit la fenêtre principale """
@@ -24,6 +29,8 @@ class Window(QMainWindow):
         self.window.setObjectName("main_window")
         self.window.resize(1091, 782)
         self.window.setWindowTitle("Form")
+
+        self.window.setStyleSheet(WINDOW_STYLE)
 
         # Récupération de l'objet backend
         self.backend = backend
@@ -82,49 +89,52 @@ class Window(QMainWindow):
     def ui_setup_menu_area(self):
         """ Création de la zone menu"""
         # Création du bouton record
-        self.button_record.setMaximumSize(200, 16777215)
+        self.button_record.setFixedSize(QSIZE)
         self.button_record.setText("Record")
         self.button_record.setCheckable(True)
         self.layout_menu.addWidget(self.button_record)
         self.button_record.clicked.connect(self.record)
 
         # Création du bouton play
-        self.button_play.setMaximumSize(200, 16777215)
+        self.button_play.setFixedSize(QSIZE)
         self.button_play.setText("|>")
         self.button_play.clicked.connect(self.show_play_dialog)
         self.layout_menu.addWidget(self.button_play)
 
         # Création du bouton pause
-        self.button_pause.setMaximumSize(200, 16777215)
+        self.button_pause.setFixedSize(QSIZE)
         self.button_pause.setText("||")
         self.layout_menu.addWidget(self.button_pause)
 
         # Création du bouton arrêt
-        self.button_stop.setMaximumSize(200, 16777215)
+        self.button_stop.setFixedSize(QSIZE)
         self.button_stop.setText("Stop")
-        self.button_stop.clicked.connect (lambda : self.onStopRecordButton ())
+        self.button_stop.clicked.connect(lambda: self.onStopRecordButton())
         self.layout_menu.addWidget(self.button_stop)
 
         # Création du bouton sauvegarder
-        self.button_save.setMaximumSize(200, 16777215)
+        self.button_save.setFixedSize(QSIZE)
         self.button_save.setText("Save")
-        self.button_save.clicked.connect (lambda : self.onSaveButton ())
+        self.button_save.clicked.connect(lambda: self.onSaveButton())
         self.layout_menu.addWidget(self.button_save)
 
         self.layout_menu.addItem(self.spacer_item)
 
         # Création du bouton Simulateur
         self.layout_menu.addWidget(self.button_simu)
+        self.button_simu.setFixedSize(QSIZE)
         self.button_simu.setText("Nv. Instance Simu.")
-        self.button_simu.clicked.connect(lambda :externals.exec_simu(self.settings_dict))
+        self.button_simu.clicked.connect(lambda: externals.exec_simu(self.settings_dict))
 
         # Création du bouton configuration
         self.button_settings.setText("Configuration")
+        self.button_settings.setFixedSize(QSIZE)
         self.layout_menu.addWidget(self.button_settings)
         self.button_settings.clicked.connect(self.show_settings)
 
         # Création du bouton aide
         self.button_help.setText("Aide")
+        self.button_help.setFixedSize(QSIZE)
         self.button_help.clicked.connect(show_help)
         self.layout_menu.addWidget(self.button_help)
 
@@ -214,14 +224,14 @@ class Window(QMainWindow):
             self.backend.record("BMC")
 
     @pyqtSlot()
-    def onStopRecordButton (self) :
+    def onStopRecordButton(self):
         if self.button_record.isChecked():
             self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCD")
             self.button_record.setChecked(False)
 
     @pyqtSlot()
-    def onSaveButton (self) :
+    def onSaveButton(self):
         path = self.settings_dict["Chemin de Sauvegarde"]
         if self.button_record.isChecked():
             self.button_record.setStyleSheet("background-color: lightgrey")
@@ -243,7 +253,7 @@ def show_help():
     aide = QMessageBox()
     aide.setWindowTitle("Aide")
     with open("aide.txt", encoding='utf-8') as file:
-        list_aide = file.readlines ()
+        list_aide = file.readlines()
     aide.setText("".join(list_aide))
     aide.exec_()
 
@@ -251,7 +261,7 @@ def show_help():
 def main(backend):
     """ Création la fenêtre principale """
     app = QApplication(sys.argv)
-    backend.launchQt ()
+    backend.launchQt()
     window = Window(backend)
     window.window.show()
     sys.exit(app.exec_())
