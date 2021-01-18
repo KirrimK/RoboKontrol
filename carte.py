@@ -46,7 +46,7 @@ class MapView(QtWidgets.QWidget):
         self.qt_is_compatible = float(version[0]) >= 5 and float(version[1]) >= 15
         self.svg_scl = False
 
-        self.parent.backend.widget.UpdateTrigger.connect(self.repaint)
+        self.parent.backend.widget.MapTrigger.connect(self.repaint)
 
         self.setMouseTracking(True)
         self.key_binding={}
