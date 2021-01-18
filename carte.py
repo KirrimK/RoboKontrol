@@ -3,14 +3,15 @@
 #couleurs aleat pour distinguer robots
 
 from math import sqrt
+from random import randint
 from time import time
 
 from PyQt5 import QtSvg, QtWidgets
-from PyQt5.QtCore import Qt, QTimer, QRect, QPoint, pyqtSignal, QT_VERSION_STR
-from PyQt5.QtGui import QBrush, QColor, QPainter, QFont#, QPen
+from PyQt5.QtCore import Qt, QRect, QPoint, pyqtSignal, QT_VERSION_STR
+from PyQt5.QtGui import QBrush, QColor, QPainter, QFont, QPen
 
 ROBOT_COLOR = 'green'
-SELECT_COLOR = 'blue'
+SELECT_COLOR = 'white'
 STOPPED_COLOR = 'red'
 CLICK_COLOR = 'white'
 ROBOT_BRUSH = QBrush(QColor(ROBOT_COLOR), Qt.SolidPattern)
@@ -41,6 +42,8 @@ class MapView(QtWidgets.QWidget):
         self.last_press = time()
         self.clicking = False
         self.time_clicked = 0
+
+        self.color_dict = {}
 
         version = QT_VERSION_STR.split(".")
         self.qt_is_compatible = float(version[0]) >= 5 and float(version[1]) >= 15
@@ -76,26 +79,32 @@ class MapView(QtWidgets.QWidget):
         #paint robots
         bkd_robots = self.parent.backend.annu.robots
         for robot in bkd_robots:
+            #attribution de couleurs aléatoires
+            if robot not in self.color_dict: #le robot n'a pas de couleur associée
+                self.color_dict[robot] = QColor(randint(0, 255), randint(0, 255), randint(0, 255))
+            #calcul de la position du robot dans le repère du widget
             robot_pos = [bkd_robots[robot].x, bkd_robots[robot].y, bkd_robots[robot].theta]
             robot_size = [ROBOT_SIZE, ROBOT_SIZE]
             mrbsize, mrbpos = self.calc_pos_size(robot_size, robot_pos[:2])
-            if self.selected_robot == robot:
-                painter.setBrush(SELECTED_RB_BRUSH)
-            elif bkd_robots[robot].isStopped :
-                painter.setBrush(STOPPED_BRUSH)
+            #dessin
+            if robot == 'C3PO' :
+                painter.setBrush(QBrush (QColor('gold'), Qt.SolidPattern))
             else:
-                if robot == 'C3PO' :
-                    painter.setBrush(QBrush (QColor('gold'), Qt.SolidPattern))
-                else:
-                    painter.setBrush(ROBOT_BRUSH)
+                painter.setBrush(QBrush (self.color_dict[robot], Qt.SolidPattern))
             pos_offset = [mrbpos[0] - mrbsize[0]/2, mrbpos[1] - mrbsize[1]/2]
             big_offset = [mrbpos[0] - mrbsize[0], mrbpos[1] - mrbsize[1]]
             robot_rect = QRect(pos_offset[0], pos_offset[1], mrbsize[0], mrbsize[1])
             outer_rect = QRect(big_offset[0], big_offset[1], 2*mrbsize[0], 2*mrbsize[1])
             start_angle = (-robot_pos[2] + 3) * 16
             span_angle = 6 * 16
+            old_pen = painter.pen()
+            if self.selected_robot == robot:
+                painter.setPen(QPen(Qt.green, 4, Qt.SolidLine))
+            if bkd_robots[robot].isStopped:
+                painter.setPen(QPen(Qt.red, 4, Qt.SolidLine))
             painter.drawPie(outer_rect, start_angle, span_angle)
             painter.drawEllipse(robot_rect)
+            painter.setPen(old_pen)
             font = QFont()
             font.setPointSize(8)
             painter.setFont(font)
