@@ -46,9 +46,7 @@ class MapView(QtWidgets.QWidget):
         self.qt_is_compatible = float(version[0]) >= 5 and float(version[1]) >= 15
         self.svg_scl = False
 
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.repaint)
-        self.timer.start(50)
+        self.parent.backend.widget.UpdateTrigger.connect(self.repaint)
 
         self.setMouseTracking(True)
         self.key_binding={}
@@ -72,10 +70,6 @@ class MapView(QtWidgets.QWidget):
             ell_rect = QRect(self.mouse_pos.x() - 25, self.mouse_pos.y() - 25, 50, 50)
             painter.setBrush(CLICK_BRUSH)
             painter.drawPie(ell_rect, 0, 360/1.5*self.time_clicked*16)
-        #paint mouse pos dans un coin
-        height = self.geometry().height()
-        rlp = self.relative_mspos
-        painter.drawText(0, height-20, "x: {} y: {}".format(int(rlp[0]), int(rlp[1])))
 
     def paint_robots(self, painter):
         """Dessin des robots sur la carte"""
@@ -223,7 +217,7 @@ class MapView(QtWidgets.QWidget):
         elif event.button() == Qt.RightButton:
             self.selected_robot = None
             for robot in self.parent.backend.annu.robots:
-                if self.distance(robot) < ROBOT_SIZE:
+                if self.distance(robot) < ROBOT_SIZE/2:
                     self.selected_robot = robot
                     self.selected_robot_signal.emit(robot)
 
@@ -247,7 +241,16 @@ class MapView(QtWidgets.QWidget):
     def mouseMoveEvent(self, event):
         """Quand la souris est bougée sur la fenêtre"""
         self.mouse_pos = event.localPos()
-        self.relative_mspos = self.reverse_pos(self.mouse_pos)
+        rlp = self.reverse_pos(self.mouse_pos)
+        self.relative_mspos = rlp
+        #mise à jour du texte du tooltip
+        tooltip_str = 'x: {} y: {}'.format(int(rlp[0]), int(rlp[1]))
+        for robot in self.parent.backend.annu.robots:
+            rb_x = int(self.parent.backend.annu.robots[robot].x)
+            rb_y = int(self.parent.backend.annu.robots[robot].y)
+            if self.distance(robot) < ROBOT_SIZE/2:
+                tooltip_str += "\n[{}] x: {} y: {}".format(robot, rb_x, rb_y)
+        self.setToolTip(tooltip_str)
         #drag and drop
         if self.selected_robot is not None:
             if event.button == Qt.LeftButton:
