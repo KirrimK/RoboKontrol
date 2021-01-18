@@ -4,7 +4,6 @@
 
 from math import sqrt
 from random import randint
-from time import time
 
 from PyQt5 import QtSvg, QtWidgets
 from PyQt5.QtCore import Qt, QRect, QPoint, pyqtSignal, QT_VERSION_STR
@@ -41,12 +40,15 @@ class MapView(QtWidgets.QWidget):
         self.relative_init_mspos = [0, 0]
 
         self.color_dict = {}
+        self.robot_number = 0
+        self.old_pos_dict = {}
+        self.old_selected = None
 
         version = QT_VERSION_STR.split(".")
         self.qt_is_compatible = float(version[0]) >= 5 and float(version[1]) >= 15
         self.svg_scl = False
 
-        self.parent.backend.widget.MapTrigger.connect(self.repaint)
+        self.parent.backend.widget.MapTrigger.connect(self.should_repaint)
 
         self.setMouseTracking(True)
         self.key_binding={}
@@ -54,6 +56,30 @@ class MapView(QtWidgets.QWidget):
         self.selected_robot_signal.connect(lambda rid: self.select_robot(rid))
 
         self.show()
+
+    def should_repaint(self):
+        """Décide si repeindre la map lors d'un MapTrigger est utile
+        permet d'économiser de la performance, surtout si le scaling n'est
+        pas activé"""
+        new_robot_number = len(self.parent.backend.annu.robots.keys())
+        should_repaint = False
+        for robot_nm in self.parent.backend.annu.robots:
+            robot = self.parent.backend.annu.robots[robot_nm]
+            robot_pos = [robot.x, robot.y, robot.theta]
+            if self.old_pos_dict.get(robot) is None:
+                self.old_pos_dict[robot] = robot_pos
+                should_repaint = True
+            elif self.old_pos_dict.get(robot_nm) != robot_pos:
+                self.old_pos_dict[robot_nm] = robot_pos
+                should_repaint = True
+        if new_robot_number != self.robot_number:
+            self.robot_number = new_robot_number
+            should_repaint = True
+        if self.old_selected != self.selected_robot:
+            self.old_selected = self.selected_robot
+            should_repaint = True
+        if should_repaint:
+            self.repaint()
 
     def paintEvent(self, event):
         """Evt appellé à chaque fois que le widget est resize ou caché"""

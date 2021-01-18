@@ -91,13 +91,14 @@ class TabRobot(QWidget):
             self.timestamp = time.time()
             self.ping = abs(self.last_update_pos - self.timestamp)
             self.lcdNumber_last_message.display(self.ping)
-            #calcul des pings equipements
-            for eqp in self.current_equipement_dic:
-                self.current_equipement_dic[eqp].update_ping()
+            
+            #calcul des pings equipements (coupé pour le moment car instable)
+            #for eqp in self.current_equipement_dic:
+            #    self.current_equipement_dic[eqp].update_ping()
         
         self.ping_timer = QTimer()
         self.ping_timer.timeout.connect(update_ping)
-        self.ping_timer.start(50)
+        self.ping_timer.start(100)
 
 
         # Connexion du signal de mise à jours des équipements avec le slot de mise à jour de l'ensemble des équipements
