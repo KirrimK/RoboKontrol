@@ -13,8 +13,6 @@ QLCD_SIZE1, QLCD_SIZE2 = QSize(60, 20), QSize(80, 20)
 # Alignment
 QT_CENTER, QT_RIGHT, QT_LEFT, QT_TOP = Qt.AlignCenter, Qt.AlignRight, Qt.AlignLeft, Qt.AlignTop
 
-# TODO: régler le problème de mise à jour des capteurs
-
 
 class Equipement(QWidget):
     """ Définit l'affichage d'un équipement attaché à un robot
@@ -108,16 +106,7 @@ class Equipement(QWidget):
         # Configuration des widgets de l'équipement
         self.ui_setup_equipement()
 
-        # Connexion du signal de pin du dernier message reçu màj avec le slot d'affichage du ping du dernier message
-        self.ping_changed_signal.connect(self.onPingChangedSignal)
-
-        self.backend.widget.CaptRegSignal.connect(lambda equipement: self.update_equipement(equipement))
-        # todo: ajouter timestamp du dernier message de changement de valeur
-
-    def onPingChangedSignal(self, ping):
-        self.lcdNumber_ping_equipement.display(str(round(ping, 1)))
-        # print(self.lcdNumber_ping_equipement.value ())
-        self.window.repaint()
+        self.backend.widget.CaptRegSignal.connect(lambda current_state: self.update_equipement(current_state))
 
     def ui_setup_equipement(self):
         """ Configure l'ensemble des widgets de l'équipement"""
@@ -253,20 +242,13 @@ class Equipement(QWidget):
             self.label_command.setText(str(0))
 
     @pyqtSlot()
-    def update_ping(self, last_update):
-        # Calcul et mise à jour du denier message reçu
-        self.timestamp = time.time()
-        self.ping = abs(self.timestamp - last_update)
-        self.lcdNumber_ping_equipement.display(str(round(self.ping, 1)))
-
-    @pyqtSlot()
-    def update_equipement(self, equipement):
+    def update_equipement(self, current_state: list):
         """ Met à jour l'équipement suivant son type"""
 
-        if equipement[0] == self.rid and equipement[1] == self.name:
+        if current_state[0] == self.rid and current_state[1] == self.name:
 
-            self.value = float(equipement[2])
-            # self.ping_changed_signal.emit(self.ping)
+            self.value = float(current_state[2])
+            self.last_update = float(current_state[3])
 
             if self.type_widget == "BINAIRE":
                 if self.value == 0:
@@ -294,3 +276,7 @@ class Equipement(QWidget):
 
             if self.type_widget == "BAR" and self.value is not None:
                 self.progressBar_equipement.setValue(self.value)
+
+            # Calcul du ping
+            self.ping = abs(time.time() - self.last_update)
+            self.lcdNumber_ping_equipement.display(self.ping)

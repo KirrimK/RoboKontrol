@@ -134,7 +134,7 @@ class Radio :
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant la position"""
         if self.backend.widget is not None :
-            self.backend.widget.PosRegSignal.emit ([i for i in args])
+            self.backend.widget.PosRegSignal.emit ([i for i in args]+[time()])
         else:
             self.backend.premiersMessages.append (('pos',[i for i in args]))
 
@@ -150,7 +150,7 @@ class Radio :
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant un retour de capteur"""
         if self.backend.widget is not None :
-            self.backend.widget.CaptRegSignal.emit ([i for i in args])
+            self.backend.widget.CaptRegSignal.emit ([i for i in args]+[time()])
         else :
             self.backend.premiersMessages.append (('actrep',[i for i in args]))
 
