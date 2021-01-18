@@ -1,10 +1,11 @@
 """ tab_robot.py - Définit l'affichage d'un onglet robot"""
 
+from math import pi
 import time
 import annuaire
 from PyQt5.QtWidgets import QLabel, QWidget, QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout,QLineEdit, QLCDNumber, \
      QScrollArea, QFrame, QProgressBar
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QSize
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QSize, QTimer
 from equipement import Equipement
 
 # Customisation
@@ -33,6 +34,7 @@ class TabRobot(QWidget):
         self.window = window
 
         self.position = ()
+        self.last_update_pos = time.time()
         self.timestamp = time.time()
         self.backend = self.window.backend
 
@@ -82,6 +84,18 @@ class TabRobot(QWidget):
 
         # Configuration des widgets de la boite robot
         self.ui_setup_tab_robot()
+
+        #calcul et mise à jour du temps de message
+        def update_ping():
+            # Calcul du ping
+            self.timestamp = time.time()
+            self.ping = abs(self.last_update_pos - self.timestamp)
+            self.lcdNumber_last_message.display(self.ping)
+        
+        self.ping_timer = QTimer()
+        self.ping_timer.timeout.connect(update_ping)
+        self.ping_timer.start(50)
+
 
         # Connexion du signal de mise à jours des équipements avec le slot de mise à jour de l'ensemble des équipements
         self.list_equipement_changed_signal.connect(self.update_equipements)
@@ -160,18 +174,14 @@ class TabRobot(QWidget):
             # Mise à jour du vecteur position du robot
             self.x = float(new_position[1])
             self.y = float(new_position[2])
-            self.theta = float(new_position[3])
+            self.theta = float(new_position[3])*360/(2*pi)
             # Récupération du timestamp de dernière mise à jour de la position
             self.last_update_pos = float(new_position[4])
-            # Calcul du ping
-            self.timestamp = time.time()
-            self.ping = abs(self.last_update_pos - self.timestamp)
 
             # Mise à jour des valeurs affichées par les QLCDNUmber
             self.lcdNumber_x.display(self.x)
             self.lcdNumber_y.display(self.y)
             self.lcdNumber_theta.display(self.theta)
-            self.lcdNumber_last_message.display(str(round(self.ping, 1)))
 
     def get_equipements(self):
         """ Charge la liste des des équipements du robot et les informations de chaque équipement présent.
