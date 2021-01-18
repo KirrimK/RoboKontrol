@@ -2,10 +2,10 @@
 
 import sys
 from time import sleep, time
+from PyQt5.QtCore import pyqtSignal #, pyqtSlot
+from PyQt5.QtWidgets import QWidget
 import annuaire
 import ivy_radio as rd
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QWidget
 
 class WidgetBackend (QWidget):
     """Classe implémentée car les signaux Qt doivent être envoyés par des objets Qt
@@ -14,9 +14,9 @@ class WidgetBackend (QWidget):
     CaptRegSignal = pyqtSignal (list)
     ActuDeclSignal = pyqtSignal (list)
     UpdateTrigger = pyqtSignal (list)
-    def __init__ (self, backend):
+    def __init__ (self, parent_backend):
         super().__init__()
-        self.backend = backend
+        self.backend = parent_backend
         self.PosRegSignal.connect (lambda liste : self.backend.onPosRegSignal (liste))
         self.CaptRegSignal.connect (lambda liste : self.backend.onCaptRegSignal (liste))
         self.ActuDeclSignal.connect (lambda liste : self.backend.onActuDeclSignal (liste))
@@ -171,29 +171,28 @@ class Backend:
         Ajoute l'actionnneur aid sur le robot rid.
         Si aid est le nom d'un capteur déjà présent sur le robot, la valeur est gardée.
 
-        Input : [rid (str), aid (str), minV (str), maxV (str), step (str), droits (str), unit (str)] (list)"""
-        rid, aid, minv, maxv, step, droits, unit = liste [0], liste [1], liste [2], liste [3], liste [4], liste [5], liste [6]
+        Input : [rid (str), aid (str), minV (str), maxV (str),
+                step (str), droits (str), unit (str)] (list)"""
+        rid, aid, minv, maxv = liste [0], liste [1], liste [2], liste [3]
+        step, droits, unit = liste [4], liste [5], liste [6]
         if droits == 'RW':
-            val = False
             binaire = False
             if float (minv) + float (step) >= float (maxv) :
                 binaire = True
             if self.annu.find (rid,aid) is not None :
-                val = True
                 valeur = self.annu.find (rid,aid).get_state () [0]
+                self.annu.find (rid,aid).set_state (valeur)
             if binaire :
                 self.annu.find (rid).create_eqp (aid, "Binaire")
             else :
                 self.annu.find (rid).create_eqp (aid, "Actionneur",float(minv), float(maxv),
                                                  float(step), unit)
-            if val:
-                self.annu.find (rid,aid).set_state (valeur)
         elif droits == 'READ':
             add = False
             if not self.annu.find (rid).check_eqp (aid):
                 add, val = True, None
             elif self.annu.find (rid, aid).get_type () is not annuaire.Actionneur :
-                    add, val = True, self.annu.find (rid, aid).get_state() [0]
+                add, val = True, self.annu.find (rid, aid).get_state() [0]
             if add:
                 self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
                 self.annu.find (rid, aid).set_state (val)
@@ -204,7 +203,7 @@ class Backend:
         Change la valeur du capteur sid sur le robot rid.
         Si aucun robot rid n'est connu, le robot est ajouté.
         Si le robot rid n'a pas de capteur sid, le capteur est ajouté.
-        
+
         Input : [rid (str), sid (str), valeur (str)] (list)"""
         rid, sid, valeur = liste [0], liste [1], liste [2]
         if not self.annu.check_robot (rid):
