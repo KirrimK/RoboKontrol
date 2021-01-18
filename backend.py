@@ -2,10 +2,10 @@
 
 import sys
 from time import sleep, time
+from PyQt5.QtCore import pyqtSignal #, pyqtSlot
+from PyQt5.QtWidgets import QWidget
 import annuaire
 import ivy_radio as rd
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QWidget
 
 class WidgetBackend (QWidget):
     """Classe implémentée car les signaux Qt doivent être envoyés par des objets Qt
@@ -174,26 +174,23 @@ class Backend:
         Input : [rid (str), aid (str), minV (str), maxV (str), step (str), droits (str), unit (str)] (list)"""
         rid, aid, minv, maxv, step, droits, unit = liste [0], liste [1], liste [2], liste [3], liste [4], liste [5], liste [6]
         if droits == 'RW':
-            val = False
             binaire = False
             if float (minv) + float (step) >= float (maxv) :
                 binaire = True
             if self.annu.find (rid,aid) is not None :
-                val = True
                 valeur = self.annu.find (rid,aid).get_state () [0]
+                self.annu.find (rid,aid).set_state (valeur)
             if binaire :
                 self.annu.find (rid).create_eqp (aid, "Binaire")
             else :
                 self.annu.find (rid).create_eqp (aid, "Actionneur",float(minv), float(maxv),
                                                  float(step), unit)
-            if val:
-                self.annu.find (rid,aid).set_state (valeur)
         elif droits == 'READ':
             add = False
             if not self.annu.find (rid).check_eqp (aid):
                 add, val = True, None
             elif self.annu.find (rid, aid).get_type () is not annuaire.Actionneur :
-                    add, val = True, self.annu.find (rid, aid).get_state() [0]
+                add, val = True, self.annu.find (rid, aid).get_state() [0]
             if add:
                 self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
                 self.annu.find (rid, aid).set_state (val)
@@ -204,7 +201,7 @@ class Backend:
         Change la valeur du capteur sid sur le robot rid.
         Si aucun robot rid n'est connu, le robot est ajouté.
         Si le robot rid n'a pas de capteur sid, le capteur est ajouté.
-        
+
         Input : [rid (str), sid (str), valeur (str)] (list)"""
         rid, sid, valeur = liste [0], liste [1], liste [2]
         if not self.annu.check_robot (rid):
