@@ -3,7 +3,7 @@
 import time
 from PyQt5.QtWidgets import QLabel, QWidget, QSlider, QPushButton, QGridLayout, QHBoxLayout,\
     QLineEdit, QDialog, QColorDialog, QCheckBox, QDoubleSpinBox, QProgressBar, QSpacerItem, QLCDNumber, QComboBox
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QSize
+from PyQt5.QtCore import pyqtSlot, Qt, QSize, QTimer #pyqtSignal
 
 
 # Customisation
@@ -63,6 +63,17 @@ class Equipement(QWidget):
         self.label_name_equipement = QLabel()
         self.label_message_equipement = QLabel()
         self.lcdNumber_ping_equipement = QLCDNumber()
+
+        #calcul et mise à jour régulière du ping
+        def update_ping():
+            self.timestamp = time.time()
+            self.ping = abs(self.timestamp - self.last_update)
+            ping = int(self.ping * 10)/10
+            self.lcdNumber_ping_equipement.display(ping)
+
+        self.ping_timer = QTimer()
+        self.ping_timer.timeout.connect(update_ping)
+        self.ping_timer.start(50)
 
         if self.type_widget == "BINAIRE":
             self.layout_binaire = QHBoxLayout()
@@ -279,7 +290,3 @@ class Equipement(QWidget):
                 self.updated_from_outside = True
                 self.progressBar_equipement.setValue(int(self.value))
                 self.updated_from_outside = False
-
-            # Calcul du ping
-            self.ping = abs(time.time() - self.last_update)
-            self.lcdNumber_ping_equipement.display(self.ping)
