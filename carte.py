@@ -2,7 +2,7 @@
 
 #couleurs aleat pour distinguer robots
 
-from math import sqrt
+from math import atan, pi, sqrt
 from random import randint
 from time import time
 
@@ -40,6 +40,8 @@ class MapView(QtWidgets.QWidget):
         self.mouse_pos_init = QPoint(0, 0)
         self.relative_init_mspos = [0, 0]
 
+        self.clicking = False
+
         self.color_dict = {}
         self.robot_number = 0
         self.old_pos_dict = {}
@@ -73,6 +75,7 @@ class MapView(QtWidgets.QWidget):
             print(exc)
             print("Valeur de FPS Max invalide. Mise à 10 FPS par défaut.")
             max_period = 0.1
+
         if time() - self.last_repaint < max_period:
             should_repaint = False
             return None
@@ -94,6 +97,9 @@ class MapView(QtWidgets.QWidget):
         #le robot sélectionné est-il tjrs le même?
         if self.old_selected != self.selected_robot:
             self.old_selected = self.selected_robot
+            should_repaint = True
+        #un clic glissé est-il réalisé (dessin vecteur)
+        if self.clicking:
             should_repaint = True
 
         if should_repaint:
@@ -129,7 +135,7 @@ class MapView(QtWidgets.QWidget):
             big_offset = [mrbpos[0] - mrbsize[0], mrbpos[1] - mrbsize[1]]
             robot_rect = QRect(pos_offset[0], pos_offset[1], mrbsize[0], mrbsize[1])
             outer_rect = QRect(big_offset[0], big_offset[1], 2*mrbsize[0], 2*mrbsize[1])
-            start_angle = (-robot_pos[2] + 3) * 16
+            start_angle = (robot_pos[2] + 3) * 16
             span_angle = 6 * 16
             old_pen = painter.pen()
             if self.selected_robot == robot:
@@ -151,8 +157,13 @@ class MapView(QtWidgets.QWidget):
 
         #paint map outline (for alignment purposes)
         if self.parent.settings_dict["Carte (Outline)"]:
-            maprt_size, maprt_pos = self.calc_pos_size([3000, -2000], [0, 0])
+            maprt_size, maprt_pos = self.calc_pos_size([self.map_width, self.map_height], [0, 0])
             painter.drawRect(QRect(maprt_pos[0], maprt_pos[1], maprt_size[0], maprt_size[1]))
+
+    def paint_vector(self, painter):
+        """Dessine la ligne pour les clics-glissés"""
+        if self.clicking:
+            painter.drawLine(self.mouse_pos_init, self.mouse_pos)
 
     def paint(self):
         """Dessin de la map et des robots"""
@@ -162,8 +173,9 @@ class MapView(QtWidgets.QWidget):
 
         self.paint_map(painter)
         self.paint_robots(painter)
+        self.paint_vector(painter)
 
-    def updt_map_data(self, config_path, height, width):
+    def updt_map_data(self, config_path, width, height):
         """Mise à jour des objets à dessiner sur la map
 
         Entrée:
@@ -172,8 +184,8 @@ class MapView(QtWidgets.QWidget):
             - width (int): taille de la carte, en mm
         """
         self.svg_scl = self.qt_is_compatible and self.parent.settings_dict['Carte (Scaling)']
-        self.map_width = height
-        self.map_height = width
+        self.map_width = width
+        self.map_height = height
 
         self.svg_data = QtSvg.QSvgRenderer(config_path)
         if self.svg_scl:
@@ -187,15 +199,15 @@ class MapView(QtWidgets.QWidget):
             if self.map_width/self.width >= self.map_height/self.height:
                 resize_factor = self.map_width/self.width
                 new_pos[0] = (int(new_pos[0])//resize_factor)
-                new_pos[1] = (int(new_pos[1])//resize_factor +
-                            self.height/2 - self.map_height//resize_factor/2)
+                new_pos[1] = self.map_height//resize_factor - (int(new_pos[1])//resize_factor -
+                            self.height/2 + self.map_height//resize_factor/2)
                 new_size[0] = (int(new_size[0])//resize_factor)
                 new_size[1] = -(int(new_size[1])//resize_factor)
             else:
                 resize_factor = self.map_height/self.height
                 new_pos[0] = (int(new_pos[0])//resize_factor +
                             self.width/2 - self.map_width//resize_factor/2)
-                new_pos[1] = int(new_pos[1])//resize_factor
+                new_pos[1] = self.map_height//resize_factor - int(new_pos[1])//resize_factor
                 new_size[0] = (int(new_size[0])//resize_factor)
                 new_size[1] = -(int(new_size[1])//resize_factor)
         else: #sinon, stretching de base
@@ -240,16 +252,16 @@ class MapView(QtWidgets.QWidget):
         if event.button() == Qt.LeftButton:
             self.mouse_pos_init = event.localPos()
             self.relative_init_mspos = self.reverse_pos(self.mouse_pos)
-            if self.selected_robot is not None:
-                cmd_pos = [0, 0, None]
-                cmd_pos[0] = self.relative_mspos[0]
-                cmd_pos[1] = self.relative_mspos[1]
-                self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)
-                cmd_x_le = str(cmd_pos[0])[:4]
-                cmd_y_le = str(cmd_pos[1])[:4]
-                qle_poscmd = self.parent.current_robots_dic[self.selected_robot].QLineEdit_positionCommand
-                qle_poscmd.setText("{} : {} : 000".format(cmd_x_le, cmd_y_le))
-                self.selected_robot = None
+            self.clicking = True
+            #if self.selected_robot is not None:
+            #    cmd_pos = [0, 0, None]
+            #    cmd_pos[0] = self.relative_mspos[0]
+            #    cmd_pos[1] = self.relative_mspos[1]
+            #    self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)
+            #    cmd_x_le = str(cmd_pos[0])[:4]
+            #    cmd_y_le = str(cmd_pos[1])[:4]
+            #    qle_poscmd = self.parent.current_robots_dic[self.selected_robot].QLineEdit_positionCommand
+            #    qle_poscmd.setText("{} : {} : 000".format(cmd_x_le, cmd_y_le))
         elif event.button() == Qt.RightButton:
             self.selected_robot = None
             for robot in self.parent.backend.annu.robots:
@@ -258,36 +270,62 @@ class MapView(QtWidgets.QWidget):
                     self.selected_robot_signal.emit(robot)
 
     def distance(self, rb_nm):
-        """Calcule la distance entre la souris et un robot"""
+        """Calcule la distance entre la souris et un robot,
+        à l'échelle de la carte"""
         rb_x = self.parent.backend.annu.robots[rb_nm].x
         rb_y = self.parent.backend.annu.robots[rb_nm].y
         dist = sqrt((self.relative_mspos[0] - rb_x)**2 +
                     (self.relative_mspos[1] - rb_y)**2)
         return dist
 
-    #def mouseReleaseEvent(self, event):
-    #    """Quand la souris est relachée"""
+    def mouseReleaseEvent(self, event):
+        """Quand la souris est relachée"""
+        if self.clicking:
+            self.clicking = False
+            pos = event.localPos()
+            pos_x = pos.x()
+            pos_y = pos.y()
+            old_pos = self.mouse_pos_init
+            opos_x = old_pos.x()
+            opos_y = old_pos.y()
+            if sqrt((pos_x - opos_x)**2 + (pos_y - opos_y)**2) > 0:
+                #le clic n'était pas statique
+                try:
+                    angle = atan(-(pos_y - opos_y)/(pos_x - opos_x))*360/(2*pi) + (180 if (pos_x - opos_x) < 0 else 0)
+                    cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], angle]
+                    self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
+                    qle_poscmd = self.parent.current_robots_dic[self.selected_robot].QLineEdit_positionCommand
+                    qle_poscmd.setText("{} : {} : {}".format(int(cmd[0]), int(cmd[1]), int(cmd[2])))
+                    print(cmd)
+                except Exception as exc:
+                    print(exc) #surement une div/zéro ou autre
+            else:
+                cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], None]
+                self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
+                qle_poscmd = self.parent.current_robots_dic[self.selected_robot].QLineEdit_positionCommand
+                qle_poscmd.setText("{} : {} : 000".format(cmd[0], cmd[1]))
 
     def mouseMoveEvent(self, event):
         """Quand la souris est bougée sur la fenêtre"""
         self.mouse_pos = event.localPos()
         rlp = self.reverse_pos(self.mouse_pos)
         self.relative_mspos = rlp
+        #TODO: remplacer le tooltip par la status bar
         #mise à jour du texte du tooltip
-        tooltip_str = 'x: {} y: {}'.format(int(rlp[0]), int(rlp[1]))
-        for robot in self.parent.backend.annu.robots:
-            rb_x = int(self.parent.backend.annu.robots[robot].x)
-            rb_y = int(self.parent.backend.annu.robots[robot].y)
-            if self.distance(robot) < ROBOT_SIZE/2:
-                tooltip_str += "\n[{}] x: {} y: {}".format(robot, rb_x, rb_y)
-        self.setToolTip(tooltip_str)
-        #drag and drop
-        if self.selected_robot is not None:
-            if event.button == Qt.LeftButton:
-                pos_cmd=[0,0,None]
-                pos_cmd[0]=pos_cmd[0]+(self.relative_mpos[0]-self.relative_init_mpos[0])
-                pos_cmd[1]=pos_cmd[1]+self.relative.mpos[1]-self.relative_init_mpos[1]
-                self.parent.backend.sendposcmd_robot(self.selected_robot, pos_cmd)
+        #tooltip_str = 'x: {} y: {}'.format(int(rlp[0]), int(rlp[1]))
+        #for robot in self.parent.backend.annu.robots:
+        #    rb_x = int(self.parent.backend.annu.robots[robot].x)
+        #    rb_y = int(self.parent.backend.annu.robots[robot].y)
+        #    if self.distance(robot) < ROBOT_SIZE/2:
+        #        tooltip_str += "\n[{}] x: {} y: {}".format(robot, rb_x, rb_y)
+        #self.setToolTip(tooltip_str)
+        #drag and drop (dessin du vecteur sur la carte)
+        #if self.selected_robot is not None:
+        #    if event.button == Qt.LeftButton:
+        #        pos_cmd=[0,0,None]
+        #        pos_cmd[0]=pos_cmd[0]+(self.relative_mpos[0]-self.relative_init_mpos[0])
+        #        pos_cmd[1]=pos_cmd[1]+self.relative.mpos[1]-self.relative_init_mpos[1]
+        #        self.parent.backend.sendposcmd_robot(self.selected_robot, pos_cmd)
 
     def reverse_pos(self, qpoint):
         """Calcule la position de la souris relative à la carte"""
@@ -298,13 +336,13 @@ class MapView(QtWidgets.QWidget):
             if self.map_width/self.width >= self.map_height/self.height:
                 resize_factor = self.map_width/self.width
                 new_pos[0] = (int(new_pos[0] - 1))*resize_factor
-                new_pos[1] = (int(new_pos[1] - 1) - self.height/2 +
+                new_pos[1] = (int(- new_pos[1] + self.map_height//resize_factor - 1) + self.height/2 -
                                 self.map_height//resize_factor/2)*resize_factor
             else:
                 resize_factor = self.map_height/self.height
                 new_pos[0] = (int(new_pos[0] - 1) - self.width/2 +
                                 self.map_width//resize_factor/2)*resize_factor
-                new_pos[1] = (int(new_pos[1] - 1))*resize_factor
+                new_pos[1] = (int(-new_pos[1] + self.map_height//resize_factor - 1))*resize_factor
         else:
             resize_fctwdt = self.map_width/self.width
             resize_fcthgt = self.map_height/self.height
