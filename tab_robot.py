@@ -172,15 +172,14 @@ class TabRobot(QWidget):
             self.lcdNumber_theta.display(self.theta)
             self.label_last_message.setText("Dernière MAJ à : {}".format(time.asctime().split()[3]))
 
-    def get_equipements(self):
-        """ Charge la liste des des équipements du robot et les informations de chaque équipement présent.
-            Renvoie le dictionnaire des équipements (clé= nom de l'équipement, valeur= objet de la class Equipement)"""
+    @pyqtSlot()
+    def update_equipements(self):
+        """ Met à jour l'ensemble des équipements accrochés au robots et initialise la mise à jour de chaque
+        équipement """
+        new_equipements_list = self.backend.getdata_robot(self.rid)[1]
 
-        # Mise à jour de la liste de l'équipement du robot
-        self.equipement_list = self.backend.getdata_robot(self.rid)[1]
-        equipements = {}
-
-        for eqp_name in self.equipement_list:
+        # Crée et ajoute les nouveaux équipements
+        for eqp_name in set(new_equipements_list) - set(self.current_equipement_list):
             eqp = self.backend.getdata_eqp(self.rid, eqp_name)
             eqp_type = eqp[0]
             eqp_value = eqp[1]
@@ -195,48 +194,28 @@ class TabRobot(QWidget):
                 self.battery_step = step
 
             elif eqp_type == annuaire.Actionneur or eqp_type == annuaire.Binaire:
-                equipements[eqp_name] = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update, "RW",
+                equipement = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update, "RW",
                                                    self.layout_box_actuators, self.rid, self.window)
+                self.current_equipement_dic[eqp_name] = equipement
+                self.current_equipement_list.append(eqp_name)
+                equipement.add_equipement()
 
             elif eqp_type == annuaire.Capteur:
-                equipements[eqp_name] = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update, "R",
+                equipement = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update, "R",
                                                    self.layout_box_sensors, self.rid, self.window)
-
-        return equipements
-
-    @pyqtSlot()
-    def update_equipements(self):
-        """ Met à jour l'ensemble des équipements accrochés au robots et initialise la mise à jour de chaque
-        équipement """
-        # Met à jour le dictionnaire des équipements
-        equipements = self.get_equipements()
-        # Crée une liste des équipements présents sur le robot
-        equipements_list = [key for key in equipements]
-
-        # Ajoute les nouveaux équipements
-        for name in set(equipements_list) - set(self.current_equipement_list):
-            self.current_equipement_dic[name] = equipements[name]
-            equipement = equipements[name]
-            equipement.add_equipement()
-
-        # Supprime les équipements qui ne sont plus présents
-        for name in set(self.current_equipement_list) - set(equipements_list):
-            equipement = self.current_equipement_dic.pop(name)
-            equipement.remove_equipement()
+                self.current_equipement_dic[eqp_name] = equipement
+                self.current_equipement_list.append(eqp_name)
+                equipement.add_equipement()
 
         # Change les capteurs en actionneurs si néccessaire.
         for name in self.current_sensors_list:
-            eqpment = equipements[name]
+            eqpment = self.current_equipement_dic[name]
             if eqpment.permission == "RW":
                 self.current_actuators_list.append(name)
                 eqpment.add_equipement()
                 self.current_sensors_list.pop(self.current_sensors_list.index(name))
                 sensor = self.current_equipement_dic[name]
                 sensor.remove_equipement()
-
-        # Met à jour la liste et le dictionnaire des capteurs présents
-        self.current_equipement_list = equipements_list
-        self.current_equipement_dic = equipements
 
         # Emission pour chaque équipement de la nouvelle valeur et du nouveau ping
         for equipement in self.current_equipement_dic.values():
