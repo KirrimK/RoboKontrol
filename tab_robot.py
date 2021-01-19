@@ -69,7 +69,7 @@ class TabRobot(QWidget):
         self.layout_box_actuators = QVBoxLayout(self.groupBox_actuators)
         self.layout_box_sensors = QVBoxLayout(self.groupBox_sensors)
         self.label_last_message = QLabel()
-        #self.lcdNumber_last_message = QLCDNumber()
+        self.lcdNumber_last_message = QLCDNumber()
         self.layout_last_command = QHBoxLayout()
         self.label_positionCommand = QLabel()
         self.QLineEdit_positionCommand = QLineEdit()
@@ -89,7 +89,9 @@ class TabRobot(QWidget):
         self.list_equipement_changed_signal.connect(self.update_equipements)
 
         # Connexion du signal de mise à jour de la position
-        self.backend.widget.PosRegSignal.connect(lambda new_position: self.update_position(new_position))
+        self.backend.widget.position_updated.connect(lambda new_position: self.update_position(new_position))
+
+        self.backend.widget.UpdateTrigger.connect(self.update_ping)
 
     def ui_setup_tab_robot(self):
         """ Configure l'ensemble de l'onglet robot"""
@@ -116,11 +118,11 @@ class TabRobot(QWidget):
         self.layout_box_robot.addLayout(self.layout_coord)
 
         # Configuration de l'affichage du dernier message reçu
-        self.label_last_message.setText("Dernière MAJ à : {}".format(time.asctime().split()[3]))
-        #self.layout_last_message.addWidget(self.label_last_message)
-        #self.lcdNumber_last_message.setFixedSize(QLCD_SIZE2)
-        #self.layout_last_message.addWidget(self.lcdNumber_last_message)
-        self.layout_box_robot.addWidget(self.label_last_message, QT_TOP)
+        self.label_last_message.setText("Dernière MAJ (s)")
+        self.layout_last_message.addWidget(self.label_last_message)
+        self.lcdNumber_last_message.setFixedSize(QLCD_SIZE2)
+        self.layout_last_message.addWidget(self.lcdNumber_last_message)
+        self.layout_box_robot.addLayout(self.layout_last_message)
 
         # Confiuration de l'envoyeur de commandes de postion
         self.label_positionCommand.setText("Dern. PosCmd:")
@@ -170,7 +172,8 @@ class TabRobot(QWidget):
             self.lcdNumber_x.display(self.x)
             self.lcdNumber_y.display(self.y)
             self.lcdNumber_theta.display(self.theta)
-            self.label_last_message.setText("Dernière MAJ à : {}".format(time.asctime().split()[3]))
+
+            self.update_ping()
 
     @pyqtSlot()
     def update_equipements(self):
@@ -265,6 +268,11 @@ class TabRobot(QWidget):
         except TypeError:
             print(self.battery_min, self.battery_max, self.battery_step)
 
+    @pyqtSlot()
+    def update_ping(self):
+        """ Calcul et met à jour le ping de la position """
+        self.ping = round(abs(time.time() - self.last_update_pos), 1)
+        self.lcdNumber_last_message.display(format(self.ping))
 
     @pyqtSlot()
     def update_tab_robot(self):

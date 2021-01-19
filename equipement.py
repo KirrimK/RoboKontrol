@@ -102,14 +102,19 @@ class Equipement(QWidget):
         # Configuration des widgets de l'équipement
         self.ui_setup_equipement()
 
+        self.backend.widget.UpdateTrigger.connect(lambda: self.update_ping(self.last_update))
+
         self.backend.widget.CaptRegSignal.connect(lambda current_state: self.update_equipement(current_state))
 
-    #calcul et mise à jour régulière du ping
-    def update_ping(self):
-        self.timestamp = time.time()
-        self.ping = abs(self.timestamp - self.last_update)
-        self.lcdNumber_ping_equipement.display(self.ping)
-        self.label_message_equipement.setText("Dernière MAJ à : {}h{}:{}".format(time.asctime().split()[3]))
+    #calcul et mise à jour du ping
+    def update_ping(self, last_update: float):
+        self.last_update = last_update
+        self.ping = round(abs(time.time() - self.last_update), 1)
+        self.lcdNumber_ping_equipement.display(format(self.ping))
+
+    def update_last_message(self, last_message: list):
+        if last_message[0] == self.rid and last_message[1] == self.name:
+            self.update_ping(last_message[2])
 
     def ui_setup_equipement(self):
         """ Configure l'ensemble des widgets de l'équipement"""
@@ -122,11 +127,11 @@ class Equipement(QWidget):
             self.label_name_equipement.setText('{0} ({1})'.format(self.name, self.unite))
         self.gridLayout_equipement.addWidget(self.label_name_equipement, 0, 0, 1, 1, QT_LEFT)
 
-        self.label_message_equipement.setText("Dernière MAJ à : {}".format(time.asctime().split()[3]))
+        self.label_message_equipement.setText("Dernière MAJ (s)")
         self.gridLayout_equipement.addWidget(self.label_message_equipement, 2, 0, 1, 2, QT_LEFT)
-        #self.lcdNumber_ping_equipement.setMaximumSize(QSize(75, 25))
-        #self.lcdNumber_ping_equipement.setFixedSize(QLCD_SIZE2)
-        #self.gridLayout_equipement.addWidget(self.lcdNumber_ping_equipement, 2, 1, 1, 1, QT_RIGHT)
+        self.lcdNumber_ping_equipement.setMaximumSize(QSize(75, 25))
+        self.lcdNumber_ping_equipement.setFixedSize(QLCD_SIZE2)
+        self.gridLayout_equipement.addWidget(self.lcdNumber_ping_equipement, 2, 1, 1, 1, QT_RIGHT)
 
         if self.type_widget == "BINAIRE":
             self.label_binaire.setFixedSize(100, 20)
@@ -252,7 +257,7 @@ class Equipement(QWidget):
 
             self.value = float(current_state[2])
             self.last_update = float(current_state[3])
-            self.label_message_equipement.setText("Dernière MAJ à : {}".format(time.asctime().split()[3]))
+            self.label_message_equipement.setText("Dernière MAJ (s)")
 
             if self.type_widget == "BINAIRE":
                 self.updated_from_outside = True
@@ -289,3 +294,5 @@ class Equipement(QWidget):
                 self.updated_from_outside = True
                 self.progressBar_equipement.setValue(int(self.value))
                 self.updated_from_outside = False
+
+            self.update_ping(self.last_update)
