@@ -227,22 +227,37 @@ class MapView(QtWidgets.QWidget):
         print(event.key())
         self.setFocusPolicy(Qt.StrongFocus)
         bkd_robots = self.parent.backend.annu.robots
-        incr=10
-        cmd_pos=[0,0,None]
+        incr=1
+        cmd_speed=[0,0,None]
         if self.selected_robot is not None:
             selec_rob = bkd_robots[self.selected_robot]
-            robot_pos = [selec_rob.x, selec_rob.y, selec_rob.theta]
+            robot_speed = [selec_rob.x, selec_rob.y, selec_rob.theta]
             if event.key() == Qt.Key_Z:
-                cmd_pos=[robot_pos[0], robot_pos[1] + incr, None]
+                cmd_speed[1]=incr
             if event.key() == Qt.Key_S:
-                cmd_pos=[robot_pos[0], robot_pos[1] - incr, None]
+                cmd_speed[1]=-incr
             if event.key() == Qt.Key_Q:
-                cmd_pos=[robot_pos[0]-incr, robot_pos[1], None]
+                cmd_speed[0]=-incr
             if event.key() == Qt.Key_D:
-                cmd_pos=[robot_pos[0]+incr, robot_pos[1], None]
-            self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)
+                cmd_speed[0]=incr        
+            self.parent.backend.send_speed_cmd(self.selected_robot, cmd_speed[0],cmd_speed[1],0)
         else:
             pass
+    def keyReleaseEvent(self,event):
+        print(event.key())
+        self.setFocusPolicy(Qt.StrongFocus)
+        bkd_robots = self.parent.backend.annu.robots
+        cmd_speed=[0,0,None]
+        if event.key() != Qt.Key_Z:
+                cmd_speed[1]=0
+        if event.key() != Qt.Key_S:
+                cmd_speed[1]=0
+        if event.key() != Qt.Key_Q:
+                cmd_speed[0]=0
+        if event.key() != Qt.Key_D:
+                cmd_speed[0]=0       
+        self.parent.backend.send_speed_cmd(self.selected_robot, cmd_speed[0],cmd_speed[1],0) 
+
 
     def mousePressEvent(self, event):
         """La souris est cliquée"""
