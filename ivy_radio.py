@@ -23,7 +23,6 @@ STOP_BUTTON_CMD = "Emergency {}"
 KILL_CMD = "Shutdown {}"
 DESCR_CMD = "ActuatorsRequest {}"
 
-MSG = '(.*)'
 def temps (t, pt):
     """Input : _timestamp (float) : donné par time ()
                     _ premier_timestamp : date du premier timestamp de la session d'enregistrement
@@ -63,7 +62,6 @@ class Radio :
         self.nom = IVYAPPNAME
         
         IvyBindMsg (self.on_posreg, POS_REG)
-        IvyBindMsg (self.on_msg, MSG)
         IvyBindMsg (self.on_captreg, CAPT_REG)
         IvyBindMsg (self.on_actudecl, ACTU_DECL)
         
@@ -79,13 +77,6 @@ class Radio :
         if 'cmds' in args :
             self.record_cmds = True
 
-    def on_msg (self, sender, message):
-        """Input fait par IvyBindMsg ('(.*)')
-        Stocke les messages sous forme de tupple dans msgs_buffer
-        si le booléen self.record_msgs est True
-        Vérifie si l'expéditeur est enregistré et l'enregistre si ce n'est pas fait."""
-        if self.record_msgs :
-            self.msgs_buffer.append ((time(),str(sender), message))
 
     def register_stop (self, save = True, del_buffers = True, *args):
         """Arrête un enregistrement, supprime optionellemnt le tampon,
@@ -133,6 +124,8 @@ class Radio :
     def on_posreg (self, sender, *args):
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant la position"""
+        if self.record_msgs :
+            self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
         if self.backend.widget is not None :
             self.backend.widget.PosRegSignal.emit ([i for i in args]+[time()])
         else:
@@ -141,6 +134,8 @@ class Radio :
     def on_actudecl (self, sender, *args):
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant la description d'un equipement"""
+        if self.record_msgs :
+            self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
         if self.backend.widget is not None :
             self.backend.widget.ActuDeclSignal.emit ([i for i in args])
         else :
@@ -149,6 +144,8 @@ class Radio :
     def on_captreg (self, sender, *args):
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant un retour de capteur"""
+        if self.record_msgs :
+            self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
         if self.backend.widget is not None :
             self.backend.widget.CaptRegSignal.emit ([i for i in args]+[time()])
         else :
@@ -160,7 +157,7 @@ class Radio :
         if self.record_cmds :
             self.cmds_buffer.append ((time(),cmd))
         if self.record_msgs :
-            self.msgs_buffer.append ((time(),'Commande_de_l\'interface',cmd))
+            self.msgs_buffer.append ((time(),'Interface',cmd))
         IvySendMsg (cmd)
 
 
