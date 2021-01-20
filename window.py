@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 from PyQt5.QtWidgets import QGroupBox, QPushButton, QSpacerItem, QStatusBar
 from PyQt5.QtWidgets import QDialog, QSizePolicy, QMessageBox, QFileDialog
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QCheckBox
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, QTimer, QSize
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, QSize
 from carte import MapView
 from inspecteur import Inspecteur
 import externals
@@ -26,19 +26,17 @@ class Window(QMainWindow):
     def __init__(self, backend):
 
         super().__init__()
-        self.window = QWidget()
-        self.window.setObjectName("main_window")
-        self.window.resize(1091, 782)
-        self.window.setWindowTitle("Form")
-
-        self.window.setStyleSheet(WINDOW_STYLE)
+        self.resize(1200, 600)
+        self.setWindowTitle("Form")
+        self.setStyleSheet(WINDOW_STYLE)
 
         # Récupération de l'objet backend
         self.backend = backend
+        self.backend.launchQt()
 
         # Création des widgets de la fenêtre
-        self.layout_window = QVBoxLayout(self.window)
-        self.layout_map_inspector = QHBoxLayout()
+        self.window = QWidget()
+        self.layout_window = QHBoxLayout(self.window)
         self.menu_area = QGroupBox()
         self.layout_menu = QHBoxLayout(self.menu_area)
         self.button_record = QPushButton()
@@ -61,10 +59,9 @@ class Window(QMainWindow):
         self.ui_setup_menu_area()
         self.ui_setup_map()
         self.ui_setup_inspector()
-        self.layout_window.addLayout(self.layout_map_inspector)
         self.ui_setup_statusbar()
 
-        # Création du dictionnaire des robots présents (k=nom, v=boite robot)
+        self.ui_setup_window()
 
         # Connexion du signal de UpdateTrigger avec le slot de mise à jour de la fenêtre
         self.backend.widget.UpdateTrigger.connect(self.update_window)
@@ -76,16 +73,21 @@ class Window(QMainWindow):
         self.settings_dict = externals.get_settings()
         self.act_settings()
 
+    def ui_setup_window(self):
+        self.setCentralWidget(self.window)
+        self.setMenuWidget(self.menu_area)
+        self.setStatusBar(self.statusbar)
+
     def ui_setup_map(self):
         """Crée la carte et l'affiche dans la fenêtre"""
         self.map_view = MapView(self)
         self.map_view.setMinimumSize(QSize(0, 250))
-        self.layout_map_inspector.addWidget(self.map_view)
+        self.layout_window.addWidget(self.map_view)
 
     def ui_setup_inspector(self):
         """ Crée l'inspecteur (QTabWidget) et l'affiche dans la fenêtre"""
         self.inspecteur = Inspecteur(self)
-        self.layout_map_inspector.addWidget(self.inspecteur)
+        self.layout_window.addWidget(self.inspecteur)
 
     def ui_setup_menu_area(self):
         """ Création de la zone menu"""
@@ -135,12 +137,11 @@ class Window(QMainWindow):
         self.button_help.clicked.connect(show_help)
         self.layout_menu.addWidget(self.button_help)
 
-        self.layout_window.addWidget(self.menu_area)
+        # self.layout_window.addWidget(self.menu_area)
 
     def ui_setup_statusbar(self):
         """ Configure la bar d'état """
-        self.layout_window.addWidget(self.statusbar)
-        #self.setStatusBar(self.statusbar)
+        # self.layout_window.addWidget(self.statusbar)
         self.statusbar.addPermanentWidget(self.statuslabel)
 
     def show_play_dialog(self):
@@ -241,7 +242,7 @@ class Window(QMainWindow):
     def update_window(self):
         """ Initialise la mise à jour de la fenêtre"""
         new_robots = self.backend.get_all_robots()
-
+        print(self.size())
         self.inspecteur.update_robots(new_robots)
         self.list_robot_changed_signal.emit(self.current_robots_list)
 
@@ -260,7 +261,6 @@ def show_help():
 def main(backend):
     """ Création la fenêtre principale """
     app = QApplication(sys.argv)
-    backend.launchQt()
     window = Window(backend)
-    window.window.show()
+    window.show()
     sys.exit(app.exec_())

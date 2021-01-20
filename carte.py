@@ -59,6 +59,8 @@ class MapView(QtWidgets.QWidget):
 
         self.selected_robot_signal.connect(lambda rid: self.select_robot(rid))
 
+        self.setFocusPolicy(Qt.StrongFocus)
+
         self.show()
 
     def should_repaint(self):
@@ -127,7 +129,7 @@ class MapView(QtWidgets.QWidget):
             robot_size = [ROBOT_SIZE, ROBOT_SIZE]
             mrbsize, mrbpos = self.calc_pos_size(robot_size, robot_pos[:2])
             #dessin
-            if robot == 'C3PO' :
+            if robot in  ('C3PO', 'C3P0') :
                 painter.setBrush(QBrush (QColor('gold'), Qt.SolidPattern))
             else:
                 painter.setBrush(QBrush (self.color_dict[robot], Qt.SolidPattern))
@@ -223,27 +225,39 @@ class MapView(QtWidgets.QWidget):
         """Une touche du clavier est pressée"""
         #self.key_binding={}
         print(event.key())
+        self.setFocusPolicy(Qt.StrongFocus)
         bkd_robots = self.parent.backend.annu.robots
-        robot_up_key = self.parent.settings_dict["UP_KEY"]
-        robot_down_key = self.parent.settings_dict["DOWN_KEY"]
-        robot_left_key = self.parent.settings_dict["LEFT_KEY"]
-        robot_right_key = self.parent.settings_dict["RIGHT_KEY"]
-        incr=10
-        cmd_pos=[0,0,None]
+        incr=1
+        cmd_speed=[0,0,None]
         if self.selected_robot is not None:
             selec_rob = bkd_robots[self.selected_robot]
-            robot_pos = [selec_rob.x, selec_rob.y, selec_rob.theta]
-            if event.text() == robot_up_key:
-                cmd_pos=[robot_pos[0], robot_pos[1] + incr, None]
-            if event.text() == robot_down_key:
-                cmd_pos=[robot_pos[0], robot_pos[1] - incr, None]
-            if event.text() == robot_left_key:
-                cmd_pos=[robot_pos[0], robot_pos[1] - incr, None]
-            if event.text() == robot_right_key:
-                cmd_pos=[robot_pos[0], robot_pos[1] + incr, None]
-            self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)
+            robot_speed = [selec_rob.x, selec_rob.y, selec_rob.theta]
+            if event.key() == Qt.Key_Z:
+                cmd_speed[1]=incr
+            if event.key() == Qt.Key_S:
+                cmd_speed[1]=-incr
+            if event.key() == Qt.Key_Q:
+                cmd_speed[0]=-incr
+            if event.key() == Qt.Key_D:
+                cmd_speed[0]=incr        
+            self.parent.backend.send_speed_cmd(self.selected_robot, cmd_speed[0],cmd_speed[1],0)
         else:
             pass
+    def keyReleaseEvent(self,event):
+        print(event.key())
+        self.setFocusPolicy(Qt.StrongFocus)
+        bkd_robots = self.parent.backend.annu.robots
+        cmd_speed=[0,0,None]
+        if event.key() != Qt.Key_Z:
+                cmd_speed[1]=0
+        if event.key() != Qt.Key_S:
+                cmd_speed[1]=0
+        if event.key() != Qt.Key_Q:
+                cmd_speed[0]=0
+        if event.key() != Qt.Key_D:
+                cmd_speed[0]=0       
+        self.parent.backend.send_speed_cmd(self.selected_robot, cmd_speed[0],cmd_speed[1],0) 
+
 
     def mousePressEvent(self, event):
         """La souris est cliquée"""

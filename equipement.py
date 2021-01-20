@@ -102,7 +102,7 @@ class Equipement(QWidget):
         # Configuration des widgets de l'équipement
         self.ui_setup_equipement()
 
-        self.backend.widget.CaptRegSignal.connect(lambda current_state: self.update_equipement(current_state))
+        self.backend.widget.equipement_updated.connect(lambda current_state: self.update_equipement(current_state))
 
     #calcul et mise à jour du ping
     def update_ping(self, last_update: float):
