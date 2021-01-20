@@ -241,7 +241,7 @@ class MapView(QtWidgets.QWidget):
 
     def keyReleaseEvent(self,event):
         """Une touche du clavier est relachée"""
-        print(event.key())
+        #print(event.key())
         self.setFocusPolicy(Qt.StrongFocus)
         cmd_speed=[0,0,None]
         if event.key() != Qt.Key_Z:
@@ -303,7 +303,7 @@ class MapView(QtWidgets.QWidget):
                 cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], None]
                 self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
                 qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
-                qle_poscmd.setText("{} : {} : 000".format(cmd[0], cmd[1]))
+                qle_poscmd.setText("{} : {} : 000".format(int(cmd[0]), int(cmd[1])))
 
     def mouseMoveEvent(self, event):
         """Quand la souris est bougée sur la fenêtre"""
