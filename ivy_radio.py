@@ -92,9 +92,12 @@ class Radio :
         if 'msgs' in args :
             self.record_msgs = False
             if save :
-                if path != "":
-                    if path [-1] != "/":
-                        path += "/"
+                if path is not None :
+                    if path != "":
+                        if path [-1] != "/":
+                            path += "/"
+                else :
+                    path = ""
                 timestamp_deb = time()
                 with open ('{}messages{}.txt'.format (path, int (timestamp_deb)),'a') as fichier :
                     fichier.write ('{}\n\nTemps (ms)\tExpediteur\t\t\tMessage\n'.format (temps_deb (timestamp_deb)))
