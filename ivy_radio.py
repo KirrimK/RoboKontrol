@@ -125,6 +125,7 @@ class Radio :
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant la position"""
         if self.record_msgs :
+            message = "Posreport {} {} {} {}".format (args[0], args[1], args [2], args [3])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
         if self.backend.widget is not None :
             self.backend.widget.PosRegSignal.emit ([i for i in args]+[time()])
@@ -135,6 +136,8 @@ class Radio :
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant la description d'un equipement"""
         if self.record_msgs :
+            message = "ActuatorDecl {} {} {} {} {} {} {}".format (args [0], args [1], args [2], args [3], 
+                        args [4], args [5], args [6])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
         if self.backend.widget is not None :
             self.backend.widget.ActuDeclSignal.emit ([i for i in args])
@@ -145,6 +148,7 @@ class Radio :
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant un retour de capteur"""
         if self.record_msgs :
+            message = "ActuatorReport {} {} {}".format (args[0], args [1], args [2]) 
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
         if self.backend.widget is not None :
             self.backend.widget.CaptRegSignal.emit ([i for i in args]+[time()])
