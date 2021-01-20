@@ -310,15 +310,15 @@ class MapView(QtWidgets.QWidget):
         self.mouse_pos = event.localPos()
         rlp = self.reverse_pos(self.mouse_pos)
         self.relative_mspos = rlp
-        #TODO: remplacer le tooltip par la status bar
-        #mise à jour du texte du tooltip
-        #tooltip_str = 'x: {} y: {}'.format(int(rlp[0]), int(rlp[1]))
-        #for robot in self.parent.backend.annu.robots:
-        #    rb_x = int(self.parent.backend.annu.robots[robot].x)
-        #    rb_y = int(self.parent.backend.annu.robots[robot].y)
-        #    if self.distance(robot) < ROBOT_SIZE/2:
-        #        tooltip_str += "\n[{}] x: {} y: {}".format(robot, rb_x, rb_y)
-        #self.setToolTip(tooltip_str)
+        #mise à jour du texte de la status bar
+        tooltip_str = ''
+        for robot in self.parent.backend.annu.robots:
+            rb_x = int(self.parent.backend.annu.robots[robot].x)
+            rb_y = int(self.parent.backend.annu.robots[robot].y)
+            if self.distance(robot) < ROBOT_SIZE/2:
+                tooltip_str += "[{} x: {} y: {}] ".format(robot, rb_x, rb_y)
+        tooltip_str += 'x: {} y: {}'.format(int(rlp[0]), int(rlp[1]))
+        self.parent.statuslabel.setText(tooltip_str)
         #drag and drop (dessin du vecteur sur la carte)
         #if self.selected_robot is not None:
         #    if event.button == Qt.LeftButton:

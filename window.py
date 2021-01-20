@@ -51,6 +51,7 @@ class Window(QMainWindow):
         self.button_settings = QPushButton()
         self.button_help = QPushButton()
         self.statusbar = QStatusBar()
+        self.statuslabel = QLabel()
 
         # Création de la liste des noms des robots présents
         self.current_robots_list = []
@@ -145,6 +146,8 @@ class Window(QMainWindow):
     def ui_setup_statusbar(self):
         """ Configure la bar d'état """
         self.layout_window.addWidget(self.statusbar)
+        #self.setStatusBar(self.statusbar)
+        self.statusbar.addPermanentWidget(self.statuslabel)
 
     def show_play_dialog(self):
         """Ouvre un petit popup demandant de choisir un fichier à lire"""
