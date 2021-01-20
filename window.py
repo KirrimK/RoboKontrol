@@ -237,6 +237,14 @@ class Window(QMainWindow):
             self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCSD", path)
             self.button_record.setChecked(False)
+    
+    @pyqtSlot()
+    def onPlayButton (self):
+        pass
+
+    @pyqtSlot ()
+    def onPauseButton (self):
+        pass
 
     @pyqtSlot()
     def update_window(self):
