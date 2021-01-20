@@ -129,7 +129,7 @@ class MapView(QtWidgets.QWidget):
             robot_size = [ROBOT_SIZE, ROBOT_SIZE]
             mrbsize, mrbpos = self.calc_pos_size(robot_size, robot_pos[:2])
             #dessin
-            if robot == 'C3PO' :
+            if robot in  ('C3PO', 'C3P0') :
                 painter.setBrush(QBrush (QColor('gold'), Qt.SolidPattern))
             else:
                 painter.setBrush(QBrush (self.color_dict[robot], Qt.SolidPattern))
