@@ -5,6 +5,7 @@ from time import sleep, time
 from PyQt5.QtCore import pyqtSignal #, pyqtSlot
 from PyQt5.QtWidgets import QWidget
 import annuaire
+import display as dsp
 import ivy_radio as rd
 
 class WidgetBackend (QWidget):
@@ -39,10 +40,10 @@ class Backend:
             -  2: impression "statique" de l'annuaire dans la console
     """
 
-    def __init__(self, annu=None, radio=None, print_flag=0):
+    def __init__(self, radio=None, print_flag=0):
         self.runs = False
         self.radio_started = False
-        self.premiersMessages = []
+        self.premiers_messages = []
         self.print_flag = print_flag
         self.start_time = 0
         self.runned_time = 0
@@ -50,8 +51,6 @@ class Backend:
         self.annu = None
         if isinstance(radio, rd.Radio):
             self.attach_radio(radio)
-        if isinstance(annu, annuaire.Annuaire):
-            self.attach_annu(annu)
         self.widget = None
 
     def launchQt (self):
@@ -61,13 +60,13 @@ class Backend:
         Initialise l'attribut self.widget
         Réagit aux messages reçus avant le lancement de l'application Qt"""
         self.widget = WidgetBackend (self)
-        for message in self.premiersMessages :
+        for message in self.premiers_messages :
             if message [0] == 'pos' :
-                self.widget.PosRegSignal.emit (message [1])
+                self.widget.position_updated.emit (message [1])
             elif message  [0] == 'actdcl':
                 self.widget.ActuDeclSignal.emit (message [1])
             else :
-                self.widget.CaptRegSignal.emit (message [1])
+                self.widget.equipement_updated.emit (message [1])
 
     def __str__(self, erase_flag=False):
         if not erase_flag:
@@ -83,14 +82,14 @@ class Backend:
         return self_str
 
     def __enter__(self):
-        if self.radio and self.annu:
+        if self.radio:
             self.start_time = time()
             self.runs = True
             self.start_radio()
             if self.print_flag != -1:
                 print("Backend Lancé. Ctrl+C pour arrêter.")
         else:
-            raise Exception("Connectez une radio ET un annuaire avant de lancer le backend.")
+            raise Exception("Connectez une radio avant de lancer le backend.")
         return self
 
     def __exit__(self, excp_type, value, traceback):
@@ -112,38 +111,6 @@ class Backend:
             self.radio.start()
             self.radio_started = True
 
-    def run_as_loop(self, run_time=None):
-        """Met en place une boucle infinie permettant un déboguage dans la console
-        Pour les tests, un temps de fonctionnement peut être inscrit
-        afin de ne pas rester dans une boucle infinie"""
-        limited_time = False
-        timer = 0
-        if run_time is not None:
-            limited_time = True
-            timer = run_time
-        while (self.runs and not limited_time) or (self.runs and limited_time and timer) >= 0:
-            if self.print_flag == 1: #--spam-print
-                print(self)
-            if self.print_flag == 2: #--erase-print
-                print(self, True)
-            try:
-                sleep(0.05)
-                self.runned_time = time() - self.start_time
-            except KeyboardInterrupt:
-                self.runs = False
-            if limited_time:
-                timer -= 0.05
-
-    def attach_annu(self, annu):
-        """Attache l'annuaire 'annu' au backend
-        (et remplace l'annu existant si il y en a un)
-
-        Entrée:
-            - annu (Annuaire): l'annuaire à attacher
-        """
-        if isinstance(annu, annuaire.Annuaire):
-            self.annu = annu
-
     def attach_radio(self, radio):
         """Attache la radio 'radio' au backend
         (si il n'y en a pas déjà une)
@@ -157,14 +124,14 @@ class Backend:
 
     #Réactions aux signaux Qt
 
-    def onPosRegSignal (self, liste ):
+    def onPosRegSignal(self, liste):
         """Méthode appelée automatiquement par on_posreg
         Transmet les valeurs envoyées par le robot vers l'annuaire
         Input :
             [rid (str), x (str), y (str), theta (str)] (list)"""
-        rid, x, y, theta, last_update = liste [0], liste [1], liste [2], liste [3], liste [4]
-        if not self.annu.check_robot (rid):
-            self.track_robot (rid)
+        rid, x, y, theta, _ = liste [0], liste [1], liste [2], liste [3], liste [4]
+        if not self.annu.check_robot(rid):
+            self.track_robot(rid)
             self.radio.send_cmd (rd.DESCR_CMD.format (rid))
         self.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
         self.widget.UpdateTrigger.emit([])
@@ -183,19 +150,19 @@ class Backend:
             binaire = False
             if float (minv) + float (step) >= float (maxv) :
                 binaire = True
-            if self.annu.find (rid,aid) is not None :
-                valeur = self.annu.find (rid,aid).get_state () [0]
-                self.annu.find (rid,aid).set_state (valeur)
+            if self.annu.find(rid,aid) is not None :
+                valeur = self.annu.find(rid,aid).get_state()[0]
+                self.annu.find(rid,aid).set_state(valeur)
             if binaire :
-                self.annu.find (rid).create_eqp (aid, "Binaire")
+                self.annu.find(rid).create_eqp(aid, "Binaire")
             else :
-                self.annu.find (rid).create_eqp (aid, "Actionneur",float(minv), float(maxv),
+                self.annu.find(rid).create_eqp(aid, "Actionneur", float(minv), float(maxv),
                                                  float(step), unit)
         elif droits == 'READ':
             add = False
             if not self.annu.find (rid).check_eqp (aid):
                 add, val = True, None
-            elif self.annu.find (rid, aid).get_type () is not annuaire.Actionneur :
+            elif self.annu.find (rid, aid).get_type () is not dsp.DisplayActionneur :
                 add, val = True, self.annu.find (rid, aid).get_state() [0]
             if add:
                 self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
@@ -227,7 +194,7 @@ class Backend:
         Entrée:
             - robot_name (str): nom du robot à tracker
         """
-        self.annu.add_robot(annuaire.Robot(robot_name))
+        self.annu.add_robot(dsp.DisplayRobot(self.annu, robot_name))
         self.widget.NewRobotSignal.emit (robot_name)
         self.widget.UpdateTrigger.emit([])
 
@@ -314,7 +281,7 @@ class Backend:
         if self.annu.find(rid) and self.annu.find(rid, eqp_name):
             if  self.annu.find (rid).isStopped :
                 self.annu.find (rid).isStopped = False
-            self.annu.find(rid, eqp_name).updt_cmd()
+            #self.annu.find(rid, eqp_name).updt_cmd() (déjà fait dans display)
             self.radio.send_cmd (rd.ACTUATOR_CMD.format (rid, eqp_name, state))
 
     def get_all_robots(self):
@@ -364,7 +331,7 @@ class Backend:
         eqp_type = eqp.get_type()
         eqp_state = eqp.get_state()
         eqp_last_updt = eqp.get_last_updt()
-        if eqp_type in (annuaire.Actionneur, annuaire.Binaire):
+        if eqp_type in (dsp.DisplayActionneur, dsp.DisplayBinaire):
             eqp_last_cmd = eqp.get_last_cmd()
         else:
             eqp_last_cmd = None
@@ -413,14 +380,3 @@ class Backend:
                 - [0]: record_msgs
                 - [1]: record_cmds"""
         return (self.radio.record_msgs, self.radio.record_cmds)
-
-if __name__ == '__main__':
-    PRINT_FL = 0
-    if len(sys.argv) == 2 and sys.argv[1] == "--no-print":
-        PRINT_FL = -1
-    if len(sys.argv) == 2 and sys.argv[1] == "--spam-print":
-        PRINT_FL = 1
-    if len(sys.argv) == 2 and sys.argv[1] == "--erase-print":
-        PRINT_FL = 2
-    with Backend(annuaire.Annuaire(), rd.Radio(), PRINT_FL) as backend:
-        backend.run_as_loop()

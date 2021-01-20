@@ -7,11 +7,11 @@ from PyQt5.QtWidgets import QDialog, QSizePolicy, QMessageBox, QFileDialog
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QCheckBox
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QSize
 from carte import MapView
-from inspecteur import Inspecteur
+import display as dsp
 import externals
 
-WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 2px solid rgb(113, 113, 113);border-width: 2px; " \
-                "border-radius: 5px;  color: rgb(255, 255, 255)} " \
+WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 2px solid rgb(113, 113, 113);"\
+                "border-width: 2px; border-radius: 5px;  color: rgb(255, 255, 255)} "
 
 QSIZE = QSize(100, 30)
 QSIZE_BIG = QSize(160, 30)
@@ -63,17 +63,11 @@ class Window(QMainWindow):
 
         self.ui_setup_window()
 
-        # Connexion du signal de UpdateTrigger avec le slot de mise à jour de la fenêtre
-        self.backend.widget.UpdateTrigger.connect(self.update_window)
-
-        # Connexion du signal de mise à jour de la liste des robots présents
-        # avec le slot de maj des robots affichés
-        self.list_robot_changed_signal.connect(lambda l: self.inspecteur.update_robots(l))
-
         self.settings_dict = externals.get_settings()
         self.act_settings()
 
     def ui_setup_window(self):
+        """Mise en place de la fenêtre principale"""
         self.setCentralWidget(self.window)
         self.setMenuWidget(self.menu_area)
         self.setStatusBar(self.statusbar)
@@ -86,7 +80,7 @@ class Window(QMainWindow):
 
     def ui_setup_inspector(self):
         """ Crée l'inspecteur (QTabWidget) et l'affiche dans la fenêtre"""
-        self.inspecteur = Inspecteur(self)
+        self.inspecteur = dsp.DisplayAnnuaire(self)
         self.layout_window.addWidget(self.inspecteur)
 
     def ui_setup_menu_area(self):
@@ -114,13 +108,13 @@ class Window(QMainWindow):
         # Création du bouton arrêt
         self.button_stop.setFixedSize(QSIZE)
         self.button_stop.setText("Stop")
-        self.button_stop.clicked.connect(lambda: self.onStopRecordButton())
+        self.button_stop.clicked.connect(self.on_stoprecord_button)
         self.layout_menu.addWidget(self.button_stop)
 
         # Création du bouton sauvegarder
         self.button_save.setFixedSize(QSIZE)
         self.button_save.setText("Save")
-        self.button_save.clicked.connect(lambda: self.onSaveButton())
+        self.button_save.clicked.connect(self.on_save_button)
         self.layout_menu.addWidget(self.button_save)
 
         self.layout_menu.addItem(self.spacer_item)
@@ -153,13 +147,15 @@ class Window(QMainWindow):
         """Obtenir un nom de fichier à partir d'un QFileDialog"""
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        file_name, _ = QFileDialog.getOpenFileName(self, "Choisir un fichier à lire", "", "All Files (*)", options=options)
+        file_name, _ = QFileDialog.getOpenFileName(self, "Choisir un fichier à lire",
+                                                "", "All Files (*)", options=options)
         return file_name
 
     def act_settings(self):
         """Effectuer les actions liées aux paramètres"""
         dim_crte = self.settings_dict["Carte (Dimensions)"].split("x")
-        self.map_view.updt_map_data(self.settings_dict["Carte (Fichier)"], int(dim_crte[0]), int(dim_crte[1]))
+        self.map_view.updt_map_data(self.settings_dict["Carte (Fichier)"],
+                                    int(dim_crte[0]), int(dim_crte[1]))
         if self.settings_dict["Enregistrement/Playback (Activer Bouton)"]:
             self.button_record.show()
             self.button_play.show()
@@ -224,28 +220,21 @@ class Window(QMainWindow):
             self.backend.record("BMC")
 
     @pyqtSlot()
-    def onStopRecordButton(self):
+    def on_stoprecord_button(self):
+        """Bouton stop cliqué"""
         if self.button_record.isChecked():
             self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCD")
             self.button_record.setChecked(False)
 
     @pyqtSlot()
-    def onSaveButton(self):
+    def on_save_button(self):
+        """Bouton sauvegarde cliqué"""
         path = self.settings_dict["Enregistrement/Playback (Chemin Sauvegarde)"]
         if self.button_record.isChecked():
             self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCSD", path)
             self.button_record.setChecked(False)
-
-    @pyqtSlot()
-    def update_window(self):
-        """ Initialise la mise à jour de la fenêtre"""
-        new_robots = self.backend.get_all_robots()
-        print(self.size())
-        self.inspecteur.update_robots(new_robots)
-        self.list_robot_changed_signal.emit(self.current_robots_list)
-
 
 @pyqtSlot()
 def show_help():
@@ -257,10 +246,10 @@ def show_help():
     aide.setText("".join(list_aide))
     aide.exec_()
 
-
 def main(backend):
     """ Création la fenêtre principale """
     app = QApplication(sys.argv)
     window = Window(backend)
+    window.backend.annu = window.inspecteur
     window.show()
     sys.exit(app.exec_())

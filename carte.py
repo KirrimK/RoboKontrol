@@ -1,7 +1,5 @@
 """Module carte.py - gestion de l'affichage sur la carte"""
 
-#couleurs aleat pour distinguer robots
-
 from math import atan, pi, sqrt
 from random import randint
 from time import time
@@ -20,6 +18,7 @@ STOPPED_BRUSH = QBrush(QColor(STOPPED_COLOR), Qt.SolidPattern)
 CLICK_BRUSH = QBrush(QColor(CLICK_COLOR), Qt.Dense7Pattern)
 ROBOT_SIZE = 200
 
+#TODO: Trouver pourquoi les robots ne s'affichent plus quand le scaling est coupé
 class MapView(QtWidgets.QWidget):
     """Un widget permettant de visualiser la carte et les robots dessus"""
     # Création d'un signal de sélection du robot sur la map
@@ -141,7 +140,8 @@ class MapView(QtWidgets.QWidget):
             span_angle = 6 * 16
             old_pen = painter.pen()
             if self.selected_robot == robot:
-                painter.setPen(QPen(QColor(self.parent.settings_dict["Carte (Couleur Sélection)"]), 4, Qt.SolidLine))
+                painter.setPen(QPen(QColor(self.parent.settings_dict["Carte (Couleur Sélection)"]),
+                                4, Qt.SolidLine))
             if bkd_robots[robot].isStopped:
                 painter.setPen(QPen(Qt.red, 4, Qt.SolidLine))
             painter.drawPie(outer_rect, start_angle, span_angle)
@@ -223,41 +223,36 @@ class MapView(QtWidgets.QWidget):
 
     def keyPressEvent(self, event):
         """Une touche du clavier est pressée"""
-        #self.key_binding={}
-        print(event.key())
         self.setFocusPolicy(Qt.StrongFocus)
-        bkd_robots = self.parent.backend.annu.robots
         incr=1
         cmd_speed=[0,0,None]
         if self.selected_robot is not None:
-            selec_rob = bkd_robots[self.selected_robot]
-            robot_speed = [selec_rob.x, selec_rob.y, selec_rob.theta]
             if event.key() == Qt.Key_Z:
                 cmd_speed[1]=incr
             if event.key() == Qt.Key_S:
                 cmd_speed[1]=-incr
             if event.key() == Qt.Key_Q:
-                cmd_speed[0]=-incr
+                cmd_speed[0]=incr * 360 / (2*pi)
             if event.key() == Qt.Key_D:
-                cmd_speed[0]=incr        
-            self.parent.backend.send_speed_cmd(self.selected_robot, cmd_speed[0],cmd_speed[1],0)
+                cmd_speed[0]=-incr * 360 / (2*pi)
+            self.parent.backend.send_speed_cmd(self.selected_robot, cmd_speed[1], 0, cmd_speed[0])
         else:
             pass
+
     def keyReleaseEvent(self,event):
+        """Une touche du clavier est relachée"""
         print(event.key())
         self.setFocusPolicy(Qt.StrongFocus)
-        bkd_robots = self.parent.backend.annu.robots
         cmd_speed=[0,0,None]
         if event.key() != Qt.Key_Z:
-                cmd_speed[1]=0
+            cmd_speed[1]=0
         if event.key() != Qt.Key_S:
-                cmd_speed[1]=0
+            cmd_speed[1]=0
         if event.key() != Qt.Key_Q:
-                cmd_speed[0]=0
+            cmd_speed[0]=0
         if event.key() != Qt.Key_D:
-                cmd_speed[0]=0       
-        self.parent.backend.send_speed_cmd(self.selected_robot, cmd_speed[0],cmd_speed[1],0) 
-
+            cmd_speed[0]=0
+        self.parent.backend.send_speed_cmd(self.selected_robot, cmd_speed[0],cmd_speed[1],0)
 
     def mousePressEvent(self, event):
         """La souris est cliquée"""
@@ -267,15 +262,6 @@ class MapView(QtWidgets.QWidget):
             self.mouse_pos_init = event.localPos()
             self.relative_init_mspos = self.reverse_pos(self.mouse_pos)
             self.clicking = True
-            #if self.selected_robot is not None:
-            #    cmd_pos = [0, 0, None]
-            #    cmd_pos[0] = self.relative_mspos[0]
-            #    cmd_pos[1] = self.relative_mspos[1]
-            #    self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)
-            #    cmd_x_le = str(cmd_pos[0])[:4]
-            #    cmd_y_le = str(cmd_pos[1])[:4]
-            #    qle_poscmd = self.parent.current_robots_dic[self.selected_robot].QLineEdit_positionCommand
-            #    qle_poscmd.setText("{} : {} : 000".format(cmd_x_le, cmd_y_le))
         elif event.button() == Qt.RightButton:
             self.selected_robot = None
             for robot in self.parent.backend.annu.robots:
@@ -305,18 +291,18 @@ class MapView(QtWidgets.QWidget):
             if sqrt((pos_x - opos_x)**2 + (pos_y - opos_y)**2) > 0:
                 #le clic n'était pas statique
                 try:
-                    angle = atan(-(pos_y - opos_y)/(pos_x - opos_x))*360/(2*pi) + (180 if (pos_x - opos_x) < 0 else 0)
+                    angle = (atan(-(pos_y - opos_y)/(pos_x - opos_x))*360/(2*pi) +
+                                (180 if (pos_x - opos_x) < 0 else 0))
                     cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], angle]
                     self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
-                    qle_poscmd = self.parent.current_robots_dic[self.selected_robot].QLineEdit_positionCommand
+                    qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
                     qle_poscmd.setText("{} : {} : {}".format(int(cmd[0]), int(cmd[1]), int(cmd[2])))
-                    print(cmd)
                 except Exception as exc:
                     print(exc) #surement une div/zéro ou autre
             else:
                 cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], None]
                 self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
-                qle_poscmd = self.parent.current_robots_dic[self.selected_robot].QLineEdit_positionCommand
+                qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
                 qle_poscmd.setText("{} : {} : 000".format(cmd[0], cmd[1]))
 
     def mouseMoveEvent(self, event):
@@ -333,13 +319,6 @@ class MapView(QtWidgets.QWidget):
                 tooltip_str += "[{} x: {} y: {}] ".format(robot, rb_x, rb_y)
         tooltip_str += 'x: {} y: {}'.format(int(rlp[0]), int(rlp[1]))
         self.parent.statuslabel.setText(tooltip_str)
-        #drag and drop (dessin du vecteur sur la carte)
-        #if self.selected_robot is not None:
-        #    if event.button == Qt.LeftButton:
-        #        pos_cmd=[0,0,None]
-        #        pos_cmd[0]=pos_cmd[0]+(self.relative_mpos[0]-self.relative_init_mpos[0])
-        #        pos_cmd[1]=pos_cmd[1]+self.relative.mpos[1]-self.relative_init_mpos[1]
-        #        self.parent.backend.sendposcmd_robot(self.selected_robot, pos_cmd)
 
     def reverse_pos(self, qpoint):
         """Calcule la position de la souris relative à la carte"""
@@ -350,8 +329,8 @@ class MapView(QtWidgets.QWidget):
             if self.map_width/self.width >= self.map_height/self.height:
                 resize_factor = self.map_width/self.width
                 new_pos[0] = (int(new_pos[0] - 1))*resize_factor
-                new_pos[1] = (int(- new_pos[1] + self.map_height//resize_factor - 1) + self.height/2 -
-                                self.map_height//resize_factor/2)*resize_factor
+                new_pos[1] = (int(- new_pos[1] + self.map_height//resize_factor - 1) +
+                                self.height/2 - self.map_height//resize_factor/2)*resize_factor
             else:
                 resize_factor = self.map_height/self.height
                 new_pos[0] = (int(new_pos[0] - 1) - self.width/2 +

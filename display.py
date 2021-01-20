@@ -1,20 +1,26 @@
 """ Module display.py - widgets associés à l'affichage des informations """
 
 import time
-import sys
 from PyQt5.QtWidgets import QLabel, QWidget, QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, \
-        QLineEdit, QLCDNumber, QScrollArea, QFrame, QProgressBar, QTabWidget, QApplication, \
-        QSlider, QGridLayout, QCheckBox, QDoubleSpinBox, QSpacerItem
+        QLineEdit, QLCDNumber, QScrollArea, QFrame, QProgressBar, QTabWidget, QSpacerItem, \
+        QSlider, QGridLayout, QCheckBox, QDoubleSpinBox
 from PyQt5.QtCore import pyqtSlot, Qt, QSize, QTimer
-#from PyQt5.QtCore import pyqtSignal
 import annuaire as anr
 
 # Customisation
-QPROGRESSBAR = "QProgressBar{background-color : grey;border : 1px; border: 2px solid grey; border-radius: 5px} "
-QEMERGENCY_BUTTON = "QPushButton{background-color : rgb(255, 0,0); border : 1px; border: 2px solid rgb(170,0,0)}"
-QPROGRESSBAR_FULL = "QProgressBar{background-color : grey; border : 1px; border: 2px solid grey; border-radius: 5px} QProgressBar::chunk{background-color: green; border-radius: 5px;}"
-QPROGRESSBAR_MEDIUM = "QProgressBar{background-color : grey; border : 1px; border: 2px solid grey; border-radius: 5px} QProgressBar::chunk{background-color: orange; border-radius: 5px;}"
-QPROGRESSBAR_LOW = "QProgressBar{background-color : grey; border : 1px; border: 2px solid grey; border-radius: 5px} QProgressBar::chunk{background-color: red; border-radius: 5px;}"
+QPROGRESSBAR = "QProgressBar{background-color : grey;border : 1px;"\
+                    " border: 2px solid grey; border-radius: 5px} "
+QEMERGENCY_BUTTON = "QPushButton{background-color : rgb(255, 0,0);"\
+                    "border : 1px; border: 2px solid rgb(170,0,0)}"
+QPROGRESSBAR_FULL = "QProgressBar{background-color : grey; border : 1px;"\
+                    "border: 2px solid grey; border-radius: 5px} "\
+                    "QProgressBar::chunk{background-color: green; border-radius: 5px;}"
+QPROGRESSBAR_MEDIUM = "QProgressBar{background-color : grey; border : 1px; "\
+                    "border: 2px solid grey; border-radius: 5px} "\
+                    "QProgressBar::chunk{background-color: orange; border-radius: 5px;}"
+QPROGRESSBAR_LOW = "QProgressBar{background-color : grey; border : 1px; "\
+                    "border: 2px solid grey; border-radius: 5px} "\
+                    "QProgressBar::chunk{background-color: red; border-radius: 5px;}"
 
 # QtWidgets size
 QLCD_SIZE1, QLCD_SIZE2 = QSize(60, 20), QSize(80, 20)
@@ -22,18 +28,24 @@ QLCD_SIZE1, QLCD_SIZE2 = QSize(60, 20), QSize(80, 20)
 QT_CENTER, QT_RIGHT, QT_LEFT, QT_TOP = Qt.AlignCenter, Qt.AlignRight, Qt.AlignLeft, Qt.AlignTop
 
 
-class DisplayAnnu(anr.Annuaire, QTabWidget):
+class DisplayAnnuaire(anr.Annuaire, QTabWidget):
     """Une combinaison de l'objet annuaire et d'un tabwidget"""
     def __init__(self, window):
         anr.Annuaire.__init__(self)
         QTabWidget.__init__(self)
         self.window = window
-        #self.window.map_view.selected_robot_signal.connect
-        # (lambda rid: self.setCurrentWidget(self.window.current_robots_dic[rid]))
+        self.backend = self.window.backend
+        self.window.map_view.selected_robot_signal.connect(
+            lambda rid: self.setCurrentWidget(self.robots[rid]))
+        self.currentChanged.connect(lambda index: self.update_selected_robot(index))
         self.ui_setup_tab()
 
-    def update_selected_robot(self, rid):
+    def update_selected_robot(self, index):
         """Met à jour le robot selectionné sur la carte"""
+        rid = None
+        for robot in self.robots.values():
+            if self.indexOf(robot) == index:
+                rid = robot.rid
         self.window.map_view.selected_robot = rid
 
     def ui_setup_tab(self):
@@ -48,7 +60,7 @@ class DisplayAnnu(anr.Annuaire, QTabWidget):
         Entrée:
         - robot (DisplayRobot)"""
         anr.Annuaire.add_robot(self, robot)
-        robot.parent = self
+        robot.parent_annu = self
         self.addTab(robot, robot.rid)
 
     def remove_robot(self, rid):
@@ -62,16 +74,11 @@ class DisplayAnnu(anr.Annuaire, QTabWidget):
         self.removeTab(self.currentIndex())
         anr.Annuaire.remove_robot(self, rid)
 
-    def update(self):
-        """Mise à jour du widget et des widgets contenus"""
-        # Emission du signal de l'onglet sélectionné
-        if self.robots:
-            self.window.map_view.selected_robot_signal.emit(self.currentWidget().rid)
-
 class DisplayRobot(anr.Robot, QWidget):
     """Une combinaison de l'objet Robot et d'un QWidget"""
-    def __init__(self, rid):
-        self.parent = None
+    def __init__(self, parent_annu, rid):
+        self.parent_annu = parent_annu
+        self.backend = self.parent_annu.backend
         anr.Robot.__init__(self, rid)
         QWidget.__init__(self)
 
@@ -105,7 +112,7 @@ class DisplayRobot(anr.Robot, QWidget):
         self.lcdnumber_las_message = QLCDNumber()
         self.layout_last_command = QHBoxLayout()
         self.label_position_command = QLabel()
-        self.qlineedit_position_cmd = QLineEdit()
+        self.qlineedit_pos_cmd = QLineEdit()
         self.emergency_button = QPushButton()
         self.progressbar_battery = QProgressBar()
 
@@ -132,12 +139,12 @@ class DisplayRobot(anr.Robot, QWidget):
 
         self.button_delete.setMaximumSize(150, 25)
         self.button_delete.setText("Eteindre")
-        self.button_delete.clicked.connect(lambda: self.parent.remove_robot(self.rid))
+        self.button_delete.clicked.connect(lambda: self.backend.stopandforget_robot(self.rid))
 
         self.emergency_button.setText("Arrêt d'urgence")
         self.emergency_button.setStyleSheet(QEMERGENCY_BUTTON)
         self.emergency_button.setMaximumSize(250, 25)
-        self.emergency_button.clicked.connect(lambda: self.parent.backend.emergency_stop_robot(self.rid))
+        self.emergency_button.clicked.connect(lambda: self.backend.emergency_stop_robot(self.rid))
         self.layout_name_delete.addWidget(self.button_delete)
         self.layout_name_delete.addWidget(self.emergency_button)
         self.layout_box_robot.addLayout(self.layout_name_delete)
@@ -158,13 +165,13 @@ class DisplayRobot(anr.Robot, QWidget):
         # Confiuration de l'envoyeur de commandes de postion
         self.label_position_command.setText("Dern. PosCmd:")
         self.layout_last_command.addWidget(self.label_position_command)
-        self.qlineedit_position_cmd = QLineEdit()
-        self.qlineedit_position_cmd.setText("1500 : 1000: 000")
-        self.qlineedit_position_cmd.setInputMask("0000 : 0000 : 000")
-        self.qlineedit_position_cmd.setFixedSize(220, 25)
-        self.qlineedit_position_cmd.editingFinished.connect(self.on_editing_finished)
-        self.qlineedit_position_cmd.setAlignment(QT_CENTER)
-        self.layout_last_command.addWidget(self.qlineedit_position_cmd)
+        self.qlineedit_pos_cmd = QLineEdit()
+        self.qlineedit_pos_cmd.setText("1500 : 1000: 000")
+        self.qlineedit_pos_cmd.setInputMask("0000 : 0000 : 000")
+        self.qlineedit_pos_cmd.setFixedSize(220, 25)
+        self.qlineedit_pos_cmd.editingFinished.connect(self.on_editing_finished)
+        self.qlineedit_pos_cmd.setAlignment(QT_CENTER)
+        self.layout_last_command.addWidget(self.qlineedit_pos_cmd)
         self.layout_box_robot.addLayout(self.layout_last_command)
 
         # Configuration de la Configure la boite actionneurs
@@ -226,9 +233,9 @@ class DisplayRobot(anr.Robot, QWidget):
                 unit = args[3]
             else:
                 unit = None
-            nv_eqp = DisplayActionneur(self.window, eqp_name, min_v, max_v, step, unit)
+            nv_eqp = DisplayActionneur(self, eqp_name, min_v, max_v, step, unit)
         elif eqp_type == "Binaire":
-            nv_eqp = DisplayBinaire(self.window, eqp_name)
+            nv_eqp = DisplayBinaire(self, eqp_name)
         elif eqp_type == "Capteur":
             min_v = args[0]
             max_v = args[1]
@@ -237,7 +244,7 @@ class DisplayRobot(anr.Robot, QWidget):
                 unit = args[3]
             else:
                 unit = None
-            nv_eqp = DisplayCapteur(self.window, eqp_name, min_v, max_v, step, unit)
+            nv_eqp = DisplayCapteur(self, eqp_name, min_v, max_v, step, unit)
 
         if nv_eqp is not None:
             self.updt_eqp(nv_eqp)
@@ -265,7 +272,7 @@ class DisplayRobot(anr.Robot, QWidget):
         for eqp_rb in self.equipements.values():
             if isinstance(eqp_rb, DisplayCapteur):
                 has_capt = True
-            if isinstance(eqp_rb, DisplayBinaire):
+            if isinstance(eqp_rb, DisplayBinaire) or isinstance(eqp_rb, DisplayActionneur):
                 has_act = True
         if not has_capt:
             self.groupbox_sensors.hide()
@@ -294,8 +301,8 @@ class DisplayRobot(anr.Robot, QWidget):
 
     @pyqtSlot()
     def on_editing_finished(self):
-        """"Appelée après la fin de l'édition de self.qlineedit_position_cmd"""
-        cmd = [int(i) for i in self.qlineedit_position_cmd.text().split(' : ')]
+        """"Appelée après la fin de l'édition de self.qlineedit_pos_cmd"""
+        cmd = [int(i) for i in self.qlineedit_pos_cmd.text().split(' : ')]
         self.backend.sendposcmd_robot(self.rid, cmd)
 
     #@pyqtSlot()
@@ -305,10 +312,11 @@ class DisplayRobot(anr.Robot, QWidget):
 
 class DisplayBinaire(anr.Binaire, QWidget):
     """Une combinaison de l'objet Equipement et d'un QWidget"""
-    def __init__(self, parent_window, nom):
+    def __init__(self, parent, nom):
         QWidget.__init__(self)
         anr.Binaire.__init__(self, nom)
-        self.parent = parent_window
+        self.parent_robot = parent
+        self.backend = self.parent_robot.backend
         self.updated_outside = False
         self.ping = 0
 
@@ -385,15 +393,16 @@ class DisplayBinaire(anr.Binaire, QWidget):
         """ Affiche et renvoie vers backend la dernière commande d'un actionneur binaire"""
         if not self.updated_outside:
             state = 1 if self.checkbox_equipement.isChecked() else 0
-            self.backend.sendeqpcmd(self.rid, self.name, state)
+            self.backend.sendeqpcmd(self.parent_robot.rid, self.nom, state)
             self.updt_cmd(state)
 
 class DisplayCapteur(anr.Capteur, QWidget):
     """Une combinaison de Capteur et d'un QWidget"""
-    def __init__(self, parent_window, nom, min_val, max_val, step=1, unite=None):
+    def __init__(self, parent_robot, nom, min_val, max_val, step=1, unite=None):
         QWidget.__init__(self)
         anr.Capteur.__init__(self, nom, min_val, max_val, step, unite)
-        self.parent = parent_window
+        self.parent_robot = parent_robot
+        self.backend = self.parent_robot.backend
         self.updated_outside = False
         self.ping = 0
 
@@ -456,16 +465,18 @@ class DisplayCapteur(anr.Capteur, QWidget):
         - valeur (float)"""
         anr.Binaire.set_state(self, valeur)
         self.updated_outside = True
-        self.lcdnumber_eqp.display(self.valeur)
-        self.progressbar_eqp.setValue(int(self.valeur))
+        if self.valeur is not None:
+            self.lcdnumber_eqp.display(self.valeur)
+            self.progressbar_eqp.setValue(int(self.valeur))
         self.updated_outside = False
 
 class DisplayActionneur(anr.Actionneur, QWidget):
     """Combinaise d'un objet Actionneur et d'un QWidget"""
-    def __init__(self, parent_window, nom, min_val, max_val, step=1, unite=None):
+    def __init__(self, parent_robot, nom, min_val, max_val, step=1, unite=None):
         QWidget.__init__(self)
         anr.Actionneur.__init__(self, nom, min_val, max_val, step, unite)
-        self.parent = parent_window
+        self.parent_robot = parent_robot
+        self.backend = self.parent_robot.backend
         self.updated_outside = False
         self.ping = 0
 
@@ -545,7 +556,7 @@ class DisplayActionneur(anr.Actionneur, QWidget):
     def onvaluechanged(self):
         """ Affiche et envoie vers backend la dernière commande d'un actionneur discret"""
         if not self.updated_outside:
-            self.backend.sendeqpcmd(self.rid, self.name, self.doublespinbox_eqp.value())
+            self.backend.sendeqpcmd(self.parent_robot.rid, self.nom, self.doublespinbox_eqp.value())
             self.label_command.setText(str(self.doublespinbox_eqp.value()))
             self.slider_equipement.setValue(int(self.doublespinbox_eqp.value()))
             self.updt_cmd(self.doublespinbox_eqp.value())
@@ -554,24 +565,7 @@ class DisplayActionneur(anr.Actionneur, QWidget):
     def onvaluechanged_slider(self):
         """ Affiche et envoie vers backend la dernière commande d'un actionneur discret"""
         if not self.updated_outside:
-            self.backend.sendeqpcmd(self.rid, self.name, self.doublespinbox_eqp.value())
+            self.backend.sendeqpcmd(self.parent_robot.rid, self.nom, self.doublespinbox_eqp.value())
             self.label_command.setText(str(self.slider_equipement.value()))
             self.doublespinbox_eqp.setValue(self.slider_equipement.value())
             self.updt_cmd(self.slider_equipement.value())
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    annu = DisplayAnnu(None)
-    robot = DisplayRobot("stonks")
-    eqp = DisplayCapteur(None, "bruh", 0, 100)
-    robot.updt_eqp(eqp)
-    eqp2 = DisplayBinaire(None, "brrruhhhh")
-    robot.updt_eqp(eqp2)
-    eqp3 = DisplayActionneur(None, "actiobruh", 0, 100, 1, "bruh")
-    robot.updt_eqp(eqp3)
-    annu.add_robot(robot)
-    annu.show()
-    robot.set_pos(1500, 1500, 90)
-    eqp.set_state(50)
-    eqp3.set_state(75)
-    sys.exit(app.exec_())
