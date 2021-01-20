@@ -160,7 +160,7 @@ class Radio :
         if self.record_cmds :
             self.cmds_buffer.append ((time(),cmd))
         if self.record_msgs :
-            self.msgs_buffer.append ((time(),'Commande de l\'interface',cmd))
+            self.msgs_buffer.append ((time(),'Commande_de_l\'interface',cmd))
         IvySendMsg (cmd)
 
 

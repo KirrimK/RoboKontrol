@@ -25,6 +25,8 @@ def ReadFile (nom_fichier, TYPE, window):
                     window.backend.widget.CaptRegSignal.emit (words [3:])
                 elif words[2] == 'ActuatorDecl':
                     window.backend.widget.ActuDeclSignal.emit (words [3:])
+                elif words [1] == 'Commande_de_l\'interface':
+                    print (' '.join (words [2:]))
             except Exception :
                 print ("La ligne [{}] pose un problème.".format (line))
     if TYPE == "CMD":
