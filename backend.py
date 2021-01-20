@@ -260,6 +260,11 @@ class Backend:
         self.widget.UpdateTrigger.emit([])
         self.widget.MapTrigger.emit([])
 
+    def stop_robot(self, robot_name):
+        """Arrête un robot"""
+        if self.radio_started:
+            self.radio.send_cmd (rd.KILL_CMD.format (robot_name))
+
     def forget_robot(self, robot_name):
         """Oublie toutes les informations connues sur le robot en question.
 
