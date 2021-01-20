@@ -5,7 +5,7 @@ import time
 import annuaire
 from PyQt5.QtWidgets import QLabel, QWidget, QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout,QLineEdit, QLCDNumber, \
      QScrollArea, QFrame, QProgressBar
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QSize
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QSize, QTimer
 from equipement import Equipement
 
 # Customisation
@@ -91,7 +91,9 @@ class TabRobot(QWidget):
         # Connexion du signal de mise à jour de la position
         self.backend.widget.position_updated.connect(lambda new_position: self.update_position(new_position))
 
-        self.backend.widget.UpdateTrigger.connect(self.update_ping)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_ping)
+        self.timer.start(100)
 
     def ui_setup_tab_robot(self):
         """ Configure l'ensemble de l'onglet robot"""
@@ -273,6 +275,8 @@ class TabRobot(QWidget):
         """ Calcul et met à jour le ping de la position """
         self.ping = round(abs(time.time() - self.last_update_pos), 1)
         self.lcdNumber_last_message.display(format(self.ping))
+        for eqp in self.current_equipement_dic.values():
+            eqp.update_ping(eqp.last_update)
 
     @pyqtSlot()
     def update_tab_robot(self):
