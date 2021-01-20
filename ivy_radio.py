@@ -133,7 +133,7 @@ class Radio :
         if self.backend.widget is not None :
             self.backend.widget.PosRegSignal.emit ([i for i in args]+[time()])
         else:
-            self.backend.premiersMessages.append (('pos',[i for i in args]))
+            self.backend.premiersMessages.append (('pos',[i for i in args]+[time()]))
 
     def on_actudecl (self, sender, *args):
         """Fonction faisant le lien entre Ivy et le thread de main

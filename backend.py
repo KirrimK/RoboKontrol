@@ -11,8 +11,6 @@ class WidgetBackend (QWidget):
     """Classe implémentée car les signaux Qt doivent être envoyés par des objets Qt
     Attributs : _radio (Radio) : l'objet parent auquel sont reliés les connections de signal."""
     NewRobotSignal = pyqtSignal (str)
-    PosRegSignal = pyqtSignal (list)
-    CaptRegSignal = pyqtSignal (list)
     ActuDeclSignal = pyqtSignal (list)
     UpdateTrigger = pyqtSignal (list)
     MapTrigger = pyqtSignal (list)
@@ -22,8 +20,8 @@ class WidgetBackend (QWidget):
     def __init__ (self, parent_backend):
         super().__init__()
         self.backend = parent_backend
-        self.PosRegSignal.connect (lambda liste : self.backend.onPosRegSignal (liste))
-        self.CaptRegSignal.connect (lambda liste : self.backend.onCaptRegSignal (liste))
+        self.position_updated.connect (lambda liste : self.backend.onPosRegSignal (liste))
+        self.equipement_updated.connect (lambda liste : self.backend.onCaptRegSignal (liste))
         self.ActuDeclSignal.connect (lambda liste : self.backend.onActuDeclSignal (liste))
 
 class Backend:
