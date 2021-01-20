@@ -1,19 +1,17 @@
 """ tab_robot.py - Définit l'affichage d'un onglet robot"""
 
-from math import pi
 import time
 import annuaire
 from PyQt5.QtWidgets import QLabel, QWidget, QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout,QLineEdit, QLCDNumber, \
-     QScrollArea, QFrame, QProgressBar
+     QScrollArea, QFrame
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QSize
 from equipement import Equipement
 
 # Customisation
-QEMERGENCYBUTTON = "QPushButton{background-color : rgb(255, 0,0); border : 1px; border: 2px solid rgb(170,0,0)}"
-QPROGRESSBAR_FULL = "QProgressBar{background-color : grey; border : 1px; border: 2px solid grey; border-radius: 5px} QProgressBar::chunk{background-color: green; border-radius: 5px;}"
-QPROGRESSBAR_MEDIUM = "QProgressBar{background-color : grey; border : 1px; border: 2px solid grey; border-radius: 5px} QProgressBar::chunk{background-color: orange; border-radius: 5px;}"
-QPROGRESSBAR_LOW = "QProgressBar{background-color : grey; border : 1px; border: 2px solid grey; border-radius: 5px} QProgressBar::chunk{background-color: red; border-radius: 5px;}"
-
+QLCD_STYLE = "QLCDNumber{background-color: grey;border: 2px solid rgb(113, 113, 113);border-width: 2px; " \
+             "border-radius: 10px;  color: rgb(255, 255, 255)} "
+QPUSHBUTTON = ""
+QEMERGENCYBUTTON = "QPushButton{background-color : rgb(255, 0, 0)}"
 # QtWidgets size
 QLCD_SIZE1, QLCD_SIZE2 = QSize(60, 20), QSize(80, 20)
 # Alignment
@@ -34,14 +32,8 @@ class TabRobot(QWidget):
         self.window = window
 
         self.position = ()
-        self.last_update_pos = time.time()
         self.timestamp = time.time()
         self.backend = self.window.backend
-
-        self.battery_value = None
-        self.battery_min = None
-        self.battery_max = None
-        self.battery_step = None
 
         # Création de la boite robot (QGroupBox)
         self.layout_tab_robot = QVBoxLayout(self)
@@ -59,8 +51,10 @@ class TabRobot(QWidget):
         self.scroll_area.setWidget(self.groupBox_robots)
         self.layout_tab_robot.addWidget(self.scroll_area)
 
+
         # Création des widgets de la boite robot
         self.layout_name_delete = QHBoxLayout()
+        self.label_name = QLabel()
         self.button_delete = QPushButton()
         self.layout_coord = QHBoxLayout()
         self.layout_last_message = QHBoxLayout()
@@ -74,32 +68,33 @@ class TabRobot(QWidget):
         self.label_positionCommand = QLabel()
         self.QLineEdit_positionCommand = QLineEdit()
         self.emergencyButton = QPushButton()
-        self.progressbar_battery = QProgressBar()
+        self.last_update_pos = time.time ()
 
         # Liste des équipements attachés au robot
         self.current_equipement_list = []
         self.current_equipement_dic = {}
         self.current_actuators_list = []
+
         self.current_sensors_list = []
 
         # Configuration des widgets de la boite robot
         self.ui_setup_tab_robot()
 
+        self.QLineEdit_position_command = None
+
         # Connexion du signal de mise à jours des équipements avec le slot de mise à jour de l'ensemble des équipements
-        self.list_equipement_changed_signal.connect(self.update_equipements)
-
-        # Connexion du signal de mise à jour de la position
-        self.backend.widget.position_updated.connect(lambda new_position: self.update_position(new_position))
-
-        self.backend.widget.UpdateTrigger.connect(self.update_ping)
+        #self.list_equipement_changed_signal.connect(self.update_equipements)
 
     def ui_setup_tab_robot(self):
         """ Configure l'ensemble de l'onglet robot"""
 
-        self.progressbar_battery.setStyleSheet(QPROGRESSBAR_FULL)
-        self.progressbar_battery.setFixedSize(150, 30)
-
+        # Configuration de l'affichage du nom robot et du bouton oublier
+        self.label_name.setMinimumSize(0, 30)
+        # self.label_name.setMaximumSize(100, 30)
+        self.label_name.setText(self.rid)
+        self.layout_name_delete.addWidget(self.label_name)
         self.button_delete.setMaximumSize(150, 25)
+        self.button_delete.setStyleSheet(QPUSHBUTTON)
         self.button_delete.setText("Eteindre")
         self.button_delete.clicked.connect(lambda: self.remove_box_robot())
 
@@ -118,9 +113,10 @@ class TabRobot(QWidget):
         self.layout_box_robot.addLayout(self.layout_coord)
 
         # Configuration de l'affichage du dernier message reçu
-        self.label_last_message.setText("Dernière MAJ (s)")
+        self.label_last_message.setText("Dern. Msg (s):")
         self.layout_last_message.addWidget(self.label_last_message)
         self.lcdNumber_last_message.setFixedSize(QLCD_SIZE2)
+        self.lcdNumber_last_message.setStyleSheet(QLCD_STYLE)
         self.layout_last_message.addWidget(self.lcdNumber_last_message)
         self.layout_box_robot.addLayout(self.layout_last_message)
 
@@ -130,9 +126,8 @@ class TabRobot(QWidget):
         self.QLineEdit_positionCommand = QLineEdit()
         self.QLineEdit_positionCommand.setText("1500 : 1000: 000")
         self.QLineEdit_positionCommand.setInputMask("0000 : 0000 : 000")
-        self.QLineEdit_positionCommand.setFixedSize(220, 25)
+        self.QLineEdit_positionCommand.setFixedSize(95, 25)
         self.QLineEdit_positionCommand.editingFinished.connect(self.onEditingFinished)
-        self.QLineEdit_positionCommand.setAlignment(QT_CENTER)
         self.layout_last_command.addWidget(self.QLineEdit_positionCommand)
         self.layout_box_robot.addLayout(self.layout_last_command)
 
@@ -154,134 +149,57 @@ class TabRobot(QWidget):
         self.layout_coord.addWidget(self.label_coord)
         self.lcdNumber_coord = QLCDNumber()
         self.lcdNumber_coord.setFixedSize(QLCD_SIZE1)
+        self.lcdNumber_coord.setStyleSheet(QLCD_STYLE)
         self.layout_coord.addWidget(self.lcdNumber_coord)
         return self.lcdNumber_coord
 
-    def update_position(self, new_position):
+    def update_position(self, position = None, new = False):
         """ Met à jour la position de la boite robot """
-
-        if new_position[0] == self.rid:
-            # Mise à jour du vecteur position du robot
-            self.x = float(new_position[1])
-            self.y = float(new_position[2])
-            self.theta = float(new_position[3])*360/(2*pi)
+        
+        if new:
             # Récupération du timestamp de dernière mise à jour de la position
-            self.last_update_pos = float(new_position[4])
-
+            self.last_update_pos = time.time ()
             # Mise à jour des valeurs affichées par les QLCDNUmber
-            self.lcdNumber_x.display(self.x)
-            self.lcdNumber_y.display(self.y)
-            self.lcdNumber_theta.display(self.theta)
+            self.lcdNumber_x.display(self.position[0])
+            self.lcdNumber_y.display(self.position[1])
+            self.lcdNumber_theta.display(self.position[2])
 
-            self.update_ping()
+        # Calcul du ping
+        self.timestamp = time.time()
+        self.ping = abs(self.last_update_pos - self.timestamp)
 
-    @pyqtSlot()
-    def update_equipements(self):
-        """ Met à jour l'ensemble des équipements accrochés au robots et initialise la mise à jour de chaque
-        équipement """
-        new_equipements_list = self.backend.getdata_robot(self.rid)[1]
+        
+        self.lcdNumber_last_message.display(str(round(self.ping, 1)))
 
-        # Crée et ajoute les nouveaux équipements
-        for eqp_name in set(new_equipements_list) - set(self.current_equipement_list):
-            eqp = self.backend.getdata_eqp(self.rid, eqp_name)
-            eqp_type = eqp[0]
-            eqp_value = eqp[1]
-            last_update = eqp[2]
-            unit = eqp[4]
-            value, min_val, max_val, step = eqp_value
-
-            if eqp_name == "Batterie":
-                self.battery_value = value
-                self.battery_min = min_val
-                self.battery_max = max_val
-                self.battery_step = step
-
-            elif eqp_type == annuaire.Actionneur or eqp_type == annuaire.Binaire:
-                equipement = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update, "RW",
-                                                   self.layout_box_actuators, self.rid, self.window)
-                self.current_equipement_dic[eqp_name] = equipement
-                self.current_equipement_list.append(eqp_name)
-                equipement.add_equipement()
-
-            elif eqp_type == annuaire.Capteur:
-                equipement = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update, "R",
-                                                   self.layout_box_sensors, self.rid, self.window)
-                self.current_equipement_dic[eqp_name] = equipement
-                self.current_equipement_list.append(eqp_name)
-                equipement.add_equipement()
-
-        # Change les capteurs en actionneurs si néccessaire.
-        for name in self.current_sensors_list:
-            eqpment = self.current_equipement_dic[name]
-            if eqpment.permission == "RW":
-                self.current_actuators_list.append(name)
-                eqpment.add_equipement()
-                self.current_sensors_list.pop(self.current_sensors_list.index(name))
-                sensor = self.current_equipement_dic[name]
-                sensor.remove_equipement()
-
-        # Emission pour chaque équipement de la nouvelle valeur et du nouveau ping
-        for equipement in self.current_equipement_dic.values():
-
-            # Ajoute le nom de l'actionneur dans la liste des actionneurs si l'équipement est un actionneur
-            if equipement.permission == "RW":
-                self.current_actuators_list.append(equipement.name)
-            # Ajoute le nom du capteur dans la liste des capteurs si l'équipement est un capteur
-            if equipement.permission == "R":
-                self.current_sensors_list.append(equipement.name)
-
-        # Cache la boite Capteurs si jamais aucun capteur n'est attaché au robot
-        if not self.current_sensors_list:
-            self.groupBox_sensors.hide()
-        else:
-            self.groupBox_sensors.show()
-
-        # Cache la boite Actionneurs si jamais aucun actionneur n'est attaché au robot
-        if not self.current_actuators_list:
-            self.groupBox_actuators.hide()
-        else:
-            self.groupBox_actuators.show()
-
-        # Mise à jour de la batterie si elle est déclarée
-        self.update_battery()
-
-        # Force le changement d'affichage des boites d'actionneurs et de capteurs.
-        self.groupBox_actuators.repaint()
-        self.groupBox_sensors.repaint()
-
-    def update_battery(self):
-        """ Met à jour l'affichage de la batterie si celle ci est déclarée """
-        try:
-            if self.battery_value is not None and self.battery_step != 0:
-                self.layout_name_delete.addWidget(self.progressbar_battery)
-                n = (float(self.battery_max)-float(self.battery_min))/float(self.battery_step)
-                v = (float(self.battery_value)-float(self.battery_min))/float(self.battery_step)
-                value = (v/n)*100
-                self.progressbar_battery.setRange(0, 100)
-                self.progressbar_battery.setValue(int(value))
-                self.progressbar_battery.setFormat("%.01f %%" % value)
-                self.progressbar_battery.setAlignment(QT_CENTER)
-                if value < 10:
-                    self.progressbar_battery.setStyleSheet(QPROGRESSBAR_LOW)
-                elif value < 30:
-                    self.progressbar_battery.setStyleSheet(QPROGRESSBAR_MEDIUM)
-        except TypeError:
-            print(self.battery_min, self.battery_max, self.battery_step)
-
-    @pyqtSlot()
-    def update_ping(self):
-        """ Calcul et met à jour le ping de la position """
-        self.ping = round(abs(time.time() - self.last_update_pos), 1)
-        self.lcdNumber_last_message.display(format(self.ping))
-
+    def newEquipment (self, eid, minV, maxV, step, droits, unit):
+        self.current_equipement_list.append [eid]
+        if droits == "RW" :
+            self.current_actuators_list.append (eid)
+            if float (minv) + float (step) >= float (maxv) :
+                kind  = "BINAIRE"
+            else :
+                kind = "DISCRET"
+        elif droits == "READ":
+            self.current_sensors_list.append (eid)
+            if None in (minV, maxV, step):
+                kind = "VALEUR"
+            else :
+                kind = "BAR"
+        self.self.current_equipement_dic [eid] = Equipement (eid, None, minV, maxV, step, unit, droits,
+                                                             kind, parent_layout, self.rid, self.window)
     @pyqtSlot()
     def update_tab_robot(self):
-        """ Initialise la mise à jour de la position et des équipements du robot de l'onglet' robot """
+        """ Mise à jour des pings """
 
-        # Récupération de la liste des équipements du robot
+        # Initialise la mise à jours de la position du robot
+        self.update_position()
+        for eqp in self.current_equipement_dic.values ():
+            eqp.update_ping ()
+        
+        """# Récupération de la liste des équipements du robot
         new_equipements = self.backend.getdata_robot(self.rid)[1]
         # Emission du signal de mise à jour des équipements du robot
-        self.list_equipement_changed_signal.emit(new_equipements)
+        self.list_equipement_changed_signal.emit(new_equipements)"""
 
     @pyqtSlot()
     def remove_box_robot(self):
@@ -299,3 +217,111 @@ class TabRobot(QWidget):
         """Appelée si le bouton d'arrêt d'urgence d'un robot est pressé"""
         self.backend.emergency_stop_robot (self.rid)
 
+"""    def get_equipements(self):
+        Charge la liste des des équipements du robot et les informations de chaque équipement présent.
+            Renvoie le dictionnaire des équipements (clé= nom de l'équipement, valeur= objet de la class Equipement)
+
+        # Mise à jour de la liste de l'équipement du robot
+        self.equipement_list = self.backend.getdata_robot(self.rid)[1]
+        equipements = {}
+
+        for eqp_name in self.equipement_list:
+            eqp = self.backend.getdata_eqp(self.rid, eqp_name)
+            eqp_type = eqp[0]
+            eqp_value = eqp[1]
+            last_update = eqp[2]
+            # eqp_last_cmd = eqp[3]
+            unit = eqp[4]
+            value, min_val, max_val, step = eqp_value
+
+            if eqp_type == annuaire.Actionneur:
+                equipements[eqp_name] = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update, "R&W",
+                                                   "DISCRET", self.layout_box_actuators, self.rid, self.window)
+
+            if eqp_type == annuaire.Binaire:
+                equipements[eqp_name] = Equipement(eqp_name, value, 0, 1, 1, None, last_update, "R&W", "BINAIRE",
+                                                   self.layout_box_actuators, self.rid, self.window)
+
+            if eqp_type == annuaire.Capteur:
+
+                if min_val is None or max_val is None or step is None:
+                    kind = "VALEUR"
+                else:
+                    kind = "BAR"
+                equipements[eqp_name] = Equipement(eqp_name, value, min_val, max_val, step, unit, last_update,
+                                                   "R", kind, self.layout_box_sensors, self.rid, self.window)
+
+        return equipements
+
+    @pyqtSlot()
+    def update_equipements(self):
+         Met à jour l'ensemble des équipements accrochés au robots et initialise la mise à jour de chaque
+        équipement 
+        # Met à jour le dictionnaire des équipements
+        equipements = self.get_equipements()
+        # Crée une liste des équipements présents sur le robot
+        equipements_list = [key for key in equipements]
+
+        # Ajoute les nouveaux équipements
+        for name in set(equipements_list) - set(self.current_equipement_list):
+            self.current_equipement_dic[name] = equipements[name]
+            equipement = equipements[name]
+            equipement.add_equipement()
+
+        # Supprime les équipements qui ne sont plus présents
+        for name in set(self.current_equipement_list) - set(equipements_list):
+            equipement = self.current_equipement_dic.pop(name)
+            equipement.remove_equipement()
+
+        # Change les capteurs en actionneurs si néccessaire.
+        for name in self.current_sensors_list:
+            eqpment = equipements[name]
+            if eqpment.variety == "R&W":
+                self.current_actuators_list.append(name)
+                eqpment.add_equipement ()
+                self.current_sensors_list.pop(self.current_sensors_list.index(name))
+                sensor = self.current_equipement_dic[name]
+                sensor.remove_equipement ()
+
+        # Met à jour la liste et le dictionnaire des capteurs présents
+        self.current_equipement_list = equipements_list
+        self.current_equipement_dic = equipements
+
+        # Emission pour chaque équipement de la nouvelle valeur et du nouveau ping
+        for equipement in self.current_equipement_dic.values():
+            # Récupération de la nouvelle valeur
+            value = equipement.value
+            # Calcul du ping
+            last_update = equipement.last_update
+            ping = abs(time.time() - last_update)
+            if equipement.value is not None:
+                # Emission de la nouvelle valeur de l'équipement
+                equipement.value_changed_signal.emit(value)
+            # Emission du nouveau ping de l'équipement
+            equipement.ping_changed_signal.emit(ping)
+
+            # Ajoute le nom de l'actionneur dans la liste des actionneurs si l'équipement est un actionneur
+            if equipement.variety == "R&W":
+                self.current_actuators_list.append(equipement.name)
+            # Ajoute le nom du capteur dans la liste des capteurs si l'équipement est un capteur
+            if equipement.variety == "R":
+                self.current_sensors_list.append(equipement.name)
+
+            # print(equipement.name, value, ping)
+
+        # Cache la boite Capteurs si jamais aucun capteur n'est attaché au robot
+        if not self.current_sensors_list:
+            self.groupBox_sensors.hide()
+        else:
+            self.groupBox_sensors.show()
+
+        # Cache la boite Actionneurs si jamais aucun actionneur n'est attaché au robot
+        if not self.current_actuators_list:
+            self.groupBox_actuators.hide()
+        else:
+            self.groupBox_actuators.show()
+
+        # Force le changement d'affichage des boites d'actionneurs et de capteurs.
+        self.groupBox_actuators.repaint()
+        self.groupBox_sensors.repaint()
+"""

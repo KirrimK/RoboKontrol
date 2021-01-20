@@ -54,6 +54,7 @@ class Radio :
     _ nom (str) : Stocke l'IVYAPPNAME"""
     def __init__ (self):
         self.backend = None
+        self.premiersMessages = []
         self.cmds_buffer = []
         self.msgs_buffer = []
         self.record_msgs = False
@@ -133,10 +134,13 @@ class Radio :
     def on_posreg (self, sender, *args):
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant la position"""
-        if self.backend.widget is not None :
-            self.backend.widget.PosRegSignal.emit ([i for i in args]+[time()])
-        else:
-            self.backend.premiersMessages.append (('pos',[i for i in args]))
+        if self.backend is not None :
+            if args [0]  not in self.backend.knownRids :
+                self.backend.track_robot (args [0])
+            if self.backend.widget is not None :
+                self.backend.widget.PosRegSignal.emit ([i for i in args])
+            else:
+                self.premiersMessages.append (('pos',[i for i in args]))
 
     def on_actudecl (self, sender, *args):
         """Fonction faisant le lien entre Ivy et le thread de main
@@ -144,15 +148,18 @@ class Radio :
         if self.backend.widget is not None :
             self.backend.widget.ActuDeclSignal.emit ([i for i in args])
         else :
-            self.backend.premiersMessages.append (('actdcl',[i for i in args]))
+            self.premiersMessages.append (('actdcl',[i for i in args]))
     
     def on_captreg (self, sender, *args):
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant un retour de capteur"""
-        if self.backend.widget is not None :
-            self.backend.widget.CaptRegSignal.emit ([i for i in args]+[time()])
-        else :
-            self.backend.premiersMessages.append (('actrep',[i for i in args]))
+        if self.backend is not None :
+            if args [0] not in self.backend.knownRids :
+                self.backend.track_robot (args [0])
+            if self.backend.widget is not None :
+                self.backend.widget.CaptRegSignal.emit ([i for i in args])
+            else :
+                self.premiersMessages.append (('actrep',[i for i in args]))
 
     def send_cmd (self,cmd):
         """Envoie du texte vers le bus Ivy et le stocke optionnellement sur les tampons

@@ -2,10 +2,10 @@
 
 import sys
 from time import sleep, time
-from PyQt5.QtCore import pyqtSignal #, pyqtSlot
-from PyQt5.QtWidgets import QWidget
 import annuaire
 import ivy_radio as rd
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt5.QtWidgets import QWidget
 
 class WidgetBackend (QWidget):
     """Classe implémentée car les signaux Qt doivent être envoyés par des objets Qt
@@ -13,17 +13,20 @@ class WidgetBackend (QWidget):
     PosRegSignal = pyqtSignal (list)
     CaptRegSignal = pyqtSignal (list)
     ActuDeclSignal = pyqtSignal (list)
-    UpdateTrigger = pyqtSignal (list)
-    MapTrigger = pyqtSignal (list)
-
-    equipement_updated = pyqtSignal(list)
-    position_updated = pyqtSignal(list)
-    def __init__ (self, parent_backend):
+    NewRobotSignal = pyqtSignal (str)
+    def __init__ (self, backend, window):
         super().__init__()
-        self.backend = parent_backend
+        self.backend = backend
+        #Connections avec annuaire (à dégager dès que possible)
         self.PosRegSignal.connect (lambda liste : self.backend.onPosRegSignal (liste))
         self.CaptRegSignal.connect (lambda liste : self.backend.onCaptRegSignal (liste))
         self.ActuDeclSignal.connect (lambda liste : self.backend.onActuDeclSignal (liste))
+        # Connexion des signaux de mise à jour avec les slot de maj des robots affichés
+        #/!\ Les lambda sont importants car les méthodes prennent 2 arguments quand elles sont appelées
+        self.NewRobotSignal.connect(lambda rid : window.inspecteur.update_robots (rid))
+        self.PosRegSignal.connect (lambda l : window.onPosRegSignal (l))
+        self.CaptRegSignal.connect (lambda l : window.onCaptRegSignal (l))
+        self.ActuDeclSignal.connect (lambda l : window.onActuDeclSignal (l))
 
 class Backend:
     """Un objet faisant le lien entre un Annuaire (module annuaire)
@@ -43,7 +46,7 @@ class Backend:
     def __init__(self, annu=None, radio=None, print_flag=0):
         self.runs = False
         self.radio_started = False
-        self.premiersMessages = []
+        self.knownRids = []
         self.print_flag = print_flag
         self.start_time = 0
         self.runned_time = 0
@@ -55,18 +58,21 @@ class Backend:
             self.attach_annu(annu)
         self.widget = None
 
-    def launchQt (self):
+    def launchQt (self, window):
         """Méthode appelée après le lancement de l'application
         Les Widgets ne peuvent exister que s'il y a une application Qt
-
+        
         Initialise l'attribut self.widget
         Réagit aux messages reçus avant le lancement de l'application Qt"""
-        self.widget = WidgetBackend (self)
-        for message in self.premiersMessages :
+        self.widget = WidgetBackend (self, window)
+        for message in self.radio.premiersMessages :
             if message [0] == 'pos' :
                 self.widget.PosRegSignal.emit (message [1])
             elif message  [0] == 'actdcl':
                 self.widget.ActuDeclSignal.emit (message [1])
+            elif message [0] == 'newR' :
+                print (message [1])
+                self.widget.NewRobotSignal.emit (message [1])
             else :
                 self.widget.CaptRegSignal.emit (message [1])
 
@@ -163,65 +169,57 @@ class Backend:
         Transmet les valeurs envoyées par le robot vers l'annuaire
         Input :
             [rid (str), x (str), y (str), theta (str)] (list)"""
-        rid, x, y, theta, last_update = liste [0], liste [1], liste [2], liste [3], time()
-        if not self.annu.check_robot (rid):
-            self.track_robot (rid)
-            self.radio.send_cmd (rd.DESCR_CMD.format (rid))
+        rid, x, y, theta = liste [0], liste [1], liste [2], liste [3]
         self.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
-        self.widget.UpdateTrigger.emit([])
-        self.widget.MapTrigger.emit([])
-        self.widget.position_updated.emit([rid, x, y, theta, last_update])
-
+        
     def onActuDeclSignal (self, liste):
         """Fonction appelée automatiquement par on_actudecl.
         Ajoute l'actionnneur aid sur le robot rid.
         Si aid est le nom d'un capteur déjà présent sur le robot, la valeur est gardée.
 
-        Input : [rid (str), aid (str), minV (str), maxV (str),
-                step (str), droits (str), unit (str)] (list)"""
-        rid, aid, minv, maxv = liste [0], liste [1], liste [2], liste [3]
-        step, droits, unit = liste [4], liste [5], liste [6]
+        Input : [rid (str), aid (str), minV (str), maxV (str), step (str), droits (str), unit (str)] (list)"""
+        rid, aid, minv, maxv, step, droits, unit = liste [0], liste [1], liste [2], liste [3], liste [4], liste [5], liste [6]
         if droits == 'RW':
+            val = False
             binaire = False
             if float (minv) + float (step) >= float (maxv) :
                 binaire = True
             if self.annu.find (rid,aid) is not None :
+                val = True
                 valeur = self.annu.find (rid,aid).get_state () [0]
-                self.annu.find (rid,aid).set_state (valeur)
             if binaire :
                 self.annu.find (rid).create_eqp (aid, "Binaire")
             else :
                 self.annu.find (rid).create_eqp (aid, "Actionneur",float(minv), float(maxv),
                                                  float(step), unit)
+            if val:
+                self.annu.find (rid,aid).set_state (valeur)
         elif droits == 'READ':
             add = False
             if not self.annu.find (rid).check_eqp (aid):
                 add, val = True, None
             elif self.annu.find (rid, aid).get_type () is not annuaire.Actionneur :
-                add, val = True, self.annu.find (rid, aid).get_state() [0]
+                    add, val = True, self.annu.find (rid, aid).get_state() [0]
             if add:
                 self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
                 self.annu.find (rid, aid).set_state (val)
-        self.widget.UpdateTrigger.emit([])
 
+
+        
     def onCaptRegSignal (self, liste):
         """Fonction appelée automatiquement par on_captreg.
         Change la valeur du capteur sid sur le robot rid.
         Si aucun robot rid n'est connu, le robot est ajouté.
         Si le robot rid n'a pas de capteur sid, le capteur est ajouté.
-
+        
         Input : [rid (str), sid (str), valeur (str)] (list)"""
-        rid, sid, valeur, last_update = liste [0], liste [1], liste [2], time()
-        if not self.annu.check_robot (rid):
-            self.track_robot (rid)
-            self.radio.send_cmd (rd.DESCR_CMD.format (rid))
+        rid, sid, valeur = liste [0], liste [1], liste [2]
         if not self.annu.find (rid).check_eqp (sid):
             self.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
         self.annu.find (rid,sid).set_state (float (valeur))
-        self.widget.UpdateTrigger.emit([])
-        self.widget.equipement_updated.emit([rid, sid, float(valeur), last_update])
 
-    def track_robot(self, robot_name):
+    def track_robot(self, rid):
+        print (rid)
         """Invoqué lors de la demande de tracking d'un robot via l'interface graphique,
         ou lors de la découverte d'un robot inconnu par la radio (si implémenté).
         Ajoute le robot à l'annuaire
@@ -230,8 +228,14 @@ class Backend:
         Entrée:
             - robot_name (str): nom du robot à tracker
         """
-        self.annu.add_robot(annuaire.Robot(robot_name))
-        self.widget.UpdateTrigger.emit([])
+        self.annu.add_robot(annuaire.Robot(rid))
+        
+        self.knownRids.append (rid)
+        self.radio.send_cmd (rd.DESCR_CMD.format (rid))
+        if self.widget is not None :
+            self.widget.NewRobotSignal.emit (rid)
+        else :
+            self.radio.premiersMessages.append (('newR', rid))
 
     def emergency_stop_robot (self, rid):
         """Commande équivalente au boutton d'arrêt d'urgence.
@@ -257,8 +261,6 @@ class Backend:
         self.annu.remove_robot(robot_name)
         if self.radio_started:
             self.radio.send_cmd (rd.KILL_CMD.format (robot_name))
-        self.widget.UpdateTrigger.emit([])
-        self.widget.MapTrigger.emit([])
 
     def forget_robot(self, robot_name):
         """Oublie toutes les informations connues sur le robot en question.
@@ -267,8 +269,6 @@ class Backend:
             - robot_name (str): nom du robot
         """
         self.annu.remove_robot(robot_name)
-        self.widget.UpdateTrigger.emit([])
-        self.widget.MapTrigger.emit([])
 
     def sendposcmd_robot(self, rid, pos):
         """Envoie une commande de position au robot désigné

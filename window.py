@@ -2,19 +2,13 @@
 
 import sys
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
-from PyQt5.QtWidgets import QGroupBox, QPushButton, QSpacerItem, QStatusBar
-from PyQt5.QtWidgets import QDialog, QSizePolicy, QMessageBox, QFileDialog
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QCheckBox
+from PyQt5.QtWidgets import QGroupBox, QPushButton, QSpacerItem
+from PyQt5.QtWidgets import QDialog, QSizePolicy, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QTimer, QSize
 from carte import MapView
 from inspecteur import Inspecteur
 import externals
-
-WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 2px solid rgb(113, 113, 113);border-width: 2px; " \
-                "border-radius: 5px;  color: rgb(255, 255, 255)} " \
-
-QSIZE = QSize(100, 30)
-QSIZE_BIG = QSize(160, 30)
 
 
 class Window(QMainWindow):
@@ -30,8 +24,6 @@ class Window(QMainWindow):
         self.window.setObjectName("main_window")
         self.window.resize(1091, 782)
         self.window.setWindowTitle("Form")
-
-        self.window.setStyleSheet(WINDOW_STYLE)
 
         # Récupération de l'objet backend
         self.backend = backend
@@ -50,8 +42,6 @@ class Window(QMainWindow):
         self.button_simu = QPushButton()
         self.button_settings = QPushButton()
         self.button_help = QPushButton()
-        self.statusbar = QStatusBar()
-        self.statuslabel = QLabel()
 
         # Création de la liste des noms des robots présents
         self.current_robots_list = []
@@ -62,16 +52,17 @@ class Window(QMainWindow):
         self.ui_setup_map()
         self.ui_setup_inspector()
         self.layout_window.addLayout(self.layout_map_inspector)
-        self.ui_setup_statusbar()
 
         # Création du dictionnaire des robots présents (k=nom, v=boite robot)
 
-        # Connexion du signal de UpdateTrigger avec le slot de mise à jour de la fenêtre
-        self.backend.widget.UpdateTrigger.connect(self.update_window)
+        # Création de timer
+        self.timer = QTimer(self)
+        self.timer.start(100)
+        # Connexion du signal timer avec le slot de mise à jour de la fenêtre
+        self.timer.timeout.connect(self.update_window)
 
-        # Connexion du signal de mise à jour de la liste des robots présents
-        # avec le slot de maj des robots affichés
-        self.list_robot_changed_signal.connect(lambda l: self.inspecteur.update_robots(l))
+        #Lancement du wiget du backend
+        self.backend.launchQt (self)
 
         self.settings_dict = externals.get_settings()
         self.act_settings()
@@ -89,105 +80,64 @@ class Window(QMainWindow):
 
     def ui_setup_menu_area(self):
         """ Création de la zone menu"""
-        self.menu_area.setStyleSheet("QGroupBox  {border: 0px;}")
-
         # Création du bouton record
-        self.button_record.setFixedSize(QSIZE)
+        self.button_record.setMaximumSize(200, 16777215)
         self.button_record.setText("Record")
         self.button_record.setCheckable(True)
         self.layout_menu.addWidget(self.button_record)
         self.button_record.clicked.connect(self.record)
 
         # Création du bouton play
-        self.button_play.setFixedSize(QSIZE)
+        self.button_play.setMaximumSize(200, 16777215)
         self.button_play.setText("|>")
-        self.button_play.clicked.connect(self.show_play_dialog)
         self.layout_menu.addWidget(self.button_play)
 
         # Création du bouton pause
-        self.button_pause.setFixedSize(QSIZE)
+        self.button_pause.setMaximumSize(200, 16777215)
         self.button_pause.setText("||")
         self.layout_menu.addWidget(self.button_pause)
 
         # Création du bouton arrêt
-        self.button_stop.setFixedSize(QSIZE)
+        self.button_stop.setMaximumSize(200, 16777215)
         self.button_stop.setText("Stop")
-        self.button_stop.clicked.connect(lambda: self.onStopRecordButton())
+        self.button_stop.clicked.connect (lambda : self.onStopRecordButton ())
         self.layout_menu.addWidget(self.button_stop)
 
         # Création du bouton sauvegarder
-        self.button_save.setFixedSize(QSIZE)
+        self.button_save.setMaximumSize(200, 16777215)
         self.button_save.setText("Save")
-        self.button_save.clicked.connect(lambda: self.onSaveButton())
+        self.button_save.clicked.connect (lambda : self.onSaveButton ())
         self.layout_menu.addWidget(self.button_save)
 
         self.layout_menu.addItem(self.spacer_item)
 
         # Création du bouton Simulateur
         self.layout_menu.addWidget(self.button_simu)
-        self.button_simu.setFixedSize(QSIZE)
-        self.button_simu.setText("Nv. Simu.")
-        self.button_simu.clicked.connect(lambda: externals.exec_simu(self.settings_dict))
+        self.button_simu.setText("Nv. Instance Simu.")
+        self.button_simu.clicked.connect(lambda :externals.exec_simu(self.settings_dict))
 
         # Création du bouton configuration
         self.button_settings.setText("Configuration")
-        self.button_settings.setFixedSize(QSIZE_BIG)
         self.layout_menu.addWidget(self.button_settings)
         self.button_settings.clicked.connect(self.show_settings)
 
         # Création du bouton aide
         self.button_help.setText("Aide")
-        self.button_help.setFixedSize(QSIZE)
         self.button_help.clicked.connect(show_help)
         self.layout_menu.addWidget(self.button_help)
 
         self.layout_window.addWidget(self.menu_area)
 
-    def ui_setup_statusbar(self):
-        """ Configure la bar d'état """
-        self.layout_window.addWidget(self.statusbar)
-        #self.setStatusBar(self.statusbar)
-        self.statusbar.addPermanentWidget(self.statuslabel)
-
-    def show_play_dialog(self):
-        """Ouvre un petit popup demandant de choisir un fichier à lire"""
-        file_name = self.get_filename()
-        self.settings_dict["Enregistrement/Playback (Dernière Lecture)"] = file_name
-
-    def get_filename(self):
-        """Obtenir un nom de fichier à partir d'un QFileDialog"""
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        file_name, _ = QFileDialog.getOpenFileName(self, "Choisir un fichier à lire", "", "All Files (*)", options=options)
-        return file_name
-
     def act_settings(self):
         """Effectuer les actions liées aux paramètres"""
-        dim_crte = self.settings_dict["Carte (Dimensions)"].split("x")
-        self.map_view.updt_map_data(self.settings_dict["Carte (Fichier)"], int(dim_crte[0]), int(dim_crte[1]))
-        if self.settings_dict["Simulateur (Activer Bouton)"]:
-            self.button_simu.show()
-        else:
-            self.button_simu.hide()
-        if self.settings_dict["Enregistrement/Playback (Activer Bouton)"]:
-            self.button_record.show()
-            self.button_play.show()
-            self.button_pause.show()
-            self.button_stop.show()
-            self.button_save.show()
-        else:
-            self.button_record.hide()
-            self.button_play.hide()
-            self.button_pause.hide()
-            self.button_stop.hide()
-            self.button_save.hide()
+        self.map_view.updt_map_data(self.settings_dict["Fichier de Carte"])
 
     def show_settings(self):
         """ Ouvre un popup (QDialog) Configuration
         permettant la modification des réglages d'enregistrement"""
         setting = QDialog(self.window)
         setting.setWindowTitle("Configuration")
-        setting.setMinimumSize(550, 400)
+        setting.setMinimumSize(500, 400)
         setting.layout = QVBoxLayout(setting)
 
         #paramètres d'un setting
@@ -196,10 +146,7 @@ class Window(QMainWindow):
         def updt_settings():
             """Mise à jour des paramètres"""
             for setting_nm in self.settings_dict:
-                if isinstance(field_dict[setting_nm], QCheckBox):
-                    self.settings_dict[setting_nm] = field_dict[setting_nm].isChecked()
-                else:
-                    self.settings_dict[setting_nm] = field_dict[setting_nm].text()
+                self.settings_dict[setting_nm] = field_dict[setting_nm].text()
             externals.set_settings(self.settings_dict)
 
         update_btn = QPushButton("Sauvegarder")
@@ -214,16 +161,30 @@ class Window(QMainWindow):
             label = QLabel(setting_nm)
             box_layout.addWidget(label)
 
-            if isinstance(self.settings_dict[setting_nm], bool):
-                field_dict[setting_nm] = QCheckBox(setting)
-                field_dict[setting_nm].setChecked(self.settings_dict[setting_nm])
-            else:
-                field_dict[setting_nm] = QLineEdit(setting)
-                field_dict[setting_nm].setText(self.settings_dict[setting_nm])
+            field_dict[setting_nm] = QLineEdit(setting)
+            field_dict[setting_nm].setText(self.settings_dict[setting_nm])
             box_layout.addWidget(field_dict[setting_nm])
 
         setting.exec_()
-
+        
+    def onPosRegSignal (self, liste):
+        print (liste[1:])
+        rid = liste [0]
+        self.current_robots_dic[rid].update_position (liste [1:],True)
+        
+    def onCaptRegSignal (self,liste):
+        rid, sid, val = liste [0], liste [1], liste [2]
+        try :
+            self.current_robots_dic[rid].current_equipement_dic[sid].update_equipement (val)
+        except KeyError :
+            self.onActuDeclSignal ([rid, sid, None, None, None, "W", None])
+            self.onCaptRegSignal (liste)
+            
+    def onActuDeclSignal (self, liste):
+        rid, eid, minv, maxv, step, droits, unit = liste [0], liste [1], liste [2], liste [3], liste [4], liste [5], liste [6]
+        self.current_robots_dic[rid].newEquipment (eid, minv, maxv, step, droits, unit)
+            
+        pass
     @pyqtSlot()
     def record(self):
         """ Enregistre des messages et commandes
@@ -233,26 +194,24 @@ class Window(QMainWindow):
             self.backend.record("BMC")
 
     @pyqtSlot()
-    def onStopRecordButton(self):
+    def onStopRecordButton (self) :
         if self.button_record.isChecked():
             self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCD")
             self.button_record.setChecked(False)
 
     @pyqtSlot()
-    def onSaveButton(self):
-        path = self.settings_dict["Enregistrement/Playback (Chemin Sauvegarde)"]
+    def onSaveButton (self) :
+        path = self.settings_dict["Chemin de Sauvegarde"]
         if self.button_record.isChecked():
             self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCSD", path)
             self.button_record.setChecked(False)
-
+            
     @pyqtSlot()
     def update_window(self):
         """ Initialise la mise à jour de la fenêtre"""
         new_robots = self.backend.get_all_robots()
-
-        self.inspecteur.update_robots(new_robots)
         self.list_robot_changed_signal.emit(self.current_robots_list)
 
 
@@ -262,7 +221,7 @@ def show_help():
     aide = QMessageBox()
     aide.setWindowTitle("Aide")
     with open("aide.txt", encoding='utf-8') as file:
-        list_aide = file.readlines()
+        list_aide = file.readlines ()
     aide.setText("".join(list_aide))
     aide.exec_()
 
@@ -270,7 +229,6 @@ def show_help():
 def main(backend):
     """ Création la fenêtre principale """
     app = QApplication(sys.argv)
-    backend.launchQt()
     window = Window(backend)
     window.window.show()
     sys.exit(app.exec_())

@@ -9,12 +9,15 @@ class Inspecteur(QTabWidget):
     """ Définit l'objet inspecteur (QTabWidget) qui comport les onglets robots (QGroupBox)
     et qui les relie à backend avec des signaux """
 
+    # Création d'un signal de sélection d'un onglet robot
+    selected_tab_signal = pyqtSignal(str)
+
     def __init__(self, window):
         super().__init__()
         self.window = window
+        self.backend = self.window.backend
 
-        # Connexion du signal du clique droit sur robot avec la sélection de l'onglet robot
-        self.window.map_view.selected_robot_signal.connect(lambda rid: self.setCurrentWidget(self.window.current_robots_dic[rid]))
+        self.window.map_view.selected_robot_signal.connect(lambda rid: self.setCurrentIndex(self.window.current_robots_list.index(rid)))
 
         self.ui_setup_tab()
 
@@ -23,31 +26,29 @@ class Inspecteur(QTabWidget):
 
     def ui_setup_tab(self):
         """ Configure l'inspecteur"""
-        self.setMaximumSize(440, 16777215)
-        self.setMovable(True)
+        self.setMaximumSize(400, 16777215)
 
     @pyqtSlot()
-    def update_robots(self, new_robots):
-        """ Met à jour la liste des robots présents et initialise la mise à jour de toutes les boites robots """
+    def update_robots(self, newRid):
+        """ Met à jour la liste des robots présents
+        et initialise la mise à jour de toutes les boites robots """
 
         # Ajoute les nouveaux robots
-        for rid in set(new_robots) - set(self.window.current_robots_list):
-            self.add_robot(rid)
+        self.add_robot(newRid)
 
         # Met à jour la liste des robots présents
-        self.window.current_robots_list = new_robots
+        self.window.current_robots_list.append (newRid)
 
         # Initialise la mise à jours des robots
-        for tab in self.window.current_robots_dic.values():
-            tab.update_tab_robot()
+        for value in self.window.current_robots_dic.values():
+            value.update_tab_robot()
 
-        # Emission du signal de l'onglet sélectionné
-        if self.window.current_robots_dic:
-            self.window.map_view.selected_robot_signal.emit(self.currentWidget().rid)
+        if self.window.current_robots_list:
+            self.selected_tab_signal.emit(self.window.current_robots_list[self.currentIndex()])
 
     def add_robot(self, rid):
-        """ Ajoute le robot dont le nom est placé en paramètre sous forme d'une boite robot dans la zone inspecteur """
-
+        """ Ajoute le robot dont le nom est placé en paramètre
+        sous forme d'une boite robot dans la zone inspecteur """
         # Création d'un onglet robot
         self.tab_robot = TabRobot(rid, self.window)
         self.window.current_robots_dic[rid] = self.tab_robot
@@ -57,11 +58,12 @@ class Inspecteur(QTabWidget):
 
     @pyqtSlot()
     def remove_robot(self, rid):
-        """ Supprime de l'inspecteur la boite robot associée au robot dont le nom est placé en paramètre """
+        """ Supprime de l'inspecteur la boite robot associée
+        au robot dont le nom est placé en paramètre """
 
-        # Retire l'onglet actuellement sélectionnée
-        self.removeTab(self.currentIndex())
         # Cache l'affichage de l'onglet du robot
         self.window.current_robots_dic.pop(rid).hide()
+        # Retire l'onglet actuellement sélectionnée
+        self.removeTab(self.currentIndex())
         # Envoie l'information que le robot a été supprimé (via le bouton supprimer)
-        self.window.backend.stopandforget_robot(rid)
+        self.backend.stopandforget_robot(rid)
