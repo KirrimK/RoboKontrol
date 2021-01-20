@@ -59,6 +59,8 @@ class MapView(QtWidgets.QWidget):
 
         self.selected_robot_signal.connect(lambda rid: self.select_robot(rid))
 
+        self.setFocusPolicy(Qt.StrongFocus)
+
         self.show()
 
     def should_repaint(self):
@@ -223,24 +225,21 @@ class MapView(QtWidgets.QWidget):
         """Une touche du clavier est pressée"""
         #self.key_binding={}
         print(event.key())
+        self.setFocusPolicy(Qt.StrongFocus)
         bkd_robots = self.parent.backend.annu.robots
-        robot_up_key = self.parent.settings_dict["UP_KEY"]
-        robot_down_key = self.parent.settings_dict["DOWN_KEY"]
-        robot_left_key = self.parent.settings_dict["LEFT_KEY"]
-        robot_right_key = self.parent.settings_dict["RIGHT_KEY"]
         incr=10
         cmd_pos=[0,0,None]
         if self.selected_robot is not None:
             selec_rob = bkd_robots[self.selected_robot]
             robot_pos = [selec_rob.x, selec_rob.y, selec_rob.theta]
-            if event.text() == robot_up_key:
+            if event.key() == Qt.Key_Z:
                 cmd_pos=[robot_pos[0], robot_pos[1] + incr, None]
-            if event.text() == robot_down_key:
+            if event.key() == Qt.Key_S:
                 cmd_pos=[robot_pos[0], robot_pos[1] - incr, None]
-            if event.text() == robot_left_key:
-                cmd_pos=[robot_pos[0], robot_pos[1] - incr, None]
-            if event.text() == robot_right_key:
-                cmd_pos=[robot_pos[0], robot_pos[1] + incr, None]
+            if event.key() == Qt.Key_Q:
+                cmd_pos=[robot_pos[0]-incr, robot_pos[1], None]
+            if event.key() == Qt.Key_D:
+                cmd_pos=[robot_pos[0]+incr, robot_pos[1], None]
             self.parent.backend.sendposcmd_robot(self.selected_robot, cmd_pos)
         else:
             pass
