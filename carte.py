@@ -214,7 +214,7 @@ class MapView(QtWidgets.QWidget):
             resize_fctwdt = self.map_width/self.width
             resize_fcthgt = self.map_height/self.height
             new_pos[0] = (int(new_pos[0])//resize_fctwdt)
-            new_pos[1] = (int(new_pos[1])//resize_fcthgt)
+            new_pos[1] = self.map_height - (int(new_pos[1])//resize_fcthgt)
             new_size[0] = (int(new_size[0])//resize_fctwdt)
             new_size[1] = -(int(new_size[1])//resize_fcthgt)
         return new_size, new_pos
@@ -347,5 +347,5 @@ class MapView(QtWidgets.QWidget):
             resize_fctwdt = self.map_width/self.width
             resize_fcthgt = self.map_height/self.height
             new_pos[0] = new_pos[0]*resize_fctwdt - 2
-            new_pos[1] = new_pos[1]*resize_fcthgt - 2
+            new_pos[1] = (-new_pos[1] + self.map_height//resize_fcthgt)*resize_fcthgt - 2
         return new_pos
