@@ -131,7 +131,7 @@ class Radio :
             message = "Posreport {} {} {} {}".format (args[0], args[1], args [2], args [3])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
         if self.backend.widget is not None :
-            self.backend.widget.PosRegSignal.emit ([i for i in args]+[time()])
+            self.backend.widget.position_updated.emit ([i for i in args]+[time()])
         else:
             self.backend.premiersMessages.append (('pos',[i for i in args]+[time()]))
 
@@ -154,7 +154,7 @@ class Radio :
             message = "ActuatorReport {} {} {}".format (args[0], args [1], args [2]) 
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
         if self.backend.widget is not None :
-            self.backend.widget.CaptRegSignal.emit ([i for i in args]+[time()])
+            self.backend.widget.equipement_updated.emit ([i for i in args]+[time()])
         else :
             self.backend.premiersMessages.append (('actrep',[i for i in args]))
 
