@@ -2,7 +2,7 @@
 
 import sys
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
-from PyQt5.QtWidgets import QGroupBox, QPushButton, QSpacerItem
+from PyQt5.QtWidgets import QGroupBox, QPushButton, QSpacerItem, QStatusBar
 from PyQt5.QtWidgets import QDialog, QSizePolicy, QMessageBox, QFileDialog
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QCheckBox
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QTimer, QSize
@@ -50,6 +50,7 @@ class Window(QMainWindow):
         self.button_simu = QPushButton()
         self.button_settings = QPushButton()
         self.button_help = QPushButton()
+        self.statusbar = QStatusBar()
 
         # Création de la liste des noms des robots présents
         self.current_robots_list = []
@@ -60,6 +61,7 @@ class Window(QMainWindow):
         self.ui_setup_map()
         self.ui_setup_inspector()
         self.layout_window.addLayout(self.layout_map_inspector)
+        self.ui_setup_statusbar()
 
         # Création du dictionnaire des robots présents (k=nom, v=boite robot)
 
@@ -86,6 +88,8 @@ class Window(QMainWindow):
 
     def ui_setup_menu_area(self):
         """ Création de la zone menu"""
+        self.menu_area.setStyleSheet("QGroupBox  {border: 0px;}")
+
         # Création du bouton record
         self.button_record.setFixedSize(QSIZE)
         self.button_record.setText("Record")
@@ -137,6 +141,10 @@ class Window(QMainWindow):
         self.layout_menu.addWidget(self.button_help)
 
         self.layout_window.addWidget(self.menu_area)
+
+    def ui_setup_statusbar(self):
+        """ Configure la bar d'état """
+        self.layout_window.addWidget(self.statusbar)
 
     def show_play_dialog(self):
         """Ouvre un petit popup demandant de choisir un fichier à lire"""
