@@ -123,12 +123,6 @@ class Window(QMainWindow):
 
         self.layout_menu.addItem(self.spacer_item)
 
-        # Création du bouton Simulateur
-        self.layout_menu.addWidget(self.button_simu)
-        self.button_simu.setFixedSize(QSIZE)
-        self.button_simu.setText("Nv. Simu.")
-        self.button_simu.clicked.connect(lambda: externals.exec_simu(self.settings_dict))
-
         # Création du bouton configuration
         self.button_settings.setText("Configuration")
         self.button_settings.setFixedSize(QSIZE_BIG)
@@ -165,10 +159,6 @@ class Window(QMainWindow):
         """Effectuer les actions liées aux paramètres"""
         dim_crte = self.settings_dict["Carte (Dimensions)"].split("x")
         self.map_view.updt_map_data(self.settings_dict["Carte (Fichier)"], int(dim_crte[0]), int(dim_crte[1]))
-        if self.settings_dict["Simulateur (Activer Bouton)"]:
-            self.button_simu.show()
-        else:
-            self.button_simu.hide()
         if self.settings_dict["Enregistrement/Playback (Activer Bouton)"]:
             self.button_record.show()
             self.button_play.show()

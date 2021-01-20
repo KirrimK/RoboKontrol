@@ -74,13 +74,13 @@ def settings_to_file(path, settings):
     with open(path, "wb") as save:
         tree.write(save, pretty_print=True)
 
-def exec_simu(st_dict):
-    """Exécute un simulateur en parallèle"""
-    char_seq = [ chr(random.randint(65, 90)) for _ in range(0, 7)]
-    rbt_name = "".join(char_seq)
-    try:
-        path = st_dict["Simulateur (Chemin)"]
-        if os.path.exists(path):
-            subprocess.Popen(["python3" if shutil.which("python3") else "python", path, rbt_name])
-    except Exception as exc:
-        print(exc)
+#def exec_simu(st_dict):
+#    """Exécute un simulateur en parallèle"""
+#    char_seq = [ chr(random.randint(65, 90)) for _ in range(0, 7)]
+#    rbt_name = "".join(char_seq)
+#    try:
+#        path = st_dict["Simulateur (Chemin)"]
+#        if os.path.exists(path):
+#            subprocess.Popen(["python3" if shutil.which("python3") else "python", path, rbt_name])
+#    except Exception as exc:
+#        print(exc)

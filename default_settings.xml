@@ -8,9 +8,6 @@
   <setting nom="Carte (Couleur Sélection)">
     <field>yellow</field>
   </setting>
-  <setting nom="Simulateur (Chemin)">
-    <field></field>
-  </setting>
   <setting nom="Enregistrement/Playback (Chemin Sauvegarde)">
     <field></field>
   </setting>
@@ -25,9 +22,6 @@
   </setting>
   <setting nom="Carte (Dimensions)">
     <field>3000x2000</field>
-  </setting>
-  <setting nom="Simulateur (Activer Bouton)">
-    <check>n</check>
   </setting>
   <setting nom="Enregistrement/Playback (Activer Bouton)">
     <check>y</check>
