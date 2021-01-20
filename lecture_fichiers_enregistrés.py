@@ -45,7 +45,7 @@ def ReadFile (nom_fichier, TYPE, window):
                 elif words [1] == "ActuatorsRequest":
                     window.backend.send_descr_cmd (words [2])
                 elif words [1] == "SpeedCmd":
-                    window.backend.send_speed_cmd (words [2], words [3], words [4], words [5])
+                    window.backend.send_speed_cmd (words [2], words [3], words [4], float (words [5]))
                 elif words [1] == "ActuatorCmd" :
                     window.backend.sendeqpcmd (words [2], words [3], words [4])
             except Exception :

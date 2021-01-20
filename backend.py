@@ -288,6 +288,15 @@ class Backend:
             else:
                 self.radio.send_cmd (rd.POS_ORIENT_CMD.format (rid, pos[0],
                                                                 pos[1], pos[2]*3.141592654/180))
+    def send_speed_cmd (self, rid, Vx, Vy, Vtheta):
+        if self.radio_started :
+            if  self.annu.find (rid).isStopped :
+                self.annu.find (rid).isStopped = False
+            self.radio.send_cmd (rd.SPEED_CMD.format (rid, Vx, Vy, Vtheta*3.141592654/180))
+
+    def send_descr_cmd (self, rid):
+        if self.radio_started :
+            self.radio.send_cmd (rd.DESCR_CMD.format (rid))
 
     def sendeqpcmd(self, rid, eqp_name, state):
         """Envoie une commande d'état à un équipement (qui recoit des commandes)
