@@ -11,8 +11,6 @@ class WidgetBackend (QWidget):
     """Classe implémentée car les signaux Qt doivent être envoyés par des objets Qt
     Attributs : _radio (Radio) : l'objet parent auquel sont reliés les connections de signal."""
     NewRobotSignal = pyqtSignal (str)
-    PosRegSignal = pyqtSignal (list)
-    CaptRegSignal = pyqtSignal (list)
     ActuDeclSignal = pyqtSignal (list)
     UpdateTrigger = pyqtSignal (list)
     MapTrigger = pyqtSignal (list)
@@ -22,8 +20,8 @@ class WidgetBackend (QWidget):
     def __init__ (self, parent_backend):
         super().__init__()
         self.backend = parent_backend
-        self.PosRegSignal.connect (lambda liste : self.backend.onPosRegSignal (liste))
-        self.CaptRegSignal.connect (lambda liste : self.backend.onCaptRegSignal (liste))
+        self.position_updated.connect (lambda liste : self.backend.onPosRegSignal (liste))
+        self.equipement_updated.connect (lambda liste : self.backend.onCaptRegSignal (liste))
         self.ActuDeclSignal.connect (lambda liste : self.backend.onActuDeclSignal (liste))
 
 class Backend:
@@ -164,14 +162,13 @@ class Backend:
         Transmet les valeurs envoyées par le robot vers l'annuaire
         Input :
             [rid (str), x (str), y (str), theta (str)] (list)"""
-        rid, x, y, theta, last_update = liste [0], liste [1], liste [2], liste [3], time()
+        rid, x, y, theta, last_update = liste [0], liste [1], liste [2], liste [3], liste [4]
         if not self.annu.check_robot (rid):
             self.track_robot (rid)
             self.radio.send_cmd (rd.DESCR_CMD.format (rid))
         self.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
         self.widget.UpdateTrigger.emit([])
         self.widget.MapTrigger.emit([])
-        self.widget.position_updated.emit([rid, x, y, theta, last_update])
 
     def onActuDeclSignal (self, liste):
         """Fonction appelée automatiquement par on_actudecl.
@@ -212,7 +209,7 @@ class Backend:
         Si le robot rid n'a pas de capteur sid, le capteur est ajouté.
 
         Input : [rid (str), sid (str), valeur (str)] (list)"""
-        rid, sid, valeur, last_update = liste [0], liste [1], liste [2], time()
+        rid, sid, valeur, last_update = liste [0], liste [1], liste [2], liste [3]
         if not self.annu.check_robot (rid):
             self.track_robot (rid)
             self.radio.send_cmd (rd.DESCR_CMD.format (rid))
@@ -220,7 +217,6 @@ class Backend:
             self.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
         self.annu.find (rid,sid).set_state (float (valeur))
         self.widget.UpdateTrigger.emit([])
-        self.widget.equipement_updated.emit([rid, sid, float(valeur), last_update])
 
     def track_robot(self, robot_name):
         """Invoqué lors de la demande de tracking d'un robot via l'interface graphique,

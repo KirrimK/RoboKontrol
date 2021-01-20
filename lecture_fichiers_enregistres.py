@@ -1,6 +1,6 @@
 """Module dédié au replay d'un fichier"""
 import PyQt5
-from time import sleep
+from time import sleep, time
 
 def ReadFile (nom_fichier, TYPE, window):
     """Fonction de lecture de fichiers.
@@ -11,18 +11,20 @@ def ReadFile (nom_fichier, TYPE, window):
     with open (nom_fichier, 'r') as fichier:
         data = fichier.readlines ()
     tempsAnc = 0
+    timestamp = time ()
     if TYPE == "MSG" :   
         for line in data [3:]:
             try :
                 words = line.split ()
                 tempsNouv = int (words[0])/1000
                 pause = tempsNouv - tempsAnc
+                timestamp += pause
                 sleep (pause)
                 tempsAnc = tempsNouv
                 if words [2]== 'PosReport':
-                    window.backend.widget.PosRegSignal.emit (words [3:])
+                    window.backend.onPosRegSignal (words [3:]+[timestamp])
                 elif words [2] == "ActuatorReport":
-                    window.backend.widget.CaptRegSignal.emit (words [3:])
+                    window.backend.onCaptRegSignal (words [3:]+[timestamp])
                 elif words[2] == 'ActuatorDecl':
                     window.backend.widget.ActuDeclSignal.emit (words [3:])
                 elif words [1] == 'Interface':
