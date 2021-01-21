@@ -34,9 +34,12 @@ class DisplayAnnuaire(anr.Annuaire, QTabWidget):
         anr.Annuaire.__init__(self)
         QTabWidget.__init__(self)
         self.window = window
-        self.backend = self.window.backend
-        self.window.map_view.selected_robot_signal.connect(
-            lambda rid: self.setCurrentWidget(self.robots[rid]))
+        if self.window is not None:
+            self.backend = self.window.backend
+            self.window.map_view.selected_robot_signal.connect(
+                lambda rid: self.setCurrentWidget(self.robots[rid]))
+        else:
+            self.backend = None
         self.currentChanged.connect(lambda index: self.update_selected_robot(index))
         self.ui_setup_tab()
 
