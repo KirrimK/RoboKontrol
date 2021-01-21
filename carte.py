@@ -18,7 +18,6 @@ STOPPED_BRUSH = QBrush(QColor(STOPPED_COLOR), Qt.SolidPattern)
 CLICK_BRUSH = QBrush(QColor(CLICK_COLOR), Qt.Dense7Pattern)
 ROBOT_SIZE = 200
 
-#TODO: Trouver pourquoi les robots ne s'affichent plus quand le scaling est coupé
 class MapView(QtWidgets.QWidget):
     """Un widget permettant de visualiser la carte et les robots dessus"""
     # Création d'un signal de sélection du robot sur la map
@@ -217,7 +216,7 @@ class MapView(QtWidgets.QWidget):
             resize_fctwdt = self.map_width/self.width
             resize_fcthgt = self.map_height/self.height
             new_pos[0] = (int(new_pos[0])//resize_fctwdt)
-            new_pos[1] = self.map_height - (int(new_pos[1])//resize_fcthgt)
+            new_pos[1] = (self.map_height - int(new_pos[1]))//resize_fcthgt
             new_size[0] = (int(new_size[0])//resize_fctwdt)
             new_size[1] = -(int(new_size[1])//resize_fcthgt)
         return new_size, new_pos
