@@ -1,10 +1,8 @@
 """Module backend.py - Gestion jointe de l'annuaire et de la communication par ivy"""
 
-import sys
-from time import sleep, time
-from PyQt5.QtCore import pyqtSignal #, pyqtSlot
+from time import time
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
-import annuaire
 import display as dsp
 import ivy_radio as rd
 

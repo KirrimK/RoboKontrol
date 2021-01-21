@@ -127,7 +127,7 @@ class Radio :
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant la position"""
         if self.record_msgs :
-            message = "Posreport {} {} {} {}".format (args[0], args[1], args [2], args [3])
+            message = "PosReport {} {} {} {}".format (args[0], args[1], args [2], args [3])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
         if self.backend.widget is not None :
             self.backend.widget.position_updated.emit ([i for i in args]+[time()])

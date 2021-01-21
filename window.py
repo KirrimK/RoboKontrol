@@ -35,7 +35,7 @@ class Window(QMainWindow):
         self.backend = backend
         self.backend.launchQt()
 
-        #Création du lecteur de fichiers 
+        #Création du lecteur de fichiers
         self.lecteur = lect.Lecteur (self)
 
         # Création des widgets de la fenêtre
@@ -247,7 +247,7 @@ class Window(QMainWindow):
             self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCSD", path)
             self.button_record.setChecked(False)
-    
+
     @pyqtSlot()
     def onPlayButton (self):
         if self.button_pause.isChecked ():
