@@ -2,7 +2,6 @@
 
 from time import time, gmtime
 from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
-from annuaire import Actionneur
 
 IVYAPPNAME = 'Radio'
 
@@ -37,8 +36,8 @@ def temps_deb (timestamp):
     !!! Cette fonction est à l'heure d'hiver."""
     itm = gmtime(timestamp+1*3600)
     return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (itm.tm_year, itm.tm_mon,
-            itm.tm_mday, itm.tm_hour, itm.tm_min, itm.tm_sec) +'{:.3}'.format (timestamp%1)[1:] 
-        
+            itm.tm_mday, itm.tm_hour, itm.tm_min, itm.tm_sec) +'{:.3}'.format (timestamp%1)[1:]
+
 class Radio :
     """Classe de l'objet qui est connecté au channel Ivy
 
@@ -60,11 +59,11 @@ class Radio :
         IvyInit (IVYAPPNAME,IVYAPPNAME+" is ready!")
         self.bus = "127.255.255.255:2010"
         self.nom = IVYAPPNAME
-        
+
         IvyBindMsg (self.on_posreg, POS_REG)
         IvyBindMsg (self.on_captreg, CAPT_REG)
         IvyBindMsg (self.on_actudecl, ACTU_DECL)
-        
+
     #ENREGISTREMENT
 
     def register_start (self, *args):
@@ -133,30 +132,30 @@ class Radio :
         if self.backend.widget is not None :
             self.backend.widget.position_updated.emit ([i for i in args]+[time()])
         else:
-            self.backend.premiersMessages.append (('pos',[i for i in args]+[time()]))
+            self.backend.premiers_messages.append (('pos',[i for i in args]+[time()]))
 
     def on_actudecl (self, sender, *args):
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant la description d'un equipement"""
         if self.record_msgs :
-            message = "ActuatorDecl {} {} {} {} {} {} {}".format (args [0], args [1], args [2], args [3], 
+            message = "ActuatorDecl {} {} {} {} {} {} {}".format (args [0], args [1], args [2], args [3],
                         args [4], args [5], args [6])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
         if self.backend.widget is not None :
             self.backend.widget.ActuDeclSignal.emit ([i for i in args])
         else :
-            self.backend.premiersMessages.append (('actdcl',[i for i in args]))
-    
+            self.backend.premiers_messages.append (('actdcl',[i for i in args]))
+
     def on_captreg (self, sender, *args):
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant un retour de capteur"""
         if self.record_msgs :
-            message = "ActuatorReport {} {} {}".format (args[0], args [1], args [2]) 
+            message = "ActuatorReport {} {} {}".format (args[0], args [1], args [2])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
         if self.backend.widget is not None :
             self.backend.widget.equipement_updated.emit ([i for i in args]+[time()])
         else :
-            self.backend.premiersMessages.append (('actrep',[i for i in args]))
+            self.backend.premiers_messages.append (('actrep',[i for i in args]))
 
     def send_cmd (self,cmd):
         """Envoie du texte vers le bus Ivy et le stocke optionnellement sur les tampons

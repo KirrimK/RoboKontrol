@@ -40,7 +40,7 @@ def read_ivytest_file(test_name):
         os.remove(file_name)
     return msg_list
 
-class TestRadio:
+class RadioTest:
     """Objet connecté au channel Ivy, enregistre tous les messages
     Un compte à rebours (en secondes) peut être demandé
     pour déclencher l'arrêt automatique après un certain temps
@@ -80,7 +80,7 @@ class TestRadio:
 if __name__ == '__main__':
     if len(sys.argv) >= 2:
         test_nm = sys.argv[1]
-        test_radio = TestRadio(test_nm)
+        test_radio = RadioTest(test_nm)
         test_radio.start()
         if len(sys.argv) > 2:
             time.sleep(0.5)

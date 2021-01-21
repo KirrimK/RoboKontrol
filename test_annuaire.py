@@ -43,7 +43,7 @@ def test_actionneur(recwarn, capsys):
     act_c.set_state(1)
     assert act_c.get_state() == (1, 0, 0, 0)
     assert act_c.get_unit() == 'volts'
-    assert act_c.updt_cmd() is None
+    assert act_c.updt_cmd(0) is None
     assert act_c.get_last_cmd()
 
     # enregistrement des alertes et des sorties console

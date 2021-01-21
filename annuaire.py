@@ -133,6 +133,7 @@ class Actionneur(Capteur):
         super().__init__(nom, min_val, max_val, step, unite)
         self.last_cmd = None
         self.valeur = None
+        self.last_cmd_val = None
 
     def __str__(self):
         nom = self.nom
@@ -143,9 +144,10 @@ class Actionneur(Capteur):
         stp = self.step
         return "Act. [{}] Val.: {} ({}) {} -> {} ({})".format(nom, val, unt, min_v, max_v, stp)
 
-    def updt_cmd(self):
+    def updt_cmd(self, state):
         """Met à jour le timestamp de dernière commande"""
         self.last_cmd = time.time()
+        self.last_cmd_val = state
 
     def get_last_cmd(self):
         """Retourne le timestamp de la dernière commande envoyée"""
