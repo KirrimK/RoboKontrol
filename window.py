@@ -234,7 +234,7 @@ class Window(QMainWindow):
             self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCD")
             self.button_record.setChecked(False)
-        elif self.button_play.isChecked () or self.button_pause.isChecked :
+        elif self.button_play.isChecked () or self.button_pause.isChecked():
             self.button_pause.setChecked (False)
             self.button_play.setChecked (False)
             self.lecteur.onStopButton ()
