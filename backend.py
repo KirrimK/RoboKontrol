@@ -130,12 +130,13 @@ class Backend:
         Input :
             [rid (str), x (str), y (str), theta (str)] (list)"""
         rid, x, y, theta, _ = liste [0], liste [1], liste [2], liste [3], liste [4]
-        if not self.annu.check_robot(rid):
-            self.track_robot(rid)
-            self.radio.send_cmd (rd.DESCR_CMD.format (rid))
-        self.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
-        self.widget.UpdateTrigger.emit([])
-        self.widget.MapTrigger.emit([])
+        if self.annu is not None:
+            if not self.annu.check_robot(rid):
+                self.track_robot(rid)
+                self.radio.send_cmd (rd.DESCR_CMD.format (rid))
+            self.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
+            self.widget.UpdateTrigger.emit([])
+            self.widget.MapTrigger.emit([])
 
     def onActuDeclSignal (self, liste):
         """Fonction appelée automatiquement par on_actudecl.
