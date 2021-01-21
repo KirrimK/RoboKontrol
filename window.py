@@ -9,6 +9,7 @@ from PyQt5.QtCore import pyqtSlot, pyqtSignal, QSize
 from carte import MapView
 from inspecteur import Inspecteur
 import externals
+import lecture_fichiers_enregistres as lect
 
 WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 2px solid rgb(113, 113, 113);border-width: 2px; " \
                 "border-radius: 5px;  color: rgb(255, 255, 255)} " \
@@ -33,6 +34,9 @@ class Window(QMainWindow):
         # Récupération de l'objet backend
         self.backend = backend
         self.backend.launchQt()
+
+        #Création du lecteur de fichiers 
+        self.lecteur = lect.Lecteur (self)
 
         # Création des widgets de la fenêtre
         self.window = QWidget()
@@ -103,12 +107,15 @@ class Window(QMainWindow):
         # Création du bouton play
         self.button_play.setFixedSize(QSIZE)
         self.button_play.setText("|>")
+        self.button_play.setCheckable (True)
         self.button_play.clicked.connect(self.show_play_dialog)
         self.layout_menu.addWidget(self.button_play)
 
         # Création du bouton pause
         self.button_pause.setFixedSize(QSIZE)
         self.button_pause.setText("||")
+        self.button_pause.setCheckable (True)
+        self.button_pause.clicked.connect (self.onPauseButton)
         self.layout_menu.addWidget(self.button_pause)
 
         # Création du bouton arrêt
@@ -148,6 +155,7 @@ class Window(QMainWindow):
         """Ouvre un petit popup demandant de choisir un fichier à lire"""
         file_name = self.get_filename()
         self.settings_dict["Enregistrement/Playback (Dernière Lecture)"] = file_name
+        self.onPlayButton ()
 
     def get_filename(self):
         """Obtenir un nom de fichier à partir d'un QFileDialog"""
@@ -229,6 +237,10 @@ class Window(QMainWindow):
             self.button_record.setStyleSheet("background-color: lightgrey")
             self.backend.record("EMCD")
             self.button_record.setChecked(False)
+        elif self.button_play.isChecked () or self.button_pause.isChecked :
+            self.button_pause.setChecked (False)
+            self.button_play.setChecked (False)
+            self.lecteur.onStopButton ()
 
     @pyqtSlot()
     def onSaveButton(self):
@@ -240,11 +252,16 @@ class Window(QMainWindow):
     
     @pyqtSlot()
     def onPlayButton (self):
-        pass
+        if self.button_pause.isChecked ():
+            self.button_pause.setChecked (False)
+        self.lecteur.onPlayButton ()
 
     @pyqtSlot ()
     def onPauseButton (self):
-        pass
+        if self.button_play.isChecked ():
+            self.button_play.setChecked = (False)
+            self.button_pause.setChecked (True)
+            self.lecteur.onPauseButton ()
 
     @pyqtSlot()
     def update_window(self):
