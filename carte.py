@@ -40,6 +40,7 @@ class MapView(QtWidgets.QWidget):
         self.relative_init_mspos = [0, 0]
 
         self.clicking = False
+        self.cmd_speed=[0,0,None]
 
         self.color_dict = {}
         self.robot_number = 0
@@ -225,17 +226,16 @@ class MapView(QtWidgets.QWidget):
         """Une touche du clavier est pressée"""
         self.setFocusPolicy(Qt.StrongFocus)
         incr=1
-        cmd_speed=[0,0,None]
         if self.selected_robot is not None:
             if event.key() == Qt.Key_Z:
-                cmd_speed[1]=incr
+                self.cmd_speed[1]=incr
             if event.key() == Qt.Key_S:
-                cmd_speed[1]=-incr
+                self.cmd_speed[1]=-incr
             if event.key() == Qt.Key_Q:
-                cmd_speed[0]=incr * 360 / (2*pi)
+                self.cmd_speed[0]=incr * 360 / (2*pi)
             if event.key() == Qt.Key_D:
-                cmd_speed[0]=-incr * 360 / (2*pi)
-            self.parent.backend.send_speed_cmd(self.selected_robot, cmd_speed[1], 0, cmd_speed[0])
+                self.cmd_speed[0]=-incr * 360 / (2*pi)
+            self.parent.backend.send_speed_cmd(self.selected_robot, self.cmd_speed[1], 0, self.cmd_speed[0])
         else:
             pass
 
@@ -243,16 +243,15 @@ class MapView(QtWidgets.QWidget):
         """Une touche du clavier est relachée"""
         #print(event.key())
         self.setFocusPolicy(Qt.StrongFocus)
-        cmd_speed=[0,0,None]
         if event.key() != Qt.Key_Z:
-            cmd_speed[1]=0
+            self.cmd_speed[1]=0
         if event.key() != Qt.Key_S:
-            cmd_speed[1]=0
+            self.cmd_speed[1]=0
         if event.key() != Qt.Key_Q:
-            cmd_speed[0]=0
+            self.cmd_speed[0]=0
         if event.key() != Qt.Key_D:
-            cmd_speed[0]=0
-        self.parent.backend.send_speed_cmd(self.selected_robot, cmd_speed[0],cmd_speed[1],0)
+            self.cmd_speed[0]=0
+        self.parent.backend.send_speed_cmd(self.selected_robot, self.cmd_speed[1], 0, self.cmd_speed[0])
 
     def mousePressEvent(self, event):
         """La souris est cliquée"""
