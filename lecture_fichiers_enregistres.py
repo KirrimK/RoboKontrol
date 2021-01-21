@@ -35,14 +35,15 @@ class Lecteur :
             try :
                 words = line.split ()
                 if len (self.data)>0:
-                    self.timer.start (int ((self.data[-1].split()[0]-int (words[0]))/1000))
+                    self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
                 timestamp = self.heureDebut + int (words [0])/1000
                 if words [2]== 'PosReport':
-                    self.window.backend.onPosRegSignal (words [3:]+[timestamp])
+                    self.window.backend.radio.on_posreg ("Lecteur",words [3], words [4], words [5], words [6])
                 elif words [2] == "ActuatorReport":
-                    self.window.backend.onCaptRegSignal (words [3:]+[timestamp])
+                    self.window.backend.radio.on_captreg ("Lecteur",words [3], words [4], words [5])
                 elif words[2] == 'ActuatorDecl':
-                    self.window.backend.onActuDeclSignal (words [3:])
+                    self.window.backend.radio.on_actudecl ("Lecteur",words [3], words [4], words [5], words [6],
+                    words [7],words [8])
                 elif words [1] == 'Interface':
                     print (' '.join (words [2:]))
             except Exception :
@@ -55,21 +56,24 @@ class Lecteur :
         else :
             self.reading = "CMD"
             with open (nomFichier, 'r') as f :
-                self.data = f.readlines ()[3:].reverse ()
+                self.data = f.readlines ()[3:]
+            self.data.reverse ()
             tempsCommande = int (self.data [-1].split ()[0])
-            self.timer.timeout.connect (lambda : self.readCmd())
+            self.timer.timeout.connect (self.readCmd)
             self.timer.start (tempsCommande)
     def readCmd (self):
         if len (self.data) == 0:
-            self.timer.timeout.disconnect (lambda : self.readCmd)
+            self.timer.timeout.disconnect (self.readCmd)
             self.reading = False
         else :
-            try :
+            #try :
+            if True :
                 words = self.data.pop (-1).split()
-                self.timer.start (int ((self.data[-1].split()[0]-int (words[0]))/1000))
+                if len (self.data)>0:
+                    self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
                 if words [1] in ('PosCmd', 'PosCmdOrient'):
-                    self.window.backend.sendposcmd_robot (words[2],words[3],words[4], 
-                        (float (words[5]) if len (words) == 6 else None))
+                    self.window.backend.sendposcmd_robot (words[2],(words[3],words[4], 
+                        (float (words[5]) if len (words) == 6 else None)))
                 elif words [1] == 'Shutdown' :
                     self.window.backend.stopandforget_robot (words [2])
                 elif words [1] == "Emergency" :
@@ -80,10 +84,10 @@ class Lecteur :
                     self.window.backend.send_speed_cmd (words [2], words [3], words [4], float (words [5]))
                 elif words [1] == "ActuatorCmd" :
                     self.window.backend.sendeqpcmd (words [2], words [3], words [4])
-            except Exception:
-                line = self.data.pop (-1)
-                print ("La ligne [{}] pose un problème.".format (line))
-                self.timer.start (1)
+            #except Exception:
+            #    line = self.data.pop (-1)
+            #    print ("La ligne [{}] pose un problème.".format (line))
+            #    self.timer.start (1)
     def onPlayButton (self):
         path = self.window.settings_dict ["Enregistrement/Playback (Dernière Lecture)"]
         if path not in (None, ""):
