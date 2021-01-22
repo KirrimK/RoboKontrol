@@ -2,6 +2,7 @@
 
 from time import time
 from PyQt5.QtCore import QTimer
+from display import DisplayActionneur as ACT
 
 class Lecteur :
     """Classe permettant la lecture des fichiers. S'initialise avec la fenêtre."""
@@ -68,8 +69,9 @@ class Lecteur :
                         self.window.inspecteur.find (rid).qlineedit_pos_cmd.setText (texte)
                 elif words [2] == "ActuatorCmd":
                     rid, sid, valeur = words [3], words [4], words [5]
-                    if self.window.inspecteur.find (rid,sid) is not None:
-                        self.window.inspecteur.find (rid,sid).updt_cmd (valeur)
+                eqp_display = self.window.inspecteur.find (rid,sid)
+                if eqp_display is not None and type (eqp_display) == ACT :
+                    eqp_display.updt_cmd (valeur)
         except Exception :
             print ("La ligne [{}] pose un problème.".format (line))
             self.timer.start (1)
@@ -124,8 +126,9 @@ class Lecteur :
             elif words [1] == "ActuatorCmd" :
                 rid, sid, val = words [2], words [3], words [4]
                 self.window.backend.sendeqpcmd (rid, sid, val)
-                if self.window.inspecteur.find (rid,sid) is not None:
-                    self.window.inspecteur.find (rid,sid).updt_cmd (val)
+                eqp_display = self.window.inspecteur.find (rid,sid)
+                if eqp_display is not None and type (eqp_display) == ACT :
+                    eqp_display.updt_cmd (val)
         except Exception:
             print ("La ligne [{}] pose un problème.".format (line))
             self.timer.start (1)
