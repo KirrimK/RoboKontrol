@@ -22,11 +22,11 @@ STOP_BUTTON_CMD = "Emergency {}"
 KILL_CMD = "Shutdown {}"
 DESCR_CMD = "ActuatorsRequest {}"
 
-def temps (t, pt):
+def temps (tps, prem_tps):
     """Input : _timestamp (float) : donné par time ()
                     _ premier_timestamp : date du premier timestamp de la session d'enregistrement
         OutPut : str du temps en ms depuis le début de la session d'eregistrement"""
-    return str (int(1000 * (t-pt)))
+    return str (int(1000 * (tps - prem_tps)))
 
 def temps_deb (timestamp):
     """Input : t (float) : value given by time()
