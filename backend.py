@@ -212,12 +212,11 @@ class Backend:
 
         Entrée :
             _ rid (str) : nom du robot à stopper"""
-        if self.annu is not None:
-            if self.radio_started:
-                self.radio.send_cmd (rd.STOP_BUTTON_CMD.format (rid))
-            if self.annu.check_robot (rid):
-                self.annu.find (rid).isStopped = True
-            print ('Robot is stopped : {}'.format (self.annu.find (rid).isStopped))
+        if self.radio_started:
+            self.radio.send_cmd (rd.STOP_BUTTON_CMD.format (rid))
+        if self.annu.check_robot (rid):
+            self.annu.find (rid).isStopped = True
+        print ('Robot is stopped : {}'.format (self.annu.find (rid).isStopped))
 
     def stopandforget_robot(self, robot_name):
         """Permet d'arrêter le robot en question
@@ -229,10 +228,10 @@ class Backend:
         """
         if self.annu is not None:
             self.annu.remove_robot(robot_name)
-            if self.radio_started:
-                self.radio.send_cmd (rd.KILL_CMD.format (robot_name))
-            self.widget.UpdateTrigger.emit([])
-            self.widget.MapTrigger.emit([])
+        if self.radio_started:
+            self.radio.send_cmd (rd.KILL_CMD.format (robot_name))
+        self.widget.UpdateTrigger.emit([])
+        self.widget.MapTrigger.emit([])
 
     def stop_robot(self, robot_name):
         """Arrête un robot"""
@@ -260,23 +259,23 @@ class Backend:
                 - [1]: y
                 - [2]: theta (si non spécifié, mettre à None)
         """
-        if self.annu is not None:
-            if self.annu.check_robot(rid) and self.radio_started:
-                if self.annu.find (rid) is not None :
-                    if  self.annu.find (rid).isStopped :
-                        self.annu.find (rid).isStopped = False
-                if pos[2] is None:
-                    self.radio.send_cmd (rd.POS_CMD.format (rid, pos[0], pos[1]))
-                else:
-                    self.radio.send_cmd (rd.POS_ORIENT_CMD.format (rid, pos[0],
-                                                                    pos[1], pos[2]*3.141592654/180))
 
-    def send_speed_cmd (self, rid, v_x, v_y, v_theta):
-        """Envoi de commande de vitesse au robot"""
-        if self.radio_started and self.annu is not None:
+        if self.annu is not None and self.annu.check_robot(rid) and self.radio_started:
             if self.annu.find (rid) is not None :
                 if  self.annu.find (rid).isStopped :
                     self.annu.find (rid).isStopped = False
+        if pos[2] is None:
+            self.radio.send_cmd (rd.POS_CMD.format (rid, pos[0], pos[1]))
+        else:
+            self.radio.send_cmd (rd.POS_ORIENT_CMD.format (rid, pos[0],
+                                                            pos[1], pos[2]*3.141592654/180))
+
+    def send_speed_cmd (self, rid, v_x, v_y, v_theta):
+        """Envoi de commande de vitesse au robot"""
+        if self.annu.find (rid) is not None and self.annu is not None:
+            if self.annu.find (rid).isStopped :
+                self.annu.find (rid).isStopped = False
+        if self.radio_started:
             self.radio.send_cmd (rd.SPEED_CMD.format (rid, v_x, v_y, v_theta*3.141592654/180))
 
     def send_descr_cmd (self, rid):
