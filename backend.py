@@ -147,31 +147,32 @@ class Backend:
                 step (str), droits (str), unit (str)] (list)"""
         rid, aid, minv, maxv = liste [0], liste [1], liste [2], liste [3]
         step, droits, unit = liste [4], liste [5], liste [6]
-        if droits == 'RW':
-            binaire = False
-            if float (minv) + float (step) >= float (maxv) :
-                binaire = True
-            if self.annu.find(rid,aid) is not None :
-                valeur = self.annu.find(rid,aid).get_state()[0]
-                self.annu.find(rid,aid).set_state(valeur)
-            if binaire :
-                self.annu.find(rid).create_eqp(aid, "Binaire")
-            else :
-                self.annu.find(rid).create_eqp(aid, "Actionneur", float(minv), float(maxv),
-                                                 float(step), unit)
-        elif droits == 'READ':
-            add = False
-            if not self.annu.find (rid).check_eqp (aid):
-                add, val = True, None
-                if add:
-                    self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
-                    self.annu.find (rid, aid).set_state (val)
-            elif self.annu.find (rid, aid).get_type () is not dsp.DisplayActionneur :
-                add, val = True, self.annu.find (rid, aid).get_state() [0]
-                if add:
-                    self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
-                    self.annu.find (rid, aid).set_state (val)
-        self.widget.UpdateTrigger.emit([])
+        if self.annu is not None:
+            if droits == 'RW':
+                binaire = False
+                if float (minv) + float (step) >= float (maxv) :
+                    binaire = True
+                if self.annu.find(rid,aid) is not None :
+                    valeur = self.annu.find(rid,aid).get_state()[0]
+                    self.annu.find(rid,aid).set_state(valeur)
+                if binaire :
+                    self.annu.find(rid).create_eqp(aid, "Binaire")
+                else :
+                    self.annu.find(rid).create_eqp(aid, "Actionneur", float(minv), float(maxv),
+                                                    float(step), unit)
+            elif droits == 'READ':
+                add = False
+                if not self.annu.find (rid).check_eqp (aid):
+                    add, val = True, None
+                    if add:
+                        self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
+                        self.annu.find (rid, aid).set_state (val)
+                elif self.annu.find (rid, aid).get_type () is not dsp.DisplayActionneur :
+                    add, val = True, self.annu.find (rid, aid).get_state() [0]
+                    if add:
+                        self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
+                        self.annu.find (rid, aid).set_state (val)
+            self.widget.UpdateTrigger.emit([])
 
     def onCaptRegSignal (self, liste):
         """Fonction appelée automatiquement par on_captreg.
@@ -181,13 +182,14 @@ class Backend:
 
         Input : [rid (str), sid (str), valeur (str)] (list)"""
         rid, sid, valeur = liste [0], liste [1], liste [2]
-        if not self.annu.check_robot (rid):
-            self.track_robot (rid)
-            self.radio.send_cmd (rd.DESCR_CMD.format (rid))
-        if not self.annu.find (rid).check_eqp (sid):
-            self.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
-        self.annu.find (rid,sid).set_state (float (valeur))
-        self.widget.UpdateTrigger.emit([])
+        if self.annu is not None:
+            if not self.annu.check_robot (rid):
+                self.track_robot (rid)
+                self.radio.send_cmd (rd.DESCR_CMD.format (rid))
+            if not self.annu.find (rid).check_eqp (sid):
+                self.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
+            self.annu.find (rid,sid).set_state (float (valeur))
+            self.widget.UpdateTrigger.emit([])
 
     def track_robot(self, robot_name):
         """Invoqué lors de la demande de tracking d'un robot via l'interface graphique,
@@ -198,9 +200,10 @@ class Backend:
         Entrée:
             - robot_name (str): nom du robot à tracker
         """
-        self.annu.add_robot(dsp.DisplayRobot(self.annu, robot_name))
-        self.widget.NewRobotSignal.emit (robot_name)
-        self.widget.UpdateTrigger.emit([])
+        if self.annu is not None:
+            self.annu.add_robot(dsp.DisplayRobot(self.annu, robot_name))
+            self.widget.NewRobotSignal.emit (robot_name)
+            self.widget.UpdateTrigger.emit([])
 
     def emergency_stop_robot (self, rid):
         """Commande équivalente au boutton d'arrêt d'urgence.
@@ -209,11 +212,12 @@ class Backend:
 
         Entrée :
             _ rid (str) : nom du robot à stopper"""
-        if self.radio_started:
-            self.radio.send_cmd (rd.STOP_BUTTON_CMD.format (rid))
-        if self.annu.check_robot (rid):
-            self.annu.find (rid).isStopped = True
-        print ('Robot is stopped : {}'.format (self.annu.find (rid).isStopped))
+        if self.annu is not None:
+            if self.radio_started:
+                self.radio.send_cmd (rd.STOP_BUTTON_CMD.format (rid))
+            if self.annu.check_robot (rid):
+                self.annu.find (rid).isStopped = True
+            print ('Robot is stopped : {}'.format (self.annu.find (rid).isStopped))
 
     def stopandforget_robot(self, robot_name):
         """Permet d'arrêter le robot en question
@@ -223,11 +227,12 @@ class Backend:
         Entrée:
             - robot_name (str): nom du robot à stopper/oublier
         """
-        self.annu.remove_robot(robot_name)
-        if self.radio_started:
-            self.radio.send_cmd (rd.KILL_CMD.format (robot_name))
-        self.widget.UpdateTrigger.emit([])
-        self.widget.MapTrigger.emit([])
+        if self.annu is not None:
+            self.annu.remove_robot(robot_name)
+            if self.radio_started:
+                self.radio.send_cmd (rd.KILL_CMD.format (robot_name))
+            self.widget.UpdateTrigger.emit([])
+            self.widget.MapTrigger.emit([])
 
     def stop_robot(self, robot_name):
         """Arrête un robot"""
@@ -240,9 +245,10 @@ class Backend:
         Entrée:
             - robot_name (str): nom du robot
         """
-        self.annu.remove_robot(robot_name)
-        self.widget.UpdateTrigger.emit([])
-        self.widget.MapTrigger.emit([])
+        if self.annu is not None:
+            self.annu.remove_robot(robot_name)
+            self.widget.UpdateTrigger.emit([])
+            self.widget.MapTrigger.emit([])
 
     def sendposcmd_robot(self, rid, pos):
         """Envoie une commande de position au robot désigné
@@ -254,25 +260,26 @@ class Backend:
                 - [1]: y
                 - [2]: theta (si non spécifié, mettre à None)
         """
-        if self.annu.check_robot(rid) and self.radio_started:
-            if  self.annu.find (rid).isStopped :
-                self.annu.find (rid).isStopped = False
-            if pos[2] is None:
-                self.radio.send_cmd (rd.POS_CMD.format (rid, pos[0], pos[1]))
-            else:
-                self.radio.send_cmd (rd.POS_ORIENT_CMD.format (rid, pos[0],
-                                                                pos[1], pos[2]*3.141592654/180))
+        if self.annu is not None:
+            if self.annu.check_robot(rid) and self.radio_started:
+                if  self.annu.find (rid).isStopped :
+                    self.annu.find (rid).isStopped = False
+                if pos[2] is None:
+                    self.radio.send_cmd (rd.POS_CMD.format (rid, pos[0], pos[1]))
+                else:
+                    self.radio.send_cmd (rd.POS_ORIENT_CMD.format (rid, pos[0],
+                                                                    pos[1], pos[2]*3.141592654/180))
 
     def send_speed_cmd (self, rid, v_x, v_y, v_theta):
         """Envoi de commande de vitesse au robot"""
-        if self.radio_started :
+        if self.radio_started and self.annu is not None:
             if  self.annu.find (rid).isStopped :
                 self.annu.find (rid).isStopped = False
             self.radio.send_cmd (rd.SPEED_CMD.format (rid, v_x, v_y, v_theta*3.141592654/180))
 
     def send_descr_cmd (self, rid):
         """Envoi de demande de descritpion au robot"""
-        if self.radio_started :
+        if self.radio_started and self.annu is not None:
             self.radio.send_cmd (rd.DESCR_CMD.format (rid))
 
     def sendeqpcmd(self, rid, eqp_name, state):
@@ -284,7 +291,7 @@ class Backend:
             - eqp_name (str): nom de l'équipement
             - state (variable): l'état souhaité (se reférer au type d'equipement)
         """
-        if self.annu.find(rid) and self.annu.find(rid, eqp_name):
+        if self.annu is not None and self.annu.find(rid) and self.annu.find(rid, eqp_name):
             if  self.annu.find (rid).isStopped :
                 self.annu.find (rid).isStopped = False
             #self.annu.find(rid, eqp_name).updt_cmd() (déjà fait dans display)
@@ -296,7 +303,8 @@ class Backend:
         Sortie:
             - list of (str): les noms des robots
         """
-        return self.annu.get_all_robots()
+        if self.annu is not None:
+            return self.annu.get_all_robots()
 
     def getdata_robot(self, robot_name):
         """Renvoie toutes les informations connues sur le robot
@@ -310,10 +318,11 @@ class Backend:
                 - [1] eqps (list of str): liste des noms des équipements attachés au robot
                 - [2] last_updt_pos (float): le timestamp de dernière mise à jour de la position
         """
-        rbt = self.annu.find(robot_name)
-        pos = rbt.get_pos()
-        eqps = rbt.get_all_eqp()
-        return (pos, eqps, rbt.last_updt_pos)
+        if self.annu is not None:
+            rbt = self.annu.find(robot_name)
+            pos = rbt.get_pos()
+            eqps = rbt.get_all_eqp()
+            return (pos, eqps, rbt.last_updt_pos)
 
     def getdata_eqp(self, robot_name, eqp_name):
         """Renvoie toutes les informations sur un équipement
@@ -333,16 +342,17 @@ class Backend:
                     le timestamp de la dernière commande envoyée par l'user
                 - [4] eqp_unit (str): le type de l'équipement
         """
-        eqp = self.annu.find(robot_name, eqp_name)
-        eqp_type = eqp.get_type()
-        eqp_state = eqp.get_state()
-        eqp_last_updt = eqp.get_last_updt()
-        if eqp_type in (dsp.DisplayActionneur, dsp.DisplayBinaire):
-            eqp_last_cmd = eqp.get_last_cmd()
-        else:
-            eqp_last_cmd = None
-        eqp_unit = eqp.get_unit()
-        return (eqp_type, eqp_state, eqp_last_updt, eqp_last_cmd, eqp_unit)
+        if self.annu is not None:
+            eqp = self.annu.find(robot_name, eqp_name)
+            eqp_type = eqp.get_type()
+            eqp_state = eqp.get_state()
+            eqp_last_updt = eqp.get_last_updt()
+            if eqp_type in (dsp.DisplayActionneur, dsp.DisplayBinaire):
+                eqp_last_cmd = eqp.get_last_cmd()
+            else:
+                eqp_last_cmd = None
+            eqp_unit = eqp.get_unit()
+            return (eqp_type, eqp_state, eqp_last_updt, eqp_last_cmd, eqp_unit)
 
     def record(self, flag, path = None):
         """Permet de déclencher/arrêter l'enregistrement des messages depuis l'interface
