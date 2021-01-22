@@ -32,6 +32,8 @@ class Lecteur :
     def readMsg(self):
         if len (self.data) == 0 :
             self.timer.timeout.disconnect ()
+            self.window.button_play.setChecked (False)
+            self.window.button_play.setStyleSheet ("background-color: lightgrey")
             self.reading = False
         else:
             line = self.data.pop (-1)
@@ -40,7 +42,6 @@ class Lecteur :
                 if len (self.data)>0:
                     self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
                     self.window.playback_sgnl.emit([1, len(self.data), 1])
-                timestamp = self.heureDebut + int (words [0])/1000
                 if words [2]== 'PosReport':
                     self.window.backend.radio.on_posreg ("Lecteur",words [3], words [4], words [5], words [6])
                 elif words [2] == "ActuatorReport":
@@ -68,40 +69,46 @@ class Lecteur :
 
     def readCmd (self):
         if len (self.data) == 0:
-            self.timer.timeout.disconnect (self.readCmd)
+            self.timer.timeout.disconnect ()
+            self.window.button_play.setChecked (False)
+            self.window.button_play.setStyleSheet ("background-color: lightgrey")
             self.reading = False
             self.window.playback_sgnl.emit([-1, 0, 0])
         else :
-            #try :
-            words = self.data.pop (-1).split()
-            if len (self.data)>0:
-                self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
-                self.window.playback_sgnl.emit([1, len(self.data), 0])
-            if words [1] in ('PosCmd', 'PosCmdOrient'):
-                self.window.backend.sendposcmd_robot (words[2],(words[3],words[4],
-                    (float (words[5]) if len (words) == 6 else None)))
-            elif words [1] == 'Shutdown' :
-                self.window.backend.stopandforget_robot (words [2])
-            elif words [1] == "Emergency" :
-                self.window.backend.emergency_stop_robot (words [2])
-            elif words [1] == "ActuatorsRequest":
-                self.window.backend.send_descr_cmd (words [2])
-            elif words [1] == "SpeedCmd":
-                self.window.backend.send_speed_cmd (words [2], words [3], words [4], float (words [5]))
-            elif words [1] == "ActuatorCmd" :
-                self.window.backend.sendeqpcmd (words [2], words [3], words [4])
-            #except Exception:
-            #    line = self.data.pop (-1)
-            #    print ("La ligne [{}] pose un problème.".format (line))
-            #    self.timer.start (1)
+            line = self.data.pop (-1)
+            try :
+                words = line.split()
+                if len (self.data)>0:
+                    self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
+                    self.window.playback_sgnl.emit([1, len(self.data), 0])
+                if words [1] in ('PosCmd', 'PosCmdOrient'):
+                    self.window.backend.sendposcmd_robot (words[2],(words[3],words[4],
+                        (float (words[5]) if len (words) == 6 else None)))
+                elif words [1] == 'Shutdown' :
+                    self.window.backend.stopandforget_robot (words [2])
+                elif words [1] == "Emergency" :
+                    self.window.backend.emergency_stop_robot (words [2])
+                elif words [1] == "ActuatorsRequest":
+                    self.window.backend.send_descr_cmd (words [2])
+                elif words [1] == "SpeedCmd":
+                    self.window.backend.send_speed_cmd (words [2], words [3], words [4], float (words [5]))
+                elif words [1] == "ActuatorCmd" :
+                    self.window.backend.sendeqpcmd (words [2], words [3], words [4])
+            except Exception:
+                print ("La ligne [{}] pose un problème.".format (line))
+                self.timer.start (1)
 
     def onPlayButton (self):
         path = self.window.settings_dict["Enregistrement/Playback (Dernière Lecture)"]
         if path not in (None, ""):
             if "essages" in path :
+                self.window.button_play.setChecked (True)
+                self.window.button_play.setStyleSheet ("background-color: red")
                 self.readMessages (path)
                 self.window.playback_sgnl.emit([0, 0, 1])
             elif "ommand" in path :
+                self.window.button_play.setChecked (True)
+                self.window.button_play.setStyleSheet ("background-color: red")
                 self.readCommands (path)
                 self.window.playback_sgnl.emit([0, 0, 0])
 
