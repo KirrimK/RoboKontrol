@@ -11,11 +11,11 @@ import display as dsp
 import externals
 import lecture_fichiers_enregistres as lect
 
-WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;border-radius: 5px} "\
-               "QProgressBar{background-color : grey;border: 2px solid dimgray;border-radius: 5px}" \
-               "QPushButton{border: 1px solid rgb(150,150,150)}"\
+WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;border-radius: 2px} "\
+               "QProgressBar{background-color : grey;border: 1px solid dimgray;border-radius: 2px}" \
+               "QPushButton{border: 1px solid rgb(150,150,150);border-radius: 2px}" \
                "QPushButton:hover{background-color: rgb(180,180,180); border: 1px solid rgb(130,130,130)}"\
-               "QPushButton:pressed{background-color: rgb(150,150,150); border: 1px solid rgb(130,130,130)}"
+               "QPushButton:pressed{background-color: rgb(150,150,150); border: 1px solid rgb(130,130,130)}" \
                
 BUTTON_ON = "QPushButton{background-color: rgb(180,0,0); border: 1px solid rgb(100,0,0)}"
 BUTTON_OFF = ""
@@ -240,6 +240,7 @@ class Window(QMainWindow):
             externals.set_settings(self.settings_dict)
 
         update_btn = QPushButton("Sauvegarder")
+        update_btn.setMinimumSize(16777215, 25)
         setting.layout.addWidget(update_btn)
         update_btn.clicked.connect(updt_settings)
         update_btn.clicked.connect(self.act_settings)
