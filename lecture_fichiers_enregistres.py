@@ -41,6 +41,7 @@ class Lecteur :
             words = line.split ()
             if len (self.data)>0:
                 self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
+                self.window.playback_sgnl.emit([1, len(self.data), 1])
             else :
                 self.timer.timeout.disconnect ()
                 self.window.button_play.setChecked (False)
@@ -59,6 +60,7 @@ class Lecteur :
             print ("La ligne [{}] pose un problème.".format (line))
             self.timer.start (1)
 
+
     def readCommands (self, nomFichier):
         """Méthode utilisée pour lire un fichier contenant des commandes de l'interface."""
         if self.reading:
@@ -73,13 +75,13 @@ class Lecteur :
             self.timer.start (tempsCommande)
 
     def readCmd (self):
-        """Fonction """
-        
+        """Méthode appelée pour envoyer la dernière commande de self.data"""
         line = self.data.pop (-1)
         try :
             words = line.split()
             if len (self.data)>0:
                 self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
+                self.window.playback_sgnl.emit([1, len(self.data), 0])
             else:
                 self.timer.timeout.disconnect ()
                 self.window.button_play.setChecked (False)
@@ -103,24 +105,29 @@ class Lecteur :
             self.timer.start (1)
 
     def onPlayButton (self):
+        """Message appelé après un appui sur le bouton play. Appelle la bonne fonction de lecture de fichier."""
         path = self.window.settings_dict["Enregistrement/Playback (Dernière Lecture)"]
         if path not in (None, ""):
             if "essages" in path :
                 self.window.button_play.setChecked (True)
                 self.window.button_play.setStyleSheet ("background-color: red")
                 self.readMessages (path)
+                self.window.playback_sgnl.emit([0, 0, 1])
             elif "ommand" in path :
                 self.window.button_play.setChecked (True)
                 self.window.button_play.setStyleSheet ("background-color: red")
                 self.readCommands (path)
+                self.window.playback_sgnl.emit([0, 0, 0])
 
     def onStopButton (self):
         if self.reading == "MSG":
             self.timer.timeout.disconnect ()
         elif self.reading == "CMD":
-            self.timer.timeout.disconnect ()
+            self.timer.timeout.disconnect ()     
+        self.window.playback_sgnl.emit([-1, 0, 0])
         self.reading = False
 
     def onPauseButton (self):
         self.pausedTimeSave = self.timer.remainingTime ()
+        self.window.playback_sgnl.emit([-2, 0, 0])
         self.timer.stop ()

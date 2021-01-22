@@ -11,8 +11,8 @@ import display as dsp
 import externals
 import lecture_fichiers_enregistres as lect
 
-WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 2px solid rgb(113, 113, 113);"\
-                "border-width: 2px; border-radius: 5px;  color: rgb(255, 255, 255)} "
+WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;border-radius: 5px} "\
+               "QProgressBar{background-color : grey;border: 2px solid dimgray;border-radius: 5px} "\
 
 QSIZE = QSize(100, 30)
 QSIZE_BIG = QSize(160, 30)
@@ -24,6 +24,8 @@ class Window(QMainWindow):
     # Création du signal de mise à jour de la liste des robots présents
     list_robot_changed_signal = pyqtSignal(list)
 
+    playback_sgnl = pyqtSignal(list)
+
     def __init__(self, backend):
 
         super().__init__()
@@ -34,6 +36,8 @@ class Window(QMainWindow):
         # Récupération de l'objet backend
         self.backend = backend
         self.backend.launchQt()
+
+        self.record_status = -1
 
         #Création du lecteur de fichiers
         self.lecteur = lect.Lecteur (self)
@@ -89,7 +93,7 @@ class Window(QMainWindow):
 
     def ui_setup_menu_area(self):
         """ Création de la zone menu"""
-        self.menu_area.setStyleSheet("QGroupBox  {border: 0px;}")
+        self.menu_area.setStyleSheet("QGroupBox{border: 0px;}")
 
         # Création du bouton record
         self.button_record.setFixedSize(QSIZE)
@@ -138,7 +142,38 @@ class Window(QMainWindow):
         self.button_help.clicked.connect(show_help)
         self.layout_menu.addWidget(self.button_help)
 
-        # self.layout_window.addWidget(self.menu_area)
+        self.backend.widget.record_signal.connect(self.updt_status_record)
+        self.playback_sgnl.connect(self.updt_status_playback)
+
+    def updt_status_record(self, state):
+        """Met à jour la barre de status quand enregistrement en cours"""
+        if state == -1:
+            self.statusbar.showMessage("Enregistrement arrêté et sauvegardé sur disque.")
+            self.record_status = -1
+        elif state == -2:
+            self.statusbar.showMessage("Enregistrement arrêté et tampon supprimé.")
+            self.record_status = -1
+        elif state == 0:
+            self.statusbar.showMessage("Enregistrement démarré.")
+            self.record_status = 0
+        elif state == 1:
+            self.record_status += 1
+            self.statusbar.showMessage("Enregistrement: {} reçus.".format(self.record_status))
+
+    def updt_status_playback(self, args):
+        """Met à jour la barre de status quand lecture en cours"""
+        if args[0] == -1:
+            self.statusbar.showMessage("Lecture arrêtée")
+        elif args[0] == -2:
+            self.statusbar.showMessage("Lecture en pause")
+        elif args[0] == 0:
+            if args[2] == 1:
+                self.statusbar.showMessage("Lecture de messages démarrée.")
+            else:
+                self.statusbar.showMessage("Lecture de commandes démarrée.")
+        else:
+            msg_mot = "messages restants" if args[2] == 1 else "commandes restantes"
+            self.statusbar.showMessage("Lecture: {} {}".format(args[1], msg_mot))
 
     def ui_setup_statusbar(self):
         """ Configure la bar d'état """
