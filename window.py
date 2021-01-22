@@ -80,6 +80,8 @@ class Window(QMainWindow):
 
         self.ui_setup_window()
 
+        self.backend.annu = self.inspecteur
+
         self.settings_dict = externals.get_settings()
         self.act_settings()
 
@@ -331,6 +333,5 @@ def main(backend):
     """ Création la fenêtre principale """
     app = QApplication(sys.argv)
     window = Window(backend)
-    window.backend.annu = window.inspecteur
     window.show()
     sys.exit(app.exec_())
