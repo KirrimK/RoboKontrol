@@ -4,7 +4,7 @@ from time import time
 from PyQt5.QtCore import QTimer
 
 BUTTON_ON = "QPushButton{background-color: rgb(180,0,0); border: 1px solid rgb(100,0,0)}"
-BUTTON_OFF = "QPushButton{background-color: rgb(220,220,220); border: 1px solid rgb(170,170,170);}"
+BUTTON_OFF = ""
 
 class Lecteur :
     """Classe permettant la lecture des fichiers. S'initialise avec la fenêtre."""

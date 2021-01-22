@@ -13,12 +13,12 @@ import lecture_fichiers_enregistres as lect
 
 WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;border-radius: 5px} "\
                "QProgressBar{background-color : grey;border: 2px solid dimgray;border-radius: 5px}" \
-               "QPushButton{background-color: rgb(220,220,220); border: 1px solid rgb(150,150,150)}"\
+               "QPushButton{border: 1px solid rgb(150,150,150)}"\
                "QPushButton:hover{background-color: rgb(180,180,180); border: 1px solid rgb(130,130,130)}"\
                "QPushButton:pressed{background-color: rgb(150,150,150); border: 1px solid rgb(130,130,130)}"
                
 BUTTON_ON = "QPushButton{background-color: rgb(180,0,0); border: 1px solid rgb(100,0,0)}"
-BUTTON_OFF = "QPushButton{background-color: rgb(220,220,220); border: 1px solid rgb(170,170,170);}"
+BUTTON_OFF = ""
 
 QSIZE = QSize(100, 30)
 QSIZE_BIG = QSize(160, 30)
