@@ -54,7 +54,7 @@ class Lecteur :
                 self.window.backend.radio.on_captreg ("Lecteur",words [3], words [4], words [5])
             elif words[2] == 'ActuatorDecl':
                 self.window.backend.radio.on_actudecl ("Lecteur",words [3], words [4], words [5], words [6],
-                words [7],words [8])
+                words [7],words [8], words[9])
             elif words [1] == 'Interface':
                 if words [2] in ('PosCmd', 'PosCmdOrient'):
                     rid, x, y, theta = words [3], words [4], words [5], (words [6] if len (words)==7 else None)
