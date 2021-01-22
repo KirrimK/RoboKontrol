@@ -17,7 +17,7 @@ class Lecteur :
     def readMessages (self, nomFichier) :
         """Méthode utilisée pour lire les fichiers contenants des messages, 
         et executer les messages comme s'ils avaient envoyés par Ivy.
-        /!\ Les commandes de l'interface ne seront pas envoyées avec ce mode."""
+        /!\\ Les commandes de l'interface ne seront pas envoyées avec ce mode."""
         if not self.reading :
             self.reading = "MSG"
             with open (nomFichier, 'r') as f :
@@ -34,7 +34,7 @@ class Lecteur :
 
     def readMsg(self):
         """Méthode utilisée pour lire le message à la fin de self.data
-        /!\ Si ce message est une commande de l'interface, elle ne sera pas envoyée."""
+        /!\\ Si ce message est une commande de l'interface, elle ne sera pas envoyée."""
         
         line = self.data.pop (-1)
         try:
@@ -120,6 +120,7 @@ class Lecteur :
                 self.window.playback_sgnl.emit([0, 0, 0])
 
     def onStopButton (self):
+        """Méthode appelée par un appui du bouton stop. Arrête la lecture du fichier."""
         if self.reading == "MSG":
             self.timer.timeout.disconnect ()
         elif self.reading == "CMD":
@@ -128,6 +129,7 @@ class Lecteur :
         self.reading = False
 
     def onPauseButton (self):
+        """Méthode appelée par un appui du bouton pause. Met la lecture du fichier en pause."""
         self.pausedTimeSave = self.timer.remainingTime ()
         self.window.playback_sgnl.emit([-2, 0, 0])
         self.timer.stop ()
