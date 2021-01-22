@@ -102,11 +102,13 @@ class Window(QMainWindow):
         self.button_record.setCheckable(True)
         self.layout_menu.addWidget(self.button_record)
         self.button_record.clicked.connect(self.record)
+        self.button_record.setStyleSheet ("background-color: lightgrey")
 
         # Création du bouton play
         self.button_play.setFixedSize(QSIZE)
         self.button_play.setText("|>")
         self.button_play.setCheckable (True)
+        self.button_play.setStyleSheet ("background-color: lightgrey")
         self.button_play.clicked.connect(self.show_play_dialog)
         self.layout_menu.addWidget(self.button_play)
 
@@ -114,18 +116,21 @@ class Window(QMainWindow):
         self.button_pause.setFixedSize(QSIZE)
         self.button_pause.setText("||")
         self.button_pause.setCheckable (True)
+        self.button_pause.setStyleSheet ("background-color: lightgrey")
         self.button_pause.clicked.connect (self.onPauseButton)
         self.layout_menu.addWidget(self.button_pause)
 
         # Création du bouton arrêt
         self.button_stop.setFixedSize(QSIZE)
         self.button_stop.setText("Stop")
+        self.button_stop.setStyleSheet ("background-color: lightgrey")
         self.button_stop.clicked.connect(self.on_stoprecord_button)
         self.layout_menu.addWidget(self.button_stop)
 
         # Création du bouton sauvegarder
         self.button_save.setFixedSize(QSIZE)
         self.button_save.setText("Save")
+        self.button_save.setStyleSheet ("background-color: lightgrey")
         self.button_save.clicked.connect(self.on_save_button)
         self.layout_menu.addWidget(self.button_save)
 
