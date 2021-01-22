@@ -24,7 +24,7 @@ class Lecteur :
             self.data.reverse ()
             print (self.data[-1])
             tempsMessage = int (self.data [-1].split ()[0])
-            self.timer.timeout.connect (lambda : self.readMsg())
+            self.timer.timeout.connect (self.readMsg)
             self.timer.start (tempsMessage)
         else :
             self.timer.start (self.pausedTimeSave)
@@ -51,7 +51,7 @@ class Lecteur :
                     words [7],words [8])
                 elif words [1] == 'Interface':
                     print (' '.join (words [2:]))
-            except Exception :
+            except Exception:
                 print ("La ligne [{}] pose un problème.".format (line))
                 self.timer.start (1)
 

@@ -8,8 +8,8 @@ from PyQt5.QtCore import pyqtSlot, Qt, QSize, QTimer
 import annuaire as anr
 
 EMERGENCY_BUTTON = "QPushButton{background-color: rgb(180,0,0); border: 1px solid rgb(100,0,0)}" \
-                    "QPushButton:hover{background-color: rgb(200,0,0);border: 1px solid rgb(60,0,0)}" \
-                    "QPushButton:pressed{background-color: red;border: 1px solid rgb(60,0,0)}" \
+                "QPushButton:hover{background-color: rgb(200,0,0);border: 1px solid rgb(60,0,0)}" \
+                "QPushButton:pressed{background-color: red;border: 1px solid rgb(60,0,0)}" \
 
 # QtWidgets size
 QLCD_SIZE1, QLCD_SIZE2 = QSize(60, 20), QSize(80, 20)
@@ -29,7 +29,7 @@ class DisplayAnnuaire(anr.Annuaire, QTabWidget):
                 lambda rid: self.setCurrentWidget(self.robots[rid]))
         else:
             self.backend = None
-        self.currentChanged.connect(lambda index: self.update_selected_robot(index))
+        self.currentChanged.connect(self.update_selected_robot)
         self.ui_setup_tab()
 
     def update_selected_robot(self, index):

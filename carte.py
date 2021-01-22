@@ -56,7 +56,7 @@ class MapView(QtWidgets.QWidget):
         self.setMouseTracking(True)
         self.key_binding={}
 
-        self.selected_robot_signal.connect(lambda rid: self.select_robot(rid))
+        self.selected_robot_signal.connect(self.select_robot)
 
         self.setFocusPolicy(Qt.StrongFocus)
 
@@ -72,9 +72,15 @@ class MapView(QtWidgets.QWidget):
         #limitation des repaints à 13 par seconde
         try:
             max_period = 1/float(self.parent.settings_dict["Carte (FPS Max)"])
-        except Exception as exc:
+            if max_period < 0:
+                raise ValueError
+        except ZeroDivisionError as exc:
             print(exc)
-            print("Valeur de FPS Max invalide. Mise à 10 FPS par défaut.")
+            print("Valeur de FPS Max invalide (zéro). Mise à 10 FPS par défaut.")
+            max_period = 0.1
+        except ValueError as exc:
+            print(exc)
+            print("Valeur de FPS Max invalide (négative). Mise à 10 FPS par défaut.")
             max_period = 0.1
 
         if time() - self.last_repaint < max_period:
@@ -289,15 +295,12 @@ class MapView(QtWidgets.QWidget):
             if self.selected_robot is not None:
                 if sqrt((pos_x - opos_x)**2 + (pos_y - opos_y)**2) > 0:
                     #le clic n'était pas statique
-                    try:
-                        angle = (atan(-(pos_y - opos_y)/(pos_x - opos_x))*360/(2*pi) +
-                                    (180 if (pos_x - opos_x) < 0 else 0))
-                        cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], angle]
-                        self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
-                        qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
-                        qle_poscmd.setText("{} : {} : {}".format(int(cmd[0]), int(cmd[1]), int(cmd[2])))
-                    except Exception as exc:
-                        print(exc) #surement une div/zéro ou autre
+                    angle = (atan(-(pos_y - opos_y)/(pos_x - opos_x))*360/(2*pi) +
+                                (180 if (pos_x - opos_x) < 0 else 0))
+                    cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], angle]
+                    self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
+                    qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
+                    qle_poscmd.setText("{} : {} : {}".format(int(cmd[0]), int(cmd[1]), int(cmd[2])))
                 else:
                     cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], None]
                     self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)

@@ -21,9 +21,9 @@ class WidgetBackend (QWidget):
     def __init__ (self, parent_backend):
         super().__init__()
         self.backend = parent_backend
-        self.position_updated.connect (lambda liste : self.backend.onPosRegSignal (liste))
-        self.equipement_updated.connect (lambda liste : self.backend.onCaptRegSignal (liste))
-        self.ActuDeclSignal.connect (lambda liste : self.backend.onActuDeclSignal (liste))
+        self.position_updated.connect (self.backend.onPosRegSignal)
+        self.equipement_updated.connect (self.backend.onCaptRegSignal)
+        self.ActuDeclSignal.connect (self.backend.onActuDeclSignal)
 
 class Backend:
     """Un objet faisant le lien entre un Annuaire (module annuaire)
@@ -53,7 +53,7 @@ class Backend:
             self.attach_radio(radio)
         self.widget = None
 
-    def launchQt (self):
+    def launch_qt (self):
         """Méthode appelée après le lancement de l'application
         Les Widgets ne peuvent exister que s'il y a une application Qt
 
@@ -163,11 +163,14 @@ class Backend:
             add = False
             if not self.annu.find (rid).check_eqp (aid):
                 add, val = True, None
+                if add:
+                    self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
+                    self.annu.find (rid, aid).set_state (val)
             elif self.annu.find (rid, aid).get_type () is not dsp.DisplayActionneur :
                 add, val = True, self.annu.find (rid, aid).get_state() [0]
-            if add:
-                self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
-                self.annu.find (rid, aid).set_state (val)
+                if add:
+                    self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
+                    self.annu.find (rid, aid).set_state (val)
         self.widget.UpdateTrigger.emit([])
 
     def onCaptRegSignal (self, liste):
@@ -177,7 +180,7 @@ class Backend:
         Si le robot rid n'a pas de capteur sid, le capteur est ajouté.
 
         Input : [rid (str), sid (str), valeur (str)] (list)"""
-        rid, sid, valeur, last_update = liste [0], liste [1], liste [2], liste [3]
+        rid, sid, valeur = liste [0], liste [1], liste [2]
         if not self.annu.check_robot (rid):
             self.track_robot (rid)
             self.radio.send_cmd (rd.DESCR_CMD.format (rid))
@@ -260,13 +263,15 @@ class Backend:
                 self.radio.send_cmd (rd.POS_ORIENT_CMD.format (rid, pos[0],
                                                                 pos[1], pos[2]*3.141592654/180))
 
-    def send_speed_cmd (self, rid, Vx, Vy, Vtheta):
+    def send_speed_cmd (self, rid, v_x, v_y, v_theta):
+        """Envoi de commande de vitesse au robot"""
         if self.radio_started :
             if  self.annu.find (rid).isStopped :
                 self.annu.find (rid).isStopped = False
-            self.radio.send_cmd (rd.SPEED_CMD.format (rid, Vx, Vy, Vtheta*3.141592654/180))
+            self.radio.send_cmd (rd.SPEED_CMD.format (rid, v_x, v_y, v_theta*3.141592654/180))
 
     def send_descr_cmd (self, rid):
+        """Envoi de demande de descritpion au robot"""
         if self.radio_started :
             self.radio.send_cmd (rd.DESCR_CMD.format (rid))
 

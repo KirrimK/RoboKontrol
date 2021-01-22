@@ -11,8 +11,9 @@ import display as dsp
 import externals
 import lecture_fichiers_enregistres as lect
 
-WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;border-radius: 5px} "\
-               "QProgressBar{background-color : grey;border: 2px solid dimgray;border-radius: 5px} "\
+WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;"\
+            "border-radius: 5px} QProgressBar{background-color : grey;"\
+            "border: 2px solid dimgray;border-radius: 5px} "
 
 QSIZE = QSize(100, 30)
 QSIZE_BIG = QSize(160, 30)
@@ -35,7 +36,7 @@ class Window(QMainWindow):
 
         # Récupération de l'objet backend
         self.backend = backend
-        self.backend.launchQt()
+        self.backend.launch_qt()
 
         self.record_status = -1
 
@@ -288,6 +289,7 @@ class Window(QMainWindow):
 
     @pyqtSlot()
     def onPlayButton (self):
+        """Bouton play cliqué"""
         if self.button_pause.isChecked ():
             self.button_pause.setChecked (False)
             self.button_pause.setStyleSheet ("background-color: lightgrey")
@@ -295,6 +297,7 @@ class Window(QMainWindow):
 
     @pyqtSlot ()
     def onPauseButton (self):
+        """Bouton pause cliqué"""
         if self.button_play.isChecked ():
             self.button_play.setChecked (False)
             self.button_play.setStyleSheet ("background-color: lightgrey")
