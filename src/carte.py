@@ -272,8 +272,9 @@ class MapView(QtWidgets.QWidget):
         """Mise à jour de la speed command du ctrl clavier
         si une touche est modifiée"""
         ur_mult = 2 if self.keys[4] == 1 else 1
-        speed_ur = 0 + (ur_mult if self.keys[0] == 1 else 0) + (-ur_mult if self.keys[1] == 1 else 0)
-        speed_utheta = 0 + (360 / pi if self.keys[2] == 1 else 0) + (-360 / pi if self.keys[3] == 1 else 0)
+        tht_mlt = 360 / pi
+        speed_ur = (ur_mult if self.keys[0] else 0) + (-ur_mult if self.keys[1] else 0)
+        speed_utheta = (tht_mlt if self.keys[2] else 0) + (-tht_mlt if self.keys[3] else 0)
         self.parent.backend.send_speed_cmd(self.selected_robot, speed_ur, 0, speed_utheta)
 
     def mousePressEvent(self, event):
@@ -310,23 +311,22 @@ class MapView(QtWidgets.QWidget):
             old_pos = self.mouse_pos_init
             opos_x = old_pos.x()
             opos_y = old_pos.y()
-            if self.selected_robot is not None:
-                if sqrt((pos_x - opos_x)**2 + (pos_y - opos_y)**2) > 0:
-                    #le clic n'était pas statique
-                    try:
-                        angle = (atan(-(pos_y - opos_y)/(pos_x - opos_x))*360/(2*pi) +
-                                    (180 if (pos_x - opos_x) < 0 else 0))
-                        cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], angle]
-                        self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
-                        qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
-                        qle_poscmd.setText("{} : {} : {}".format(int(cmd[0]), int(cmd[1]), int(cmd[2])))
-                    except ZeroDivisionError as exc:
-                        print(exc)
-                else:
-                    cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], None]
+            diff_x = pos_x - opos_x
+            diff_y = pos_y - opos_y
+            if self.selected_robot is not None and sqrt((diff_x)**2 + (diff_y)**2) > 0:
+                #le clic n'était pas statique
+                if diff_x != 0: #évite division par zéro
+                    angle = (atan(-(diff_y)/(diff_x))*360/(2*pi) +
+                                (180 if (diff_x) < 0 else 0))
+                    cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], angle]
                     self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
                     qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
-                    qle_poscmd.setText("{} : {} : 000".format(int(cmd[0]), int(cmd[1])))
+                    qle_poscmd.setText("{} : {} : {}".format(int(cmd[0]), int(cmd[1]), int(cmd[2])))
+            else:
+                cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], None]
+                self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
+                qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
+                qle_poscmd.setText("{} : {} : 000".format(int(cmd[0]), int(cmd[1])))
 
     def mouseMoveEvent(self, event):
         """Quand la souris est bougée sur la fenêtre"""

@@ -4,7 +4,7 @@ import os
 import sys
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 from PyQt5.QtWidgets import QGroupBox, QPushButton, QSpacerItem, QStatusBar
-from PyQt5.QtWidgets import QDialog, QSizePolicy, QMessageBox, QFileDialog, QScrollArea
+from PyQt5.QtWidgets import QDialog, QSizePolicy, QFileDialog, QScrollArea
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QCheckBox
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon
@@ -13,11 +13,11 @@ import display as dsp
 import param_files
 import lecteur as lect
 
-WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;border-radius: 2px} "\
-               "QProgressBar{background-color : grey;border: 1px solid dimgray;border-radius: 2px}" \
-               "QPushButton{border: 1px solid rgb(150,150,150);border-radius: 2px}" \
-               "QPushButton:hover{background-color: rgb(180,180,180); border: 1px solid rgb(130,130,130)}"\
-               "QPushButton:pressed{background-color: rgb(150,150,150); border: 1px solid rgb(130,130,130)}" \
+WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;"\
+    "border-radius: 2px} QProgressBar{background-color : grey;border: 1px solid dimgray;"\
+    "border-radius: 2px} QPushButton{border: 1px solid rgb(150,150,150);border-radius: 2px}"\
+    "QPushButton:hover{background-color: rgb(180,180,180); border: 1px solid rgb(130,130,130)}"\
+    "QPushButton:pressed{background-color: rgb(150,150,150); border: 1px solid rgb(130,130,130)}"
 
 BUTTON_ON = "QPushButton{background-color: rgb(180,0,0); border: 1px solid rgb(100,0,0)}"
 BUTTON_OFF = ""

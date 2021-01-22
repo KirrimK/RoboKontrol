@@ -206,6 +206,8 @@ class Robot:
     - equipements (dict): liste des équipements connectés au robot
         - clé: nom (str)
         - valeur: equipement (Equipement)
+    - last_updt_pos (float): timestamp de dernière mise à jour de la position
+    - is_stopped (bool): le robot est-il en "arrêt d'urgence"?
 
     (passer les equipements lors de la construction sous forme de list)
     """

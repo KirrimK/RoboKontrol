@@ -43,7 +43,7 @@ class Lecteur :
             self.window.button_play.setStyleSheet ("")
             self.window.playback_sgnl.emit([-1, 0, 0])
             self.reading = False
-            return (None)
+            return None
         line = self.data.pop (-1)
         try:
             words = line.split ()
@@ -98,7 +98,7 @@ class Lecteur :
             self.window.button_play.setStyleSheet ("")
             self.window.playback_sgnl.emit([-1, 0, 0])
             self.reading = False
-            return (None)
+            return None
         line = self.data.pop (-1)
         try :
             words = line.split()
