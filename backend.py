@@ -180,7 +180,7 @@ class Backend:
             self.track_robot (rid)
             self.radio.send_cmd (rd.DESCR_CMD.format (rid))
         if not self.annu.find (rid).check_eqp (sid):
-            self.annu.find (rid).create_eqp (sid, "Capteur", -65536 , 65536, 1, None)
+            self.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
         self.annu.find (rid,sid).set_state (float (valeur))
         self.widget.UpdateTrigger.emit([])
 

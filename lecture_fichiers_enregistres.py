@@ -15,6 +15,9 @@ class Lecteur :
         self.heureDebut = None
 
     def readMessages (self, nomFichier) :
+        """Méthode utilisée pour lire les fichiers contenants des messages, 
+        et executer les messages comme s'ils avaient envoyés par Ivy.
+        /!\ Les commandes de l'interface ne seront pas envoyées avec ce mode."""
         if not self.reading :
             self.reading = "MSG"
             with open (nomFichier, 'r') as f :
@@ -30,31 +33,34 @@ class Lecteur :
             self.timer.start (self.pausedTimeSave)
 
     def readMsg(self):
-        if len (self.data) == 0 :
-            self.timer.timeout.disconnect ()
-            self.window.button_play.setChecked (False)
-            self.window.button_play.setStyleSheet ("background-color: lightgrey")
-            self.reading = False
-        else:
-            line = self.data.pop (-1)
-            try:
-                words = line.split ()
-                if len (self.data)>0:
-                    self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
-                if words [2]== 'PosReport':
-                    self.window.backend.radio.on_posreg ("Lecteur",words [3], words [4], words [5], words [6])
-                elif words [2] == "ActuatorReport":
-                    self.window.backend.radio.on_captreg ("Lecteur",words [3], words [4], words [5])
-                elif words[2] == 'ActuatorDecl':
-                    self.window.backend.radio.on_actudecl ("Lecteur",words [3], words [4], words [5], words [6],
-                    words [7],words [8])
-                elif words [1] == 'Interface':
-                    print (' '.join (words [2:]))
-            except Exception :
-                print ("La ligne [{}] pose un problème.".format (line))
-                self.timer.start (1)
+        """Méthode utilisée pour lire le message à la fin de self.data
+        /!\ Si ce message est une commande de l'interface, elle ne sera pas envoyée."""
+        
+        line = self.data.pop (-1)
+        try:
+            words = line.split ()
+            if len (self.data)>0:
+                self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
+            else :
+                self.timer.timeout.disconnect ()
+                self.window.button_play.setChecked (False)
+                self.window.button_play.setStyleSheet ("background-color: lightgrey")
+                self.reading = False
+            if words [2]== 'PosReport':
+                self.window.backend.radio.on_posreg ("Lecteur",words [3], words [4], words [5], words [6])
+            elif words [2] == "ActuatorReport":
+                self.window.backend.radio.on_captreg ("Lecteur",words [3], words [4], words [5])
+            elif words[2] == 'ActuatorDecl':
+                self.window.backend.radio.on_actudecl ("Lecteur",words [3], words [4], words [5], words [6],
+                words [7],words [8])
+            elif words [1] == 'Interface':
+                print (' '.join (words [2:]))
+        except Exception :
+            print ("La ligne [{}] pose un problème.".format (line))
+            self.timer.start (1)
 
     def readCommands (self, nomFichier):
+        """Méthode utilisée pour lire un fichier contenant des commandes de l'interface."""
         if self.reading:
             self.timer.start (self.pausedTimeSave)
         else :
@@ -67,33 +73,34 @@ class Lecteur :
             self.timer.start (tempsCommande)
 
     def readCmd (self):
-        if len (self.data) == 0:
-            self.timer.timeout.disconnect ()
-            self.window.button_play.setChecked (False)
-            self.window.button_play.setStyleSheet ("background-color: lightgrey")
-            self.reading = False
-        else :
-            line = self.data.pop (-1)
-            try :
-                words = line.split()
-                if len (self.data)>0:
-                    self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
-                if words [1] in ('PosCmd', 'PosCmdOrient'):
-                    self.window.backend.sendposcmd_robot (words[2],(words[3],words[4],
-                        (float (words[5]) if len (words) == 6 else None)))
-                elif words [1] == 'Shutdown' :
-                    self.window.backend.stopandforget_robot (words [2])
-                elif words [1] == "Emergency" :
-                    self.window.backend.emergency_stop_robot (words [2])
-                elif words [1] == "ActuatorsRequest":
-                    self.window.backend.send_descr_cmd (words [2])
-                elif words [1] == "SpeedCmd":
-                    self.window.backend.send_speed_cmd (words [2], words [3], words [4], float (words [5]))
-                elif words [1] == "ActuatorCmd" :
-                    self.window.backend.sendeqpcmd (words [2], words [3], words [4])
-            except Exception:
-                print ("La ligne [{}] pose un problème.".format (line))
-                self.timer.start (1)
+        """Fonction """
+        
+        line = self.data.pop (-1)
+        try :
+            words = line.split()
+            if len (self.data)>0:
+                self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
+            else:
+                self.timer.timeout.disconnect ()
+                self.window.button_play.setChecked (False)
+                self.window.button_play.setStyleSheet ("background-color: lightgrey")
+                self.reading = False
+            if words [1] in ('PosCmd', 'PosCmdOrient'):
+                self.window.backend.sendposcmd_robot (words[2],(words[3],words[4],
+                    (float (words[5]) if len (words) == 6 else None)))
+            elif words [1] == 'Shutdown' :
+                self.window.backend.stopandforget_robot (words [2])
+            elif words [1] == "Emergency" :
+                self.window.backend.emergency_stop_robot (words [2])
+            elif words [1] == "ActuatorsRequest":
+                self.window.backend.send_descr_cmd (words [2])
+            elif words [1] == "SpeedCmd":
+                self.window.backend.send_speed_cmd (words [2], words [3], words [4], float (words [5]))
+            elif words [1] == "ActuatorCmd" :
+                self.window.backend.sendeqpcmd (words [2], words [3], words [4])
+        except Exception:
+            print ("La ligne [{}] pose un problème.".format (line))
+            self.timer.start (1)
 
     def onPlayButton (self):
         path = self.window.settings_dict["Enregistrement/Playback (Dernière Lecture)"]
@@ -109,9 +116,9 @@ class Lecteur :
 
     def onStopButton (self):
         if self.reading == "MSG":
-            self.timer.disconnect ()
+            self.timer.timeout.disconnect ()
         elif self.reading == "CMD":
-            self.timer.disconnect ()
+            self.timer.timeout.disconnect ()
         self.reading = False
 
     def onPauseButton (self):
