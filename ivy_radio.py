@@ -22,11 +22,11 @@ STOP_BUTTON_CMD = "Emergency {}"
 KILL_CMD = "Shutdown {}"
 DESCR_CMD = "ActuatorsRequest {}"
 
-def temps (t, pt):
+def temps (tps, prem_tps):
     """Input : _timestamp (float) : donné par time ()
                     _ premier_timestamp : date du premier timestamp de la session d'enregistrement
         OutPut : str du temps en ms depuis le début de la session d'eregistrement"""
-    return str (int(1000 * (t-pt)))
+    return str (int(1000 * (tps - prem_tps)))
 
 def temps_deb (timestamp):
     """Input : t (float) : value given by time()
@@ -100,10 +100,9 @@ class Radio :
                 timestamp_deb = time()
                 with open ('{}messages{}.txt'.format (path, int (timestamp_deb)),'a') as fichier :
                     fichier.write ('{}\n\nTemps (ms)\tExpediteur\t\t\tMessage\n'.format (temps_deb (timestamp_deb)))
-                    for (i, ligne) in enumerate (self.msgs_buffer) :
-                        if i == 0:
-                            PremierTemps = ligne [0]
-                        fichier.write (temps (ligne[0], PremierTemps)+'\t\t'+ligne[1]+'\t\t'+ligne[2]+'\n')
+                    premier_temps = self.msgs_buffer[0][0]
+                    for ligne in self.msgs_buffer:
+                        fichier.write (temps (ligne[0], premier_temps)+'\t\t'+ligne[1]+'\t\t'+ligne[2]+'\n')
             if del_buffers :
                 self.msgs_buffer = []
         if 'cmds' in args :
@@ -115,10 +114,9 @@ class Radio :
                 tps = time ()
                 with open ('{}commandes{}.txt'.format (path, int(tps)),'a') as fichier :
                     fichier.write ('{}\n\nTemps (ms)\tCommande\n'.format (temps_deb(tps)))
-                    for (i,ligne) in self.cmds_buffer :
-                        if i == 0:
-                            PremierTemps = ligne [0]
-                        fichier.write (temps (ligne[0], PremierTemps)+'\t\t'+ligne[1]+'\n')
+                    premier_temps = self.msgs_buffer[0][0]
+                    for ligne in self.cmds_buffer:
+                        fichier.write (temps (ligne[0], premier_temps)+'\t\t'+ligne[1]+'\n')
             if del_buffers :
                 self.cmds_buffer = []
      #REACTIONS AUX REGEXPS
@@ -129,6 +127,7 @@ class Radio :
         if self.record_msgs :
             message = "PosReport {} {} {} {}".format (args[0], args[1], args [2], args [3])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
+            self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
             self.backend.widget.position_updated.emit ([i for i in args]+[time()])
         else:
@@ -141,6 +140,7 @@ class Radio :
             message = "ActuatorDecl {} {} {} {} {} {} {}".format (args [0], args [1], args [2], args [3],
                         args [4], args [5], args [6])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
+            self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
             self.backend.widget.ActuDeclSignal.emit ([i for i in args])
         else :
@@ -152,6 +152,7 @@ class Radio :
         if self.record_msgs :
             message = "ActuatorReport {} {} {}".format (args[0], args [1], args [2])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
+            self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
             self.backend.widget.equipement_updated.emit ([i for i in args]+[time()])
         else :
@@ -164,6 +165,8 @@ class Radio :
             self.cmds_buffer.append ((time(),cmd))
         if self.record_msgs :
             self.msgs_buffer.append ((time(),'Interface',cmd))
+        if self.record_cmds or self.record_msgs:
+            self.backend.widget.record_signal.emit(1)
         IvySendMsg (cmd)
 
 

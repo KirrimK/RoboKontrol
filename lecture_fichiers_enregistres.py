@@ -16,13 +16,13 @@ class Lecteur :
         self.heureDebut = None
 
     def readMessages (self, nomFichier) :
-        """Méthode utilisée pour lire les fichiers contenants des messages, 
+        """Méthode utilisée pour lire les fichiers contenants des messages,
         et executer les messages comme s'ils avaient envoyés par Ivy.
         /!\\ Les commandes de l'interface ne seront pas envoyées avec ce mode."""
         if not self.reading :
             self.reading = "MSG"
-            with open (nomFichier, 'r') as f :
-                self.data = f.readlines ()
+            with open (nomFichier, 'r') as file :
+                self.data = file.readlines ()
             self.heureDebut = time ()
             self.data = self.data [3:]
             self.data.reverse ()
@@ -70,12 +70,11 @@ class Lecteur :
                 elif words [2] == "ActuatorCmd":
                     rid, sid, valeur = words [3], words [4], words [5]
                 eqp_display = self.window.inspecteur.find (rid,sid)
-                if eqp_display is not None and type (eqp_display) == ACT :
+                if eqp_display is not None and isinstance(eqp_display, ACT):
                     eqp_display.updt_cmd (valeur)
         except Exception :
             print ("La ligne [{}] pose un problème.".format (line))
             self.timer.start (1)
-
 
     def readCommands (self, nomFichier):
         """Méthode utilisée pour lire un fichier contenant des commandes de l'interface."""
@@ -83,8 +82,8 @@ class Lecteur :
             self.timer.start (self.pausedTimeSave)
         else :
             self.reading = "CMD"
-            with open (nomFichier, 'r') as f :
-                self.data = f.readlines ()[3:]
+            with open (nomFichier, 'r') as file:
+                self.data = file.readlines ()[3:]
             self.data.reverse ()
             tempsCommande = int (self.data [-1].split ()[0])
             self.timer.timeout.connect (self.readCmd)
@@ -127,7 +126,7 @@ class Lecteur :
                 rid, sid, val = words [2], words [3], words [4]
                 self.window.backend.sendeqpcmd (rid, sid, val)
                 eqp_display = self.window.inspecteur.find (rid,sid)
-                if eqp_display is not None and type (eqp_display) == ACT :
+                if eqp_display is not None and isinstance(eqp_display, ACT):
                     eqp_display.updt_cmd (val)
         except Exception:
             print ("La ligne [{}] pose un problème.".format (line))
@@ -153,7 +152,7 @@ class Lecteur :
         if self.reading == "MSG":
             self.timer.timeout.disconnect ()
         elif self.reading == "CMD":
-            self.timer.timeout.disconnect ()     
+            self.timer.timeout.disconnect ()
         self.window.playback_sgnl.emit([-1, 0, 0])
         self.reading = False
 
