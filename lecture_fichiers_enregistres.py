@@ -28,7 +28,6 @@ class Lecteur :
             self.heure_debut = time ()
             self.data = self.data [3:]
             self.data.reverse ()
-            print (self.data[-1])
             temps_message = int (self.data [-1].split ()[0])
             self.timer.timeout.connect (self.read_msg)
             self.timer.start (temps_message)
@@ -71,11 +70,11 @@ class Lecteur :
                         self.window.inspecteur.find (rid).qlineedit_pos_cmd.setText (texte)
                 elif words [2] == "ActuatorCmd":
                     rid, sid, valeur = words [3], words [4], words [5]
-                eqp_display = self.window.inspecteur.find (rid,sid)
-                if eqp_display is not None and isinstance(eqp_display, ACT):
-                    eqp_display.updt_cmd (valeur)
-        except Exception :
-            print ("La ligne [{}] pose un problème.".format (line))
+                    eqp_display = self.window.inspecteur.find (rid,sid)
+                    if eqp_display is not None and isinstance(eqp_display, ACT):
+                        eqp_display.updt_cmd (valeur)
+        except Exception as bug:
+            print ("La ligne [{}] pose un problème.\n{}".format (line, bug))
             self.timer.start (1)
 
     def read_commands (self, nom_fichier):
@@ -130,8 +129,8 @@ class Lecteur :
                 eqp_display = self.window.inspecteur.find (rid,sid)
                 if eqp_display is not None and isinstance(eqp_display, ACT):
                     eqp_display.updt_cmd (val)
-        except Exception:
-            print ("La ligne [{}] pose un problème.".format (line))
+        except Exception as bug:
+            print ("La ligne [{}] pose un problème.\n{}".format (line, bug))
             self.timer.start (1)
 
     def onPlayButton (self):

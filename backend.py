@@ -262,8 +262,9 @@ class Backend:
         """
         if self.annu is not None:
             if self.annu.check_robot(rid) and self.radio_started:
-                if  self.annu.find (rid).isStopped :
-                    self.annu.find (rid).isStopped = False
+                if self.annu.find (rid) is not None :
+                    if  self.annu.find (rid).isStopped :
+                        self.annu.find (rid).isStopped = False
                 if pos[2] is None:
                     self.radio.send_cmd (rd.POS_CMD.format (rid, pos[0], pos[1]))
                 else:
@@ -273,8 +274,9 @@ class Backend:
     def send_speed_cmd (self, rid, v_x, v_y, v_theta):
         """Envoi de commande de vitesse au robot"""
         if self.radio_started and self.annu is not None:
-            if  self.annu.find (rid).isStopped :
-                self.annu.find (rid).isStopped = False
+            if self.annu.find (rid) is not None :
+                if  self.annu.find (rid).isStopped :
+                    self.annu.find (rid).isStopped = False
             self.radio.send_cmd (rd.SPEED_CMD.format (rid, v_x, v_y, v_theta*3.141592654/180))
 
     def send_descr_cmd (self, rid):
