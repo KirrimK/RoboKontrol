@@ -19,6 +19,7 @@ En l'absence de robot, le programme suivant est un simulateur compatible: [https
 Pour lancer l'application, executer `main.py`.
 
 ### Mode d'emploi
+
 (TBD)
 
 ---
