@@ -4,7 +4,7 @@ import os
 import sys
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 from PyQt5.QtWidgets import QGroupBox, QPushButton, QSpacerItem, QStatusBar
-from PyQt5.QtWidgets import QDialog, QSizePolicy, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QDialog, QSizePolicy, QMessageBox, QFileDialog, QScrollArea
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QCheckBox
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon
@@ -150,7 +150,7 @@ class Window(QMainWindow):
         # Création du bouton aide
         self.button_help.setText("Aide")
         self.button_help.setFixedSize(QSIZE)
-        self.button_help.clicked.connect(show_help)
+        self.button_help.clicked.connect(self.show_help)
         self.layout_menu.addWidget(self.button_help)
 
         self.backend.widget.record_signal.connect(self.updt_status_record)
@@ -319,15 +319,19 @@ class Window(QMainWindow):
             self.button_pause.setStyleSheet (BUTTON_ON)
             self.lecteur.onPauseButton ()
 
-@pyqtSlot()
-def show_help():
-    """Ouvre une pop_up (QMessageBox) Aide avec la contenu du fichier aide.txt"""
-    aide = QMessageBox()
-    aide.setWindowTitle("Aide")
-    with open("aide.txt", encoding='utf-8') as file:
-        list_aide = file.readlines()
-    aide.setText("".join(list_aide))
-    aide.exec_()
+    @pyqtSlot()
+    def show_help(self):
+        """Ouvre une pop_up (QDialog) Aide avec la contenu du fichier aide.txt"""
+        aide = QDialog(self)
+        aide.layout = QVBoxLayout(aide)
+        aide.scroll = QScrollArea(aide)
+        aide.setWindowTitle("Aide")
+        with open("aide.txt", encoding='utf-8') as file:
+            list_aide = file.readlines()
+        aide.label = QLabel("".join(list_aide))
+        aide.scroll.setWidget(aide.label)
+        aide.layout.addWidget(aide.scroll)
+        aide.exec_()
 
 def main(backend):
     """ Création la fenêtre principale """
