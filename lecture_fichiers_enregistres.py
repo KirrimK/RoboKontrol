@@ -48,7 +48,7 @@ class Lecteur :
         line = self.data.pop (-1)
         try:
             words = line.split ()
-            self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
+            self.timer.start ((int (self.data[-1].split()[0])-int (words[0]))if len (self.data)!= 0 else 1)
             self.window.playback_sgnl.emit([1, len(self.data), 1])
 
             if words [2]== 'PosReport':
@@ -103,7 +103,7 @@ class Lecteur :
         line = self.data.pop (-1)
         try :
             words = line.split()
-            self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
+            self.timer.start ((int (self.data[-1].split()[0])-int (words[0]))if len (self.data)!= 0 else 1)
             self.window.playback_sgnl.emit([1, len(self.data), 0])
             if words [1] in ('PosCmd', 'PosCmdOrient'):
                 rid, x, y, theta = words [2], words [3], words [4], (words [5] if len (words)==6 else None)
