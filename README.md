@@ -49,8 +49,5 @@ Il arrête l'enregistrement et sauvegarde les données dans le dossier dont l'ad
 Pour le bouton lecture, vous avez besoin d'un fichier respectant la même syntaxe que ceux qu'enregistre l'interface. Selectionnez ce fichier dans le menu qui s'ouvre après l'appui du bouton.
 
 
-
-(TBD)
-
 ---
 <div>L'icone de l'application a été réalisée par <a href="https://creativemarket.com/eucalyp" title="Eucalyp">Eucalyp</a> du site <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
