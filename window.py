@@ -147,8 +147,9 @@ class Window(QMainWindow):
 
     def show_play_dialog(self):
         """Ouvre un petit popup demandant de choisir un fichier à lire"""
-        file_name = self.get_filename()
-        self.settings_dict["Enregistrement/Playback (Dernière Lecture)"] = file_name
+        if not self.button_pause.isChecked ():
+            file_name = self.get_filename()
+            self.settings_dict["Enregistrement/Playback (Dernière Lecture)"] = file_name
         self.onPlayButton ()
 
     def get_filename(self):
@@ -237,6 +238,8 @@ class Window(QMainWindow):
         elif self.button_play.isChecked () or self.button_pause.isChecked():
             self.button_pause.setChecked (False)
             self.button_play.setChecked (False)
+            self.button_play.setStyleSheet ("background-color: lightgrey")
+            self.button_pause.setStyleSheet ("background-color: lightgrey")
             self.lecteur.onStopButton ()
 
     @pyqtSlot()
@@ -252,13 +255,16 @@ class Window(QMainWindow):
     def onPlayButton (self):
         if self.button_pause.isChecked ():
             self.button_pause.setChecked (False)
+            self.button_pause.setStyleSheet ("background-color: lightgrey")
         self.lecteur.onPlayButton ()
 
     @pyqtSlot ()
     def onPauseButton (self):
         if self.button_play.isChecked ():
-            self.button_play.setChecked = (False)
+            self.button_play.setChecked (False)
+            self.button_play.setStyleSheet ("background-color: lightgrey")
             self.button_pause.setChecked (True)
+            self.button_pause.setStyleSheet ('background-color: red')
             self.lecteur.onPauseButton ()
 
 @pyqtSlot()
