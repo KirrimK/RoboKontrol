@@ -295,12 +295,15 @@ class MapView(QtWidgets.QWidget):
             if self.selected_robot is not None:
                 if sqrt((pos_x - opos_x)**2 + (pos_y - opos_y)**2) > 0:
                     #le clic n'était pas statique
-                    angle = (atan(-(pos_y - opos_y)/(pos_x - opos_x))*360/(2*pi) +
-                                (180 if (pos_x - opos_x) < 0 else 0))
-                    cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], angle]
-                    self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
-                    qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
-                    qle_poscmd.setText("{} : {} : {}".format(int(cmd[0]), int(cmd[1]), int(cmd[2])))
+                    try:
+                        angle = (atan(-(pos_y - opos_y)/(pos_x - opos_x))*360/(2*pi) +
+                                    (180 if (pos_x - opos_x) < 0 else 0))
+                        cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], angle]
+                        self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
+                        qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
+                        qle_poscmd.setText("{} : {} : {}".format(int(cmd[0]), int(cmd[1]), int(cmd[2])))
+                    except ZeroDivisionError as exc:
+                        print(exc)
                 else:
                     cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], None]
                     self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
