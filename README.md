@@ -6,8 +6,7 @@ Développée pour le projet programmation python en première année ingénieur 
 
 ## Installation:
 
-### Utilisation normale:
-- Cloner le dépôt dans le dossier de votre choix: `git clone https://github.com/KirrimK/Projet_Info_ENAC_1A`
+- Cloner le dépôt dans le dossier de votre choix: `git clone https://github.com/KirrimK/RoboKontrol`
 - Installer les librairies python requises: `pip install ivy-python lxml PyQt5`
 - Sous Linux, il peut être nécessaire d'installer le paquet QtSvg séparément: `sudo apt-get install python3-pyqt5.qtsvg` (sous Ubuntu)
 
