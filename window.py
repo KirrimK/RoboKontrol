@@ -1,11 +1,13 @@
 """Module ui_window.py - Crée la fenêtre comportant l'inspecteur, la carte et la zone de menu"""
 
-import os, sys
+import os
+import sys
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 from PyQt5.QtWidgets import QGroupBox, QPushButton, QSpacerItem, QStatusBar
 from PyQt5.QtWidgets import QDialog, QSizePolicy, QMessageBox, QFileDialog
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QCheckBox
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QSize
+from PyQt5.QtGui import QIcon
 from carte import MapView
 import display as dsp
 import externals
@@ -16,7 +18,7 @@ WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;colo
                "QPushButton{border: 1px solid rgb(150,150,150);border-radius: 2px}" \
                "QPushButton:hover{background-color: rgb(180,180,180); border: 1px solid rgb(130,130,130)}"\
                "QPushButton:pressed{background-color: rgb(150,150,150); border: 1px solid rgb(130,130,130)}" \
-               
+
 BUTTON_ON = "QPushButton{background-color: rgb(180,0,0); border: 1px solid rgb(100,0,0)}"
 BUTTON_OFF = ""
 
@@ -36,7 +38,8 @@ class Window(QMainWindow):
 
         super().__init__()
         self.resize(1200, 600)
-        self.setWindowTitle("Form")
+        self.setWindowTitle("RoboKontrol")
+        self.setWindowIcon(QIcon("app_icon.png"))
         self.setStyleSheet(WINDOW_STYLE)
 
         # Récupération de l'objet backend

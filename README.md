@@ -1,4 +1,4 @@
-# Projet_Info_ENAC_1A
+# RoboKontrol
 
 Une application Python/Qt servant d'interface pour le contrôle de robots et/ou simulateurs de robots développés par le club ENAC Robotique.
 
