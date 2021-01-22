@@ -11,7 +11,7 @@ from PyQt5.QtGui import QIcon
 from carte import MapView
 import display as dsp
 import externals
-import lecture_fichiers_enregistres as lect
+import lecteur as lect
 
 WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;border-radius: 2px} "\
                "QProgressBar{background-color : grey;border: 1px solid dimgray;border-radius: 2px}" \
