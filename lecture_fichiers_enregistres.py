@@ -39,6 +39,7 @@ class Lecteur :
                 words = line.split ()
                 if len (self.data)>0:
                     self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
+                    self.window.playback_sgnl.emit([1, len(self.data), 1])
                 timestamp = self.heureDebut + int (words [0])/1000
                 if words [2]== 'PosReport':
                     self.window.backend.radio.on_posreg ("Lecteur",words [3], words [4], words [5], words [6])
@@ -69,11 +70,13 @@ class Lecteur :
         if len (self.data) == 0:
             self.timer.timeout.disconnect (self.readCmd)
             self.reading = False
+            self.window.playback_sgnl.emit([-1, 0, 0])
         else :
             #try :
             words = self.data.pop (-1).split()
             if len (self.data)>0:
                 self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
+                self.window.playback_sgnl.emit([1, len(self.data), 0])
             if words [1] in ('PosCmd', 'PosCmdOrient'):
                 self.window.backend.sendposcmd_robot (words[2],(words[3],words[4],
                     (float (words[5]) if len (words) == 6 else None)))
@@ -97,16 +100,20 @@ class Lecteur :
         if path not in (None, ""):
             if "essages" in path :
                 self.readMessages (path)
+                self.window.playback_sgnl.emit([0, 0, 1])
             elif "ommand" in path :
                 self.readCommands (path)
+                self.window.playback_sgnl.emit([0, 0, 0])
 
     def onStopButton (self):
         if self.reading == "MSG":
             self.timer.disconnect ()
         elif self.reading == "CMD":
             self.timer.disconnect ()
+        self.window.playback_sgnl.emit([-1, 0, 0])
         self.reading = False
 
     def onPauseButton (self):
         self.pausedTimeSave = self.timer.remainingTime ()
+        self.window.playback_sgnl.emit([-2, 0, 0])
         self.timer.stop ()
