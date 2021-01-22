@@ -31,7 +31,7 @@ class Lecteur :
 
     def readMsg(self):
         if len (self.data) == 0 :
-            self.timer.timeout.disconnect (lambda : self.readMsg())
+            self.timer.timeout.disconnect ()
             self.reading = False
         else:
             line = self.data.pop (-1)
@@ -102,9 +102,9 @@ class Lecteur :
 
     def onStopButton (self):
         if self.reading == "MSG":
-            self.timer.disconnect (lambda : self.readMsg)
+            self.timer.disconnect ()
         elif self.reading == "CMD":
-            self.timer.disconnect (lambda : self.readCmd)
+            self.timer.disconnect ()
         self.reading = False
 
     def onPauseButton (self):
