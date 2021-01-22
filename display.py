@@ -8,8 +8,8 @@ from PyQt5.QtCore import pyqtSlot, Qt, QSize, QTimer
 import annuaire as anr
 
 EMERGENCY_BUTTON = "QPushButton{background-color: rgb(180,0,0); border: 1px solid rgb(100,0,0)}" \
-                    "QPushButton:hover{background-color: rgb(200,0,0);border: 1px solid rgb(60,0,0)}" \
-                    "QPushButton:pressed{background-color: red;border: 1px solid rgb(60,0,0)}" \
+                "QPushButton:hover{background-color: rgb(200,0,0);border: 1px solid rgb(60,0,0)}" \
+                "QPushButton:pressed{background-color: red;border: 1px solid rgb(60,0,0)}" \
 
 # QtWidgets size
 QLCD_SIZE1, QLCD_SIZE2 = QSize(60, 20), QSize(80, 20)
@@ -29,7 +29,7 @@ class DisplayAnnuaire(anr.Annuaire, QTabWidget):
                 lambda rid: self.setCurrentWidget(self.robots[rid]))
         else:
             self.backend = None
-        self.currentChanged.connect(lambda index: self.update_selected_robot(index))
+        self.currentChanged.connect(self.update_selected_robot)
         self.ui_setup_tab()
 
     def update_selected_robot(self, index):
@@ -116,13 +116,13 @@ class DisplayRobot(anr.Robot, QWidget):
         self.scroll_area.setWidget(self.groupbox_robots)
         self.layout_tab_robot.addWidget(self.scroll_area)
 
-        self.button_delete.setMaximumSize(200, 25)
+        self.button_delete.setFixedSize(175, 25)
         self.button_delete.setText("Eteindre")
         self.button_delete.clicked.connect(lambda: self.backend.stopandforget_robot(self.rid))
 
         self.emergency_button.setText("Arrêt d'urgence")
         self.emergency_button.setStyleSheet(EMERGENCY_BUTTON)
-        self.emergency_button.setMaximumSize(200, 25)
+        self.emergency_button.setFixedSize(175, 25)
         self.emergency_button.clicked.connect(lambda: self.backend.emergency_stop_robot(self.rid))
         self.layout_name_delete.addWidget(self.button_delete)
         self.layout_name_delete.addWidget(self.emergency_button)
@@ -283,11 +283,6 @@ class DisplayRobot(anr.Robot, QWidget):
         """"Appelée après la fin de l'édition de self.qlineedit_pos_cmd"""
         cmd = [int(i) for i in self.qlineedit_pos_cmd.text().split(' : ')]
         self.backend.sendposcmd_robot(self.rid, cmd)
-
-    #@pyqtSlot()
-    #def emergency_buttonPressed(self):
-    #    """Appelée si le bouton d'arrêt d'urgence d'un robot est pressé"""
-    #    self.backend.emergency_stop_robot(self.rid)
 
 class DisplayBinaire(anr.Binaire, QWidget):
     """Une combinaison de l'objet Equipement et d'un QWidget"""

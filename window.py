@@ -11,8 +11,14 @@ import display as dsp
 import externals
 import lecture_fichiers_enregistres as lect
 
-WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;border-radius: 5px} "\
-               "QProgressBar{background-color : grey;border: 2px solid dimgray;border-radius: 5px} "\
+WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;border-radius: 2px} "\
+               "QProgressBar{background-color : grey;border: 1px solid dimgray;border-radius: 2px}" \
+               "QPushButton{border: 1px solid rgb(150,150,150);border-radius: 2px}" \
+               "QPushButton:hover{background-color: rgb(180,180,180); border: 1px solid rgb(130,130,130)}"\
+               "QPushButton:pressed{background-color: rgb(150,150,150); border: 1px solid rgb(130,130,130)}" \
+               
+BUTTON_ON = "QPushButton{background-color: rgb(180,0,0); border: 1px solid rgb(100,0,0)}"
+BUTTON_OFF = ""
 
 QSIZE = QSize(100, 30)
 QSIZE_BIG = QSize(160, 30)
@@ -35,7 +41,7 @@ class Window(QMainWindow):
 
         # Récupération de l'objet backend
         self.backend = backend
-        self.backend.launchQt()
+        self.backend.launch_qt()
 
         self.record_status = -1
 
@@ -234,6 +240,7 @@ class Window(QMainWindow):
             externals.set_settings(self.settings_dict)
 
         update_btn = QPushButton("Sauvegarder")
+        update_btn.setMinimumSize(16777215, 25)
         setting.layout.addWidget(update_btn)
         update_btn.clicked.connect(updt_settings)
         update_btn.clicked.connect(self.act_settings)
@@ -260,21 +267,21 @@ class Window(QMainWindow):
         """ Enregistre des messages et commandes
         et arrête l'enregistrement lorsque cliquer une seconde fois """
         if self.button_record.isChecked():
-            self.button_record.setStyleSheet("background-color: red")
+            self.button_record.setStyleSheet(BUTTON_ON)
             self.backend.record("BMC")
 
     @pyqtSlot()
     def on_stoprecord_button(self):
         """Bouton stop cliqué"""
         if self.button_record.isChecked():
-            self.button_record.setStyleSheet("background-color: lightgrey")
+            self.button_record.setStyleSheet(BUTTON_OFF)
             self.backend.record("EMCD")
             self.button_record.setChecked(False)
         elif self.button_play.isChecked () or self.button_pause.isChecked():
             self.button_pause.setChecked (False)
             self.button_play.setChecked (False)
-            self.button_play.setStyleSheet ("background-color: lightgrey")
-            self.button_pause.setStyleSheet ("background-color: lightgrey")
+            self.button_play.setStyleSheet (BUTTON_OFF)
+            self.button_pause.setStyleSheet (BUTTON_OFF)
             self.lecteur.onStopButton ()
 
     @pyqtSlot()
@@ -282,24 +289,26 @@ class Window(QMainWindow):
         """Bouton sauvegarde cliqué"""
         path = self.settings_dict["Enregistrement/Playback (Chemin Sauvegarde)"]
         if self.button_record.isChecked():
-            self.button_record.setStyleSheet("background-color: lightgrey")
+            self.button_record.setStyleSheet(BUTTON_OFF)
             self.backend.record("EMCSD", path)
             self.button_record.setChecked(False)
 
     @pyqtSlot()
     def onPlayButton (self):
+        """Bouton play cliqué"""
         if self.button_pause.isChecked ():
             self.button_pause.setChecked (False)
-            self.button_pause.setStyleSheet ("background-color: lightgrey")
+            self.button_pause.setStyleSheet (BUTTON_OFF)
         self.lecteur.onPlayButton ()
 
     @pyqtSlot ()
     def onPauseButton (self):
+        """Bouton pause cliqué"""
         if self.button_play.isChecked ():
             self.button_play.setChecked (False)
-            self.button_play.setStyleSheet ("background-color: lightgrey")
+            self.button_play.setStyleSheet (BUTTON_OFF)
             self.button_pause.setChecked (True)
-            self.button_pause.setStyleSheet ('background-color: red')
+            self.button_pause.setStyleSheet (BUTTON_ON)
             self.lecteur.onPauseButton ()
 
 @pyqtSlot()

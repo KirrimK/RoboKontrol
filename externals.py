@@ -2,9 +2,9 @@
     + création de sous-process"""
 
 import os
-import subprocess
-import shutil
-import random
+#import subprocess
+#import shutil
+#import random
 from operator import itemgetter
 import lxml.etree as ET
 
