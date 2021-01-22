@@ -16,6 +16,8 @@ class WidgetBackend (QWidget):
 
     equipement_updated = pyqtSignal(list)
     position_updated = pyqtSignal(list)
+
+    record_signal = pyqtSignal(float)
     def __init__ (self, parent_backend):
         super().__init__()
         self.backend = parent_backend
@@ -180,7 +182,7 @@ class Backend:
             self.track_robot (rid)
             self.radio.send_cmd (rd.DESCR_CMD.format (rid))
         if not self.annu.find (rid).check_eqp (sid):
-            self.annu.find (rid).create_eqp (sid, "Capteur", -65536 , 65536, 1, None)
+            self.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
         self.annu.find (rid,sid).set_state (float (valeur))
         self.widget.UpdateTrigger.emit([])
 
@@ -349,6 +351,7 @@ class Backend:
                          ECSD: arrêter d'enregistrer les commandes, sauvegarder puis effacer
         """
         if flag[0] == "B": #begin
+            self.widget.record_signal.emit(0)
             msgs = None
             cmds = None
             if "M" in flag:
@@ -363,12 +366,14 @@ class Backend:
                 msgs = "msgs"
             if "C" in flag:
                 cmds = "cmds"
-            save = False
-            if "S" in flag:
-                save = True
             delb = False
             if "D" in flag:
                 delb = True
+                self.widget.record_signal.emit(-2)
+            save = False
+            if "S" in flag:
+                save = True
+                self.widget.record_signal.emit(-1)
             self.radio.register_stop(save, delb, msgs, cmds, path)
 
     def record_state(self):
