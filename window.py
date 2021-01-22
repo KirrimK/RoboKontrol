@@ -1,6 +1,6 @@
 """Module ui_window.py - Crée la fenêtre comportant l'inspecteur, la carte et la zone de menu"""
 
-import sys
+import os, sys
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 from PyQt5.QtWidgets import QGroupBox, QPushButton, QSpacerItem, QStatusBar
 from PyQt5.QtWidgets import QDialog, QSizePolicy, QMessageBox, QFileDialog
@@ -218,6 +218,8 @@ class Window(QMainWindow):
             self.button_pause.hide()
             self.button_stop.hide()
             self.button_save.hide()
+        if not os.path.exists(self.settings_dict["Enregistrement/Playback (Chemin Sauvegarde)"]):
+            os.mkdir(self.settings_dict["Enregistrement/Playback (Chemin Sauvegarde)"])
 
     def show_settings(self):
         """ Ouvre un popup (QDialog) Configuration
