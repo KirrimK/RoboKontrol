@@ -518,7 +518,6 @@ class DisplayActionneur(anr.Actionneur, QWidget):
         - valeur (float)"""
         anr.Binaire.set_state(self, valeur)
         self.updated_outside = True
-        self.label_command.setText(str(valeur))
         self.slider_equipement.setValue(int(valeur))
         self.doublespinbox_eqp.setValue(valeur)
         self.updated_outside = False
