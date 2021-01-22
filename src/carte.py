@@ -39,7 +39,7 @@ class MapView(QtWidgets.QWidget):
         self.relative_init_mspos = [0, 0]
 
         self.clicking = False
-        self.cmd_speed=[0,0,None]
+        self.keys = [0, 0, 0, 0]
 
         self.color_dict = {}
         self.robot_number = 0
@@ -230,33 +230,43 @@ class MapView(QtWidgets.QWidget):
     def keyPressEvent(self, event):
         """Une touche du clavier est pressée"""
         self.setFocusPolicy(Qt.StrongFocus)
-        incr=1
+        new_keys = [key for key in self.keys]
         if self.selected_robot is not None:
             if event.key() == Qt.Key_Z:
-                self.cmd_speed[1]=incr
+                new_keys[0] = 1
             if event.key() == Qt.Key_S:
-                self.cmd_speed[1]=-incr
+                new_keys[1] = 1
             if event.key() == Qt.Key_Q:
-                self.cmd_speed[0]=incr * 360 / (2*pi)
+                new_keys[2] = 1
             if event.key() == Qt.Key_D:
-                self.cmd_speed[0]=-incr * 360 / (2*pi)
-            self.parent.backend.send_speed_cmd(self.selected_robot, self.cmd_speed[1], 0, self.cmd_speed[0])
-        else:
-            pass
+                new_keys[3] = 1
+            if self.keys != new_keys:
+                #les touches pressées ont changé
+                self.keys = new_keys
+                speed_ur = 0 + (1 if new_keys[0] == 1 else 0) + (-1 if new_keys[1] == 1 else 0)
+                speed_utheta = 0 + (360 / (2*pi) if new_keys[2] == 1 else 0) + (-360 / (2*pi) if new_keys[3] == 1 else 0)
+                self.parent.backend.send_speed_cmd(self.selected_robot, speed_ur, 0, speed_utheta)
 
     def keyReleaseEvent(self,event):
         """Une touche du clavier est relachée"""
         #print(event.key())
         self.setFocusPolicy(Qt.StrongFocus)
-        if event.key() != Qt.Key_Z:
-            self.cmd_speed[1]=0
-        if event.key() != Qt.Key_S:
-            self.cmd_speed[1]=0
-        if event.key() != Qt.Key_Q:
-            self.cmd_speed[0]=0
-        if event.key() != Qt.Key_D:
-            self.cmd_speed[0]=0
-        self.parent.backend.send_speed_cmd(self.selected_robot, self.cmd_speed[1], 0, self.cmd_speed[0])
+        new_keys = [key for key in self.keys]
+        if self.selected_robot is not None:
+            if event.key() == Qt.Key_Z:
+                new_keys[0] = 0
+            if event.key() == Qt.Key_S:
+                new_keys[1] = 0
+            if event.key() == Qt.Key_Q:
+                new_keys[2] = 0
+            if event.key() == Qt.Key_D:
+                new_keys[3] = 0
+            if self.keys != new_keys:
+                #les touches pressées ont changé
+                self.keys = new_keys
+                speed_ur = 0 + (1 if new_keys[0] == 1 else 0) + (-1 if new_keys[1] == 1 else 0)
+                speed_utheta = 0 + (360 / (2*pi) if new_keys[2] == 1 else 0) + (-360 / (2*pi) if new_keys[3] == 1 else 0)
+                self.parent.backend.send_speed_cmd(self.selected_robot, speed_ur, 0, speed_utheta)
 
     def mousePressEvent(self, event):
         """La souris est cliquée"""
