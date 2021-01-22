@@ -74,8 +74,8 @@ class Lecteur :
                 eqp_display = self.window.inspecteur.find (rid,sid)
                 if eqp_display is not None and isinstance(eqp_display, ACT):
                     eqp_display.updt_cmd (valeur)
-        except Exception :
-            print ("La ligne [{}] pose un problème.".format (line))
+        except Exception as e:
+            print ("La ligne [{}] pose un problème.".format (line), e)
             self.timer.start (1)
 
     def read_commands (self, nom_fichier):
