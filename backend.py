@@ -261,7 +261,7 @@ class Backend:
                 - [2]: theta (si non spécifié, mettre à None)
         """
         if self.annu is not None:
-            if self.annu.check_robot(rid) and self.radio_started:
+            if self.radio_started:
                 if self.annu.find (rid) is not None :
                     if  self.annu.find (rid).isStopped :
                         self.annu.find (rid).isStopped = False
@@ -297,7 +297,7 @@ class Backend:
             if  self.annu.find (rid).isStopped :
                 self.annu.find (rid).isStopped = False
             #self.annu.find(rid, eqp_name).updt_cmd() (déjà fait dans display)
-            self.radio.send_cmd (rd.ACTUATOR_CMD.format (rid, eqp_name, state))
+        self.radio.send_cmd (rd.ACTUATOR_CMD.format (rid, eqp_name, state))
 
     def get_all_robots(self):
         """Retourne la liste de tous les noms des robots
