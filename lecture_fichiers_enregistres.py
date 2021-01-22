@@ -2,6 +2,7 @@
 
 from time import time
 from PyQt5.QtCore import QTimer
+from display import DisplayActionneur as ACT
 
 class Lecteur :
     """Classe permettant la lecture des fichiers. S'initialise avec la fenêtre."""
@@ -58,7 +59,7 @@ class Lecteur :
             elif words [1] == 'Interface':
                 if words [2] in ('PosCmd', 'PosCmdOrient'):
                     rid, x, y, theta = words [3], words [4], words [5], (words [6] if len (words)==7 else None)
-                    if self.window.backend.annu.check_robot (words [3]):
+                    if self.window.inspecteur.check_robot (words [3]):
                         anc_texte = self.window.inspecteur.find (rid).qlineedit_pos_cmd.text ()
                         texte = "{:04d} : {:04d}".format (int(float (x)), int(float(y)))
                         if theta is not None:
@@ -66,6 +67,11 @@ class Lecteur :
                         else :
                             texte += anc_texte [10:]
                         self.window.inspecteur.find (rid).qlineedit_pos_cmd.setText (texte)
+                elif words [2] == "ActuatorCmd":
+                    rid, sid, valeur = words [3], words [4], words [5]
+                eqp_display = self.window.inspecteur.find (rid,sid)
+                if eqp_display is not None and type (eqp_display) == ACT :
+                    eqp_display.updt_cmd (valeur)
         except Exception :
             print ("La ligne [{}] pose un problème.".format (line))
             self.timer.start (1)
@@ -118,7 +124,11 @@ class Lecteur :
             elif words [1] == "SpeedCmd":
                 self.window.backend.send_speed_cmd (words [2], words [3], words [4], float (words [5]))
             elif words [1] == "ActuatorCmd" :
-                self.window.backend.sendeqpcmd (words [2], words [3], words [4])
+                rid, sid, val = words [2], words [3], words [4]
+                self.window.backend.sendeqpcmd (rid, sid, val)
+                eqp_display = self.window.inspecteur.find (rid,sid)
+                if eqp_display is not None and type (eqp_display) == ACT :
+                    eqp_display.updt_cmd (val)
         except Exception:
             print ("La ligne [{}] pose un problème.".format (line))
             self.timer.start (1)

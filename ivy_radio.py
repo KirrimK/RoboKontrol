@@ -115,7 +115,7 @@ class Radio :
                 tps = time ()
                 with open ('{}commandes{}.txt'.format (path, int(tps)),'a') as fichier :
                     fichier.write ('{}\n\nTemps (ms)\tCommande\n'.format (temps_deb(tps)))
-                    for ligne in self.cmds_buffer :
+                    for (i,ligne) in self.cmds_buffer :
                         if i == 0:
                             PremierTemps = ligne [0]
                         fichier.write (temps (ligne[0], PremierTemps)+'\t\t'+ligne[1]+'\n')
@@ -129,7 +129,6 @@ class Radio :
         if self.record_msgs :
             message = "PosReport {} {} {} {}".format (args[0], args[1], args [2], args [3])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
-            self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
             self.backend.widget.position_updated.emit ([i for i in args]+[time()])
         else:
@@ -142,7 +141,6 @@ class Radio :
             message = "ActuatorDecl {} {} {} {} {} {} {}".format (args [0], args [1], args [2], args [3],
                         args [4], args [5], args [6])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
-            self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
             self.backend.widget.ActuDeclSignal.emit ([i for i in args])
         else :
@@ -154,7 +152,6 @@ class Radio :
         if self.record_msgs :
             message = "ActuatorReport {} {} {}".format (args[0], args [1], args [2])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
-            self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
             self.backend.widget.equipement_updated.emit ([i for i in args]+[time()])
         else :
@@ -165,10 +162,8 @@ class Radio :
         Input : _ cmd (str) : Le message à envoyer"""
         if self.record_cmds :
             self.cmds_buffer.append ((time(),cmd))
-            self.backend.widget.record_signal.emit(1)
         if self.record_msgs :
             self.msgs_buffer.append ((time(),'Interface',cmd))
-            self.backend.widget.record_signal.emit(1)
         IvySendMsg (cmd)
 
 
