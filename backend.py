@@ -296,7 +296,7 @@ class Backend:
             if  self.annu.find (rid).isStopped :
                 self.annu.find (rid).isStopped = False
             #self.annu.find(rid, eqp_name).updt_cmd() (déjà fait dans display)
-            self.radio.send_cmd (rd.ACTUATOR_CMD.format (rid, eqp_name, state))
+        self.radio.send_cmd (rd.ACTUATOR_CMD.format (rid, eqp_name, state))
 
     def get_all_robots(self):
         """Retourne la liste de tous les noms des robots
