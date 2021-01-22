@@ -20,3 +20,6 @@ Pour lancer l'application, executer `main.py`.
 
 ### Mode d'emploi
 (TBD)
+
+---
+<div>L'icone de l'application a été réalisée par <a href="https://creativemarket.com/eucalyp" title="Eucalyp">Eucalyp</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
