@@ -203,6 +203,7 @@ class Window(QMainWindow):
 
     def act_settings(self):
         """Effectuer les actions liées aux paramètres"""
+        record_path = self.settings_dict["Enregistrement/Playback (Chemin Sauvegarde)"]
         dim_crte = self.settings_dict["Carte (Dimensions)"].split("x")
         self.map_view.updt_map_data(self.settings_dict["Carte (Fichier)"],
                                     int(dim_crte[0]), int(dim_crte[1]))
@@ -218,7 +219,7 @@ class Window(QMainWindow):
             self.button_pause.hide()
             self.button_stop.hide()
             self.button_save.hide()
-        if not os.path.exists(self.settings_dict["Enregistrement/Playback (Chemin Sauvegarde)"]):
+        if not os.path.exists(record_path) and record_path != "":
             os.mkdir(self.settings_dict["Enregistrement/Playback (Chemin Sauvegarde)"])
 
     def show_settings(self):

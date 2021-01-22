@@ -49,6 +49,8 @@ def settings_from_file(file_path):
             check = setting.find("check")
             if check is None:
                 field = setting.find("field").text
+                if field is None:
+                    field = ""
                 settings[nom] = field
             else:
                 settings[nom] = (check.text == "y")
