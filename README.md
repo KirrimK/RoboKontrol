@@ -19,6 +19,37 @@ Pour lancer l'application, executer `main.py`.
 
 ### Mode d'emploi
 
+#### CONNECTER UN ROBOT
+
+Les robots qui sont dans le canal Ivy de l'interface sont automatiquement affichés sur celle ci.
+
+#### COMMENT GUIDER LE ROBOT
+Pour envoyer une commande de position à un robot, vous pouvez selectionner le tab robot correspondant, et cliquer sur la carte.
+
+Pour envoyer une commande de position avec une orientation au robot, vous pouvez soit modifier la ligne de commande dernière position, soit déplacer la souris pendant un clic sur la carte.
+
+Pour envoyer une commande de vitesse au robot, vous pouvez utilisez les touches suivantes :
+- Z : Vers l'avant
+- S : Vers l'arrière
+- Q : Tourner vers la gauche
+- D : Tourner vers la droite
+
+#### ENREGISTREMENT
+
+Pour enregistrer les messages et les commandes envoyées, appuyez sur le bouton record. Le bouton devrait se colorer en rouge, et un label en dessous de la carte vous indiquera le nombre de messages ayant été captés par la radio et qui sont enregistrés.
+
+Pour arrêter l'enregistrement, vous avez deux options :
+- Le bouton Stop :
+Il arrête l'enregistrement en effaçant les données.
+- Le bouton Save :
+Il arrête l'enregistrement et sauvegarde les données dans le dossier dont l'adresse est indiquée dans le paramètre [Enregistrement/Playback (Chemin Sauvegarde)] sous la forme d'un fichier de messages et d'un fichier de commandes.
+
+#### LECTURE
+
+Pour le bouton lecture, vous avez besoin d'un fichier respectant la même syntaxe que ceux qu'enregistre l'interface. Selectionnez ce fichier dans le menu qui s'ouvre après l'appui du bouton.
+
+
+
 (TBD)
 
 ---
