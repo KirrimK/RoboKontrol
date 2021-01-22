@@ -11,9 +11,12 @@ import display as dsp
 import externals
 import lecture_fichiers_enregistres as lect
 
-WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;"\
-            "border-radius: 5px} QProgressBar{background-color : grey;"\
-            "border: 2px solid dimgray;border-radius: 5px} "
+WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;border-radius: 5px} "\
+               "QProgressBar{background-color : grey;border: 2px solid dimgray;border-radius: 5px}" \
+               "QPushButton{background-color: rgb(220,220,220); border: 1px solid rgb(150,150,150)}"\
+               "QPushButton:hover{background-color: rgb(180,180,180); border: 1px solid rgb(130,130,130)}"\
+               "QPushButton:pressed{background-color: rgb(150,150,150); border: 1px solid rgb(130,130,130)}"
+               
 BUTTON_ON = "QPushButton{background-color: rgb(180,0,0); border: 1px solid rgb(100,0,0)}"
 BUTTON_OFF = "QPushButton{background-color: rgb(220,220,220); border: 1px solid rgb(170,170,170);}"
 
@@ -104,13 +107,11 @@ class Window(QMainWindow):
         self.button_record.setCheckable(True)
         self.layout_menu.addWidget(self.button_record)
         self.button_record.clicked.connect(self.record)
-        self.button_record.setStyleSheet(BUTTON_OFF)
 
         # Création du bouton play
         self.button_play.setFixedSize(QSIZE)
         self.button_play.setText("|>")
         self.button_play.setCheckable (True)
-        self.button_play.setStyleSheet(BUTTON_OFF)
         self.button_play.clicked.connect(self.show_play_dialog)
         self.layout_menu.addWidget(self.button_play)
 
@@ -118,21 +119,18 @@ class Window(QMainWindow):
         self.button_pause.setFixedSize(QSIZE)
         self.button_pause.setText("||")
         self.button_pause.setCheckable (True)
-        self.button_pause.setStyleSheet(BUTTON_OFF)
         self.button_pause.clicked.connect (self.onPauseButton)
         self.layout_menu.addWidget(self.button_pause)
 
         # Création du bouton arrêt
         self.button_stop.setFixedSize(QSIZE)
         self.button_stop.setText("Stop")
-        self.button_stop.setStyleSheet(BUTTON_OFF)
         self.button_stop.clicked.connect(self.on_stoprecord_button)
         self.layout_menu.addWidget(self.button_stop)
 
         # Création du bouton sauvegarder
         self.button_save.setFixedSize(QSIZE)
         self.button_save.setText("Save")
-        self.button_save.setStyleSheet(BUTTON_OFF)
         self.button_save.clicked.connect(self.on_save_button)
         self.layout_menu.addWidget(self.button_save)
 
