@@ -3,9 +3,6 @@
 from time import time
 from PyQt5.QtCore import QTimer
 
-BUTTON_ON = "QPushButton{background-color: rgb(180,0,0); border: 1px solid rgb(100,0,0)}"
-BUTTON_OFF = ""
-
 class Lecteur :
     """Classe permettant la lecture des fichiers. S'initialise avec la fenêtre."""
     def __init__ (self, window):
@@ -30,7 +27,7 @@ class Lecteur :
             self.data.reverse ()
             print (self.data[-1])
             tempsMessage = int (self.data [-1].split ()[0])
-            self.timer.timeout.connect (self.readMsg)
+            self.timer.timeout.connect (lambda : self.readMsg())
             self.timer.start (tempsMessage)
         else :
             self.timer.start (self.pausedTimeSave)
@@ -48,8 +45,7 @@ class Lecteur :
             else :
                 self.timer.timeout.disconnect ()
                 self.window.button_play.setChecked (False)
-                self.window.button_play.setStyleSheet(BUTTON_OFF)
-                self.window.playback_sgnl.emit([-1, 0, 0])
+                self.window.button_play.setStyleSheet ("background-color: lightgrey")
                 self.reading = False
             if words [2]== 'PosReport':
                 self.window.backend.radio.on_posreg ("Lecteur",words [3], words [4], words [5], words [6])
@@ -69,7 +65,6 @@ class Lecteur :
                         else :
                             texte += anc_texte [10:]
                         self.window.inspecteur.find (rid).qlineedit_pos_cmd.setText (texte)
-                print (' '.join (words [2:]))
         except Exception :
             print ("La ligne [{}] pose un problème.".format (line))
             self.timer.start (1)
@@ -99,12 +94,19 @@ class Lecteur :
             else:
                 self.timer.timeout.disconnect ()
                 self.window.button_play.setChecked (False)
-                self.window.button_play.setStyleSheet(BUTTON_OFF)
-                self.window.playback_sgnl.emit([-1, 0, 0])
+                self.window.button_play.setStyleSheet ("background-color: lightgrey")
                 self.reading = False
             if words [1] in ('PosCmd', 'PosCmdOrient'):
-                self.window.backend.sendposcmd_robot (words[2],(words[3],words[4],
-                    (float (words[5]) if len (words) == 6 else None)))
+                rid, x, y, theta = words [3], words [4], words [5], (words [6] if len (words)==7 else None)
+                if self.window.backend.annu.check_robot (words [3]):
+                    anc_texte = self.window.inspecteur.find (rid).qlineedit_pos_cmd.text ()
+                    texte = "{:04d} : {:04d}".format (int(float (x)), int(float(y)))
+                    if theta is not None:
+                        texte += " : {:03d}".format (int (float(theta)/3.141592654*180))
+                    else :
+                        texte += anc_texte [10:]
+                    self.window.inspecteur.find (rid).qlineedit_pos_cmd.setText (texte)
+                self.window.backend.sendposcmd_robot (rid,(x,y,(float (theta) if len (words) == 6 else None)))
             elif words [1] == 'Shutdown' :
                 self.window.backend.stopandforget_robot (words [2])
             elif words [1] == "Emergency" :
@@ -125,12 +127,12 @@ class Lecteur :
         if path not in (None, ""):
             if "essages" in path :
                 self.window.button_play.setChecked (True)
-                self.window.button_play.setStyleSheet(BUTTON_ON)
+                self.window.button_play.setStyleSheet ("background-color: red")
                 self.readMessages (path)
                 self.window.playback_sgnl.emit([0, 0, 1])
             elif "ommand" in path :
                 self.window.button_play.setChecked (True)
-                self.window.button_play.setStyleSheet(BUTTON_ON)
+                self.window.button_play.setStyleSheet ("background-color: red")
                 self.readCommands (path)
                 self.window.playback_sgnl.emit([0, 0, 0])
 
