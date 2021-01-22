@@ -199,7 +199,7 @@ class Robot:
     """Classe définissant un robot avec les attributs suivants:
 
     Attributs:
-    - id (str): le nom du robot
+    - rid (str): le nom du robot
     - x (float): la position selon l'axe x du robot sur la carte (en mm)
     - y (float): la position selon l'axe x du robot sur la carte (en mm)
     - theta (float): l'orientation du robot (en radians/sens trigo depuis axe x)

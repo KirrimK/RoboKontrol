@@ -9,7 +9,11 @@ import annuaire as anr
 
 EMERGENCY_BUTTON = "QPushButton{background-color: rgb(180,0,0); border: 1px solid rgb(100,0,0)}" \
                 "QPushButton:hover{background-color: rgb(200,0,0);border: 1px solid rgb(60,0,0)}" \
-                "QPushButton:pressed{background-color: red;border: 1px solid rgb(60,0,0)}" \
+                "QPushButton:pressed{background-color: red;border: 1px solid rgb(60,0,0)}"
+
+READONLY_BUTTON = "QPushButton{background-color: rgb(0,0,180); border: 1px solid rgb(0,0,100)}" \
+                "QPushButton:hover{background-color: rgb(0,0,200);border: 1px solid rgb(0,0,60)}" \
+                "QPushButton:pressed{background-color: blue;border: 1px solid rgb(0,0,60)}"
 
 # QtWidgets size
 QLCD_SIZE1, QLCD_SIZE2 = QSize(60, 20), QSize(80, 20)
@@ -74,6 +78,8 @@ class DisplayRobot(anr.Robot, QWidget):
         anr.Robot.__init__(self, rid)
         QWidget.__init__(self)
 
+        self.is_ghost = self.rid[-6:] == '_ghost'
+
         self.ping = 0
 
         # Création des widgets de la boite robot
@@ -118,12 +124,19 @@ class DisplayRobot(anr.Robot, QWidget):
 
         self.button_delete.setFixedSize(175, 25)
         self.button_delete.setText("Eteindre")
+        if self.is_ghost:
+            self.button_delete.setText("Oublier")
         self.button_delete.clicked.connect(lambda: self.backend.stopandforget_robot(self.rid))
 
         self.emergency_button.setText("Arrêt d'urgence")
         self.emergency_button.setStyleSheet(EMERGENCY_BUTTON)
+        if self.is_ghost:
+            self.emergency_button.setText("Lecture")
+            self.emergency_button.setStyleSheet(READONLY_BUTTON)
         self.emergency_button.setFixedSize(175, 25)
-        self.emergency_button.clicked.connect(lambda: self.backend.emergency_stop_robot(self.rid))
+        if not self.is_ghost:
+            self.emergency_button.clicked.connect(
+                    lambda: self.backend.emergency_stop_robot(self.rid))
         self.layout_name_delete.addWidget(self.button_delete)
         self.layout_name_delete.addWidget(self.emergency_button)
         self.layout_box_robot.addLayout(self.layout_name_delete)
