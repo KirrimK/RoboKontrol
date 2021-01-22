@@ -11,8 +11,8 @@ import display as dsp
 import externals
 import lecture_fichiers_enregistres as lect
 
-WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 2px solid rgb(113, 113, 113);"\
-                "border-width: 2px; border-radius: 5px;  color: rgb(255, 255, 255)} "
+WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;border-radius: 5px} "\
+               "QProgressBar{background-color : grey;border: 2px solid dimgray;border-radius: 5px} "\
 
 QSIZE = QSize(100, 30)
 QSIZE_BIG = QSize(160, 30)
@@ -93,7 +93,7 @@ class Window(QMainWindow):
 
     def ui_setup_menu_area(self):
         """ Création de la zone menu"""
-        self.menu_area.setStyleSheet("QGroupBox  {border: 0px;}")
+        self.menu_area.setStyleSheet("QGroupBox{border: 0px;}")
 
         # Création du bouton record
         self.button_record.setFixedSize(QSIZE)

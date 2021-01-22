@@ -7,20 +7,9 @@ from PyQt5.QtWidgets import QLabel, QWidget, QPushButton, QGroupBox, QHBoxLayout
 from PyQt5.QtCore import pyqtSlot, Qt, QSize, QTimer
 import annuaire as anr
 
-# Customisation
-QPROGRESSBAR = "QProgressBar{background-color : grey;border : 1px;"\
-                    " border: 2px solid grey; border-radius: 5px} "
-QEMERGENCY_BUTTON = "QPushButton{background-color : rgb(255, 0,0);"\
-                    "border : 1px; border: 2px solid rgb(170,0,0)}"
-QPROGRESSBAR_FULL = "QProgressBar{background-color : grey; border : 1px;"\
-                    "border: 2px solid grey; border-radius: 5px} "\
-                    "QProgressBar::chunk{background-color: green; border-radius: 5px;}"
-QPROGRESSBAR_MEDIUM = "QProgressBar{background-color : grey; border : 1px; "\
-                    "border: 2px solid grey; border-radius: 5px} "\
-                    "QProgressBar::chunk{background-color: orange; border-radius: 5px;}"
-QPROGRESSBAR_LOW = "QProgressBar{background-color : grey; border : 1px; "\
-                    "border: 2px solid grey; border-radius: 5px} "\
-                    "QProgressBar::chunk{background-color: red; border-radius: 5px;}"
+EMERGENCY_BUTTON = "QPushButton{background-color: rgb(180,0,0); border: 1px solid rgb(100,0,0)}" \
+                    "QPushButton:hover{background-color: rgb(200,0,0);border: 1px solid rgb(60,0,0)}" \
+                    "QPushButton:pressed{background-color: red;border: 1px solid rgb(60,0,0)}" \
 
 # QtWidgets size
 QLCD_SIZE1, QLCD_SIZE2 = QSize(60, 20), QSize(80, 20)
@@ -87,22 +76,11 @@ class DisplayRobot(anr.Robot, QWidget):
 
         self.ping = 0
 
-        # Création de la boite robot (QGroupBox)
-        self.layout_tab_robot = QVBoxLayout(self)
-        self.groupbox_robots = QWidget()
-        self.layout_box_robot = QVBoxLayout(self.groupbox_robots)
-
-        self.scroll_area = QScrollArea()
-        self.scroll_area.setWidgetResizable(True)
-
-        self.scroll_area.setFrameShape(QFrame.NoFrame)
-        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-
-        self.scroll_area.setWidget(self.groupbox_robots)
-        self.layout_tab_robot.addWidget(self.scroll_area)
-
         # Création des widgets de la boite robot
+        self.groupbox_robots = QWidget()
+        self.layout_tab_robot = QVBoxLayout(self)
+        self.layout_box_robot = QVBoxLayout(self.groupbox_robots)
+        self.scroll_area = QScrollArea()
         self.layout_name_delete = QHBoxLayout()
         self.button_delete = QPushButton()
         self.layout_coord = QHBoxLayout()
@@ -122,14 +100,7 @@ class DisplayRobot(anr.Robot, QWidget):
         # Configuration des widgets de la boite robot
         self.ui_setup_tab_robot()
 
-        # Connexion du signal de mise à jours des équipements avec
-        # le slot de mise à jour de l'ensemble des équipements
-        #self.list_equipement_changed_signal.connect(self.update_equipements)
-
-        # Connexion du signal de mise à jour de la position
-        #self.backend.widget.position_updated.connec
-        # (lambda new_position: self.set_pos(new_position))
-
+        # Création d'un QTimer pour la mise à jour du ping du robot
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_ping)
         self.timer.start(100)
@@ -137,16 +108,21 @@ class DisplayRobot(anr.Robot, QWidget):
     def ui_setup_tab_robot(self):
         """ Configure l'ensemble de l'onglet robot"""
 
-        self.progressbar_battery.setStyleSheet(QPROGRESSBAR_FULL)
-        self.progressbar_battery.setFixedSize(150, 30)
+        # Configuration de la scroll bar
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setFrameShape(QFrame.NoFrame)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.scroll_area.setWidget(self.groupbox_robots)
+        self.layout_tab_robot.addWidget(self.scroll_area)
 
-        self.button_delete.setMaximumSize(150, 25)
+        self.button_delete.setMaximumSize(200, 25)
         self.button_delete.setText("Eteindre")
         self.button_delete.clicked.connect(lambda: self.backend.stopandforget_robot(self.rid))
 
         self.emergency_button.setText("Arrêt d'urgence")
-        self.emergency_button.setStyleSheet(QEMERGENCY_BUTTON)
-        self.emergency_button.setMaximumSize(250, 25)
+        self.emergency_button.setStyleSheet(EMERGENCY_BUTTON)
+        self.emergency_button.setMaximumSize(200, 25)
         self.emergency_button.clicked.connect(lambda: self.backend.emergency_stop_robot(self.rid))
         self.layout_name_delete.addWidget(self.button_delete)
         self.layout_name_delete.addWidget(self.emergency_button)
@@ -329,7 +305,6 @@ class DisplayBinaire(anr.Binaire, QWidget):
         self.label_name_equipement = QLabel()
         self.label_message_equipement = QLabel("Dernière MAJ (s)")
         self.lcdnumber_ping_eqp = QLCDNumber()
-
         self.layout_binaire = QHBoxLayout()
         self.checkbox_equipement = QCheckBox()
         self.label_command = QLineEdit()
@@ -444,7 +419,6 @@ class DisplayCapteur(anr.Capteur, QWidget):
 
         self.progressbar_eqp = QProgressBar()
         self.progressbar_eqp.setRange(int(self.min_val), int(self.max_val))
-        self.progressbar_eqp.setStyleSheet(QPROGRESSBAR)
         self.progressbar_eqp.setAlignment(QT_CENTER)
         self.progressbar_eqp.setFormat("%v")
         self.progressbar_eqp.setFixedSize(150, 30)
@@ -474,7 +448,7 @@ class DisplayCapteur(anr.Capteur, QWidget):
         self.updated_outside = False
 
 class DisplayActionneur(anr.Actionneur, QWidget):
-    """Combinaise d'un objet Actionneur et d'un QWidget"""
+    """ Combinaison d'un objet Actionneur et d'un QWidget """
     def __init__(self, parent_robot, nom, min_val, max_val, step=1, unite=None):
         QWidget.__init__(self)
         anr.Actionneur.__init__(self, nom, min_val, max_val, step, unite)
