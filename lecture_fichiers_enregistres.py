@@ -45,7 +45,8 @@ class Lecteur :
             else :
                 self.timer.timeout.disconnect ()
                 self.window.button_play.setChecked (False)
-                self.window.button_play.setStyleSheet ("background-color: lightgrey")
+                self.window.button_play.setStyleSheet ("")
+                self.window.playback_sgnl.emit([-1, 0, 0])
                 self.reading = False
             if words [2]== 'PosReport':
                 self.window.backend.radio.on_posreg ("Lecteur",words [3], words [4], words [5], words [6])
@@ -98,7 +99,8 @@ class Lecteur :
             else:
                 self.timer.timeout.disconnect ()
                 self.window.button_play.setChecked (False)
-                self.window.button_play.setStyleSheet ("background-color: lightgrey")
+                self.window.button_play.setStyleSheet ("")
+                self.window.playback_sgnl.emit([-1, 0, 0])
                 self.reading = False
             if words [1] in ('PosCmd', 'PosCmdOrient'):
                 rid, x, y, theta = words [3], words [4], words [5], (words [6] if len (words)==7 else None)

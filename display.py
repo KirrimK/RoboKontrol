@@ -503,6 +503,14 @@ class DisplayActionneur(anr.Actionneur, QWidget):
         self.layout_discret.addWidget(self.doublespinbox_eqp)
         self.gridlayout_eqp.addLayout(self.layout_discret, 0, 1, 1, 1, QT_RIGHT)
 
+        self.label_command.setText("None")
+        self.label_command.setFixedSize(75, 30)
+        self.label_command.setReadOnly(True)
+        self.label_command.setAlignment(QT_CENTER)
+        self.gridlayout_eqp.addWidget(self.label_command, 1, 1, 1, 1, QT_RIGHT)
+        self.label_last_command.setText("Dern. Cmd:")
+        self.gridlayout_eqp.addWidget(self.label_last_command, 1, 0, 1, 1, QT_LEFT)
+
     def set_state(self, valeur):
         """Change la valeur
 
@@ -510,7 +518,6 @@ class DisplayActionneur(anr.Actionneur, QWidget):
         - valeur (float)"""
         anr.Binaire.set_state(self, valeur)
         self.updated_outside = True
-        self.label_command.setText(str(valeur))
         self.slider_equipement.setValue(int(valeur))
         self.doublespinbox_eqp.setValue(valeur)
         self.updated_outside = False
