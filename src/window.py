@@ -10,7 +10,7 @@ from PyQt5.QtCore import pyqtSlot, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon
 from carte import MapView
 import display as dsp
-import externals
+import param_files
 import lecteur as lect
 
 WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;border-radius: 2px} "\
@@ -82,7 +82,7 @@ class Window(QMainWindow):
 
         self.backend.annu = self.inspecteur
 
-        self.settings_dict = externals.get_settings()
+        self.settings_dict = param_files.get_settings()
         self.act_settings()
 
     def ui_setup_window(self):
@@ -245,7 +245,7 @@ class Window(QMainWindow):
                     self.settings_dict[setting_nm] = field_dict[setting_nm].isChecked()
                 else:
                     self.settings_dict[setting_nm] = field_dict[setting_nm].text()
-            externals.set_settings(self.settings_dict)
+            param_files.set_settings(self.settings_dict)
 
         update_btn = QPushButton("Sauvegarder")
         update_btn.setMinimumSize(16777215, 25)
