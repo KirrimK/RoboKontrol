@@ -14,6 +14,8 @@ import lecture_fichiers_enregistres as lect
 WINDOW_STYLE = "QLCDNumber{background-color: grey;border: 1px solid dimgray;color: white;"\
             "border-radius: 5px} QProgressBar{background-color : grey;"\
             "border: 2px solid dimgray;border-radius: 5px} "
+RECORD_BUTTON_ON = "background-color: rgb(180,0,0); border: 1px solid rgb(100,0,0)"
+RECORD_BUTTON_OFF = "background-color: rgb(220,220,220); border: 1px solid rgb(170,170,170);}"
 
 QSIZE = QSize(100, 30)
 QSIZE_BIG = QSize(160, 30)
@@ -266,21 +268,20 @@ class Window(QMainWindow):
         """ Enregistre des messages et commandes
         et arrête l'enregistrement lorsque cliquer une seconde fois """
         if self.button_record.isChecked():
-            self.button_record.setStyleSheet("background-color: red")
+            self.button_record.setStyleSheet(RECORD_BUTTON_ON)
             self.backend.record("BMC")
 
     @pyqtSlot()
     def on_stoprecord_button(self):
         """Bouton stop cliqué"""
         if self.button_record.isChecked():
-            self.button_record.setStyleSheet("background-color: lightgrey")
+            self.button_record.setStyleSheet(RECORD_BUTTON_OFF)
             self.backend.record("EMCD")
             self.button_record.setChecked(False)
         elif self.button_play.isChecked () or self.button_pause.isChecked():
             self.button_pause.setChecked (False)
             self.button_play.setChecked (False)
-            self.button_play.setStyleSheet ("background-color: lightgrey")
-            self.button_pause.setStyleSheet ("background-color: lightgrey")
+            self.button_play.setStyleSheet (RECORD_BUTTON_OFF)
             self.lecteur.onStopButton ()
 
     @pyqtSlot()
@@ -288,7 +289,7 @@ class Window(QMainWindow):
         """Bouton sauvegarde cliqué"""
         path = self.settings_dict["Enregistrement/Playback (Chemin Sauvegarde)"]
         if self.button_record.isChecked():
-            self.button_record.setStyleSheet("background-color: lightgrey")
+            self.button_record.setStyleSheet(RECORD_BUTTON_OFF)
             self.backend.record("EMCSD", path)
             self.button_record.setChecked(False)
 
@@ -297,7 +298,7 @@ class Window(QMainWindow):
         """Bouton play cliqué"""
         if self.button_pause.isChecked ():
             self.button_pause.setChecked (False)
-            self.button_pause.setStyleSheet ("background-color: lightgrey")
+            self.button_pause.setStyleSheet (RECORD_BUTTON_OFF)
         self.lecteur.onPlayButton ()
 
     @pyqtSlot ()
@@ -305,9 +306,9 @@ class Window(QMainWindow):
         """Bouton pause cliqué"""
         if self.button_play.isChecked ():
             self.button_play.setChecked (False)
-            self.button_play.setStyleSheet ("background-color: lightgrey")
+            self.button_play.setStyleSheet (RECORD_BUTTON_OFF)
             self.button_pause.setChecked (True)
-            self.button_pause.setStyleSheet ('background-color: red')
+            self.button_pause.setStyleSheet (RECORD_BUTTON_ON)
             self.lecteur.onPauseButton ()
 
 @pyqtSlot()
