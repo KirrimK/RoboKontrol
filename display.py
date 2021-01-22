@@ -284,11 +284,6 @@ class DisplayRobot(anr.Robot, QWidget):
         cmd = [int(i) for i in self.qlineedit_pos_cmd.text().split(' : ')]
         self.backend.sendposcmd_robot(self.rid, cmd)
 
-    #@pyqtSlot()
-    #def emergency_buttonPressed(self):
-    #    """Appelée si le bouton d'arrêt d'urgence d'un robot est pressé"""
-    #    self.backend.emergency_stop_robot(self.rid)
-
 class DisplayBinaire(anr.Binaire, QWidget):
     """Une combinaison de l'objet Equipement et d'un QWidget"""
     def __init__(self, parent, nom):

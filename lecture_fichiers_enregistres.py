@@ -3,6 +3,9 @@
 from time import time
 from PyQt5.QtCore import QTimer
 
+BUTTON_ON = "QPushButton{background-color: rgb(180,0,0); border: 1px solid rgb(100,0,0)}"
+BUTTON_OFF = "QPushButton{background-color: rgb(220,220,220); border: 1px solid rgb(170,170,170);}"
+
 class Lecteur :
     """Classe permettant la lecture des fichiers. S'initialise avec la fenêtre."""
     def __init__ (self, window):
@@ -45,7 +48,7 @@ class Lecteur :
             else :
                 self.timer.timeout.disconnect ()
                 self.window.button_play.setChecked (False)
-                self.window.button_play.setStyleSheet ("background-color: lightgrey")
+                self.window.button_play.setStyleSheet(BUTTON_OFF)
                 self.window.playback_sgnl.emit([-1, 0, 0])
                 self.reading = False
             if words [2]== 'PosReport':
@@ -86,7 +89,7 @@ class Lecteur :
             else:
                 self.timer.timeout.disconnect ()
                 self.window.button_play.setChecked (False)
-                self.window.button_play.setStyleSheet ("background-color: lightgrey")
+                self.window.button_play.setStyleSheet(BUTTON_OFF)
                 self.window.playback_sgnl.emit([-1, 0, 0])
                 self.reading = False
             if words [1] in ('PosCmd', 'PosCmdOrient'):
@@ -112,12 +115,12 @@ class Lecteur :
         if path not in (None, ""):
             if "essages" in path :
                 self.window.button_play.setChecked (True)
-                self.window.button_play.setStyleSheet ("background-color: red")
+                self.window.button_play.setStyleSheet(BUTTON_ON)
                 self.readMessages (path)
                 self.window.playback_sgnl.emit([0, 0, 1])
             elif "ommand" in path :
                 self.window.button_play.setChecked (True)
-                self.window.button_play.setStyleSheet ("background-color: red")
+                self.window.button_play.setStyleSheet(BUTTON_ON)
                 self.readCommands (path)
                 self.window.playback_sgnl.emit([0, 0, 0])
 
