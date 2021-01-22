@@ -70,11 +70,19 @@ class Lecteur :
                         self.window.inspecteur.find (rid).qlineedit_pos_cmd.setText (texte)
                 elif words [2] == "ActuatorCmd":
                     rid, sid, valeur = words [3], words [4], words [5]
+<<<<<<< HEAD
                     eqp_display = self.window.inspecteur.find (rid,sid)
                     if eqp_display is not None and isinstance(eqp_display, ACT):
                         eqp_display.updt_cmd (valeur)
         except Exception as bug:
             print ("La ligne [{}] pose un problème.\n{}".format (line, bug))
+=======
+                eqp_display = self.window.inspecteur.find (rid,sid)
+                if eqp_display is not None and isinstance(eqp_display, ACT):
+                    eqp_display.updt_cmd (valeur)
+        except Exception as e:
+            print ("La ligne [{}] pose un problème.".format (line), e)
+>>>>>>> ffe695c52cc881e95cb913db1f2b1b8d00b64696
             self.timer.start (1)
 
     def read_commands (self, nom_fichier):

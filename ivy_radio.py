@@ -1,5 +1,6 @@
 """Module ivy_radio.py - module de gestion des communications via Ivy-python"""
 
+import logging
 from time import time, gmtime
 from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
 
@@ -179,6 +180,7 @@ class Radio :
     def start (self):
         """Démare la radio"""
         IvyStart (self.bus)
+        logging.getLogger('Ivy').setLevel(logging.WARN)
 
     def stop (self, *args):
         """Appelé automatiquement à l'arrêt du programme. Enlève la radio du bus Ivy."""
