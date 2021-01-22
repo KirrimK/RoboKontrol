@@ -36,19 +36,19 @@ class Lecteur :
     def readMsg(self):
         """Méthode utilisée pour lire le message à la fin de self.data
         /!\\ Si ce message est une commande de l'interface, elle ne sera pas envoyée."""
-        
+        if len (self.data) == 0:
+            self.timer.timeout.disconnect ()
+            self.window.button_play.setChecked (False)
+            self.window.button_play.setStyleSheet ("")
+            self.window.playback_sgnl.emit([-1, 0, 0])
+            self.reading = False
+            return (None)
         line = self.data.pop (-1)
         try:
             words = line.split ()
-            if len (self.data)>0:
-                self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
-                self.window.playback_sgnl.emit([1, len(self.data), 1])
-            else :
-                self.timer.timeout.disconnect ()
-                self.window.button_play.setChecked (False)
-                self.window.button_play.setStyleSheet ("")
-                self.window.playback_sgnl.emit([-1, 0, 0])
-                self.reading = False
+            self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
+            self.window.playback_sgnl.emit([1, len(self.data), 1])
+
             if words [2]== 'PosReport':
                 self.window.backend.radio.on_posreg ("Lecteur",words [3], words [4], words [5], words [6])
             elif words [2] == "ActuatorReport":
@@ -92,18 +92,18 @@ class Lecteur :
 
     def readCmd (self):
         """Méthode appelée pour envoyer la dernière commande de self.data"""
+        if len (self.data) == 0:
+            self.timer.timeout.disconnect ()
+            self.window.button_play.setChecked (False)
+            self.window.button_play.setStyleSheet ("")
+            self.window.playback_sgnl.emit([-1, 0, 0])
+            self.reading = False
+            return (None)
         line = self.data.pop (-1)
         try :
             words = line.split()
-            if len (self.data)>0:
-                self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
-                self.window.playback_sgnl.emit([1, len(self.data), 0])
-            else:
-                self.timer.timeout.disconnect ()
-                self.window.button_play.setChecked (False)
-                self.window.button_play.setStyleSheet ("")
-                self.window.playback_sgnl.emit([-1, 0, 0])
-                self.reading = False
+            self.timer.start ((int (self.data[-1].split()[0])-int (words[0])))
+            self.window.playback_sgnl.emit([1, len(self.data), 0])
             if words [1] in ('PosCmd', 'PosCmdOrient'):
                 rid, x, y, theta = words [3], words [4], words [5], (words [6] if len (words)==7 else None)
                 if self.window.backend.annu.check_robot (words [3]):
