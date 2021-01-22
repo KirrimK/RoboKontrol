@@ -414,19 +414,16 @@ class DisplayCapteur(anr.Capteur, QWidget):
         self.lcdnumber_ping_eqp.setFixedSize(QLCD_SIZE2)
         self.gridlayout_eqp.addWidget(self.lcdnumber_ping_eqp, 2, 1, 1, 1, QT_RIGHT)
 
-        self.lcdnumber_eqp.setMinimumSize(150, 30)
-        self.gridlayout_eqp.addWidget(self.lcdnumber_eqp, 0, 1, 1, 1, QT_RIGHT)
-
-        self.progressbar_eqp = QProgressBar()
-        self.progressbar_eqp.setRange(int(self.min_val), int(self.max_val))
-        self.progressbar_eqp.setAlignment(QT_CENTER)
-        self.progressbar_eqp.setFormat("%v")
-        self.progressbar_eqp.setFixedSize(150, 30)
-        self.gridlayout_eqp.addWidget(self.progressbar_eqp, 0, 1, 1, 1, QT_RIGHT)
-
         if self.min_val is None or self.max_val is None or self.step is None:
+            self.lcdnumber_eqp.setMinimumSize(150, 30)
+            self.gridlayout_eqp.addWidget(self.lcdnumber_eqp, 0, 1, 1, 1, QT_RIGHT)
             self.progressbar_eqp.hide()
         else:
+            self.progressbar_eqp.setRange(int(self.min_val), int(self.max_val))
+            self.progressbar_eqp.setAlignment(QT_CENTER)
+            self.progressbar_eqp.setFormat("%v")
+            self.progressbar_eqp.setFixedSize(150, 30)
+            self.gridlayout_eqp.addWidget(self.progressbar_eqp, 0, 1, 1, 1, QT_RIGHT)
             self.lcdnumber_eqp.hide()
 
     #calcul et mise à jour du ping
