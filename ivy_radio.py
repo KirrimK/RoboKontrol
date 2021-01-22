@@ -127,7 +127,7 @@ class Radio :
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant la position"""
         if self.record_msgs :
-            message = "PosReport {} {} {} {}".format (args[0], args[1], args [2], args [3])
+            message = "PosReport {} {} {} {}".format (args[0]+'_ghost', args[1], args [2], args [3])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
             self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
@@ -139,7 +139,7 @@ class Radio :
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant la description d'un equipement"""
         if self.record_msgs :
-            message = "ActuatorDecl {} {} {} {} {} {} {}".format (args [0], args [1], args [2], args [3],
+            message = "ActuatorDecl {} {} {} {} {} {} {}".format (args [0]+'_ghost', args [1], args [2], args [3],
                         args [4], args [5], args [6])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
             self.backend.widget.record_signal.emit(1)
@@ -152,7 +152,7 @@ class Radio :
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant un retour de capteur"""
         if self.record_msgs :
-            message = "ActuatorReport {} {} {}".format (args[0], args [1], args [2])
+            message = "ActuatorReport {} {} {}".format (args[0]+'_ghost', args [1], args [2])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
             self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
@@ -166,7 +166,10 @@ class Radio :
         if self.record_cmds :
             self.cmds_buffer.append ((time(),cmd))
         if self.record_msgs :
-            self.msgs_buffer.append ((time(),'Interface',cmd))
+            txt = cmd.split ()
+            txt [1] = txt[1]+'_ghost'
+            txt = " ".join (txt)
+            self.msgs_buffer.append ((time(),'Interface',txt))
         if self.record_cmds or self.record_msgs:
             self.backend.widget.record_signal.emit(1)
         IvySendMsg (cmd)
