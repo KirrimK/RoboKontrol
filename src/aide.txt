@@ -18,6 +18,7 @@ vous pouvez utilisez les touches suivantes :
 	- S : Vers l'arrière
 	- Q : Tourner vers la gauche
 	- D : Tourner vers la droite
+	- Shift: Avancer/Reculer plus vite
 
 ———————————————————————————————————————
 	ENREGISTREMENT

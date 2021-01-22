@@ -33,6 +33,7 @@ Pour envoyer une commande de vitesse au robot, vous pouvez utilisez les touches 
 - S : Vers l'arrière
 - Q : Tourner vers la gauche
 - D : Tourner vers la droite
+- Shift: Avancer/Reculer plus vite
 
 #### ENREGISTREMENT
 
@@ -48,6 +49,14 @@ Il arrête l'enregistrement et sauvegarde les données dans le dossier dont l'ad
 
 Pour le bouton lecture, vous avez besoin d'un fichier respectant la même syntaxe que ceux qu'enregistre l'interface. Selectionnez ce fichier dans le menu qui s'ouvre après l'appui du bouton.
 
+Sélectionner un fichier "messages" vous permettra de revoir
+les déplacements effectués par vos robots ainsi
+que les états des différents équipements de celui-ci.
+
+Sélectionner un fichier "commandes" vous permettra de rejouer une séquence
+de commandes enregistrées précédemment,
+qui seront exécutées par les robots actuellement connectés,
+si leur nom correspond à ceux des robots mentionnés dans le fichier.
 
 ---
 <div>L'icone de l'application a été réalisée par <a href="https://creativemarket.com/eucalyp" title="Eucalyp">Eucalyp</a> du site <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
