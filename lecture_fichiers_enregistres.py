@@ -55,6 +55,16 @@ class Lecteur :
                 self.window.backend.radio.on_actudecl ("Lecteur",words [3], words [4], words [5], words [6],
                 words [7],words [8])
             elif words [1] == 'Interface':
+                if words [2] in ('PosCmd', 'PosCmdOrient'):
+                    rid, x, y, theta = words [3], words [4], words [5], (words [6] if len (words)==7 else None)
+                    if self.window.backend.annu.check_robot (words [3]):
+                        anc_texte = self.window.inspecteur.find (rid).qlineedit_pos_cmd.text ()
+                        texte = "{:04d} : {:04d}".format (int(float (x)), int(float(y)))
+                        if theta is not None:
+                            texte += " : {:03d}".format (int (float(theta)/3.141592654*180))
+                        else :
+                            texte += anc_texte [10:]
+                        self.window.inspecteur.find (rid).qlineedit_pos_cmd.setText (texte)
                 print (' '.join (words [2:]))
         except Exception :
             print ("La ligne [{}] pose un problème.".format (line))
