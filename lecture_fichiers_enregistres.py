@@ -4,6 +4,8 @@ from time import time
 from PyQt5.QtCore import QTimer
 from display import DisplayActionneur as ACT
 
+#TODO: reformater le code pour rendre plus lisible, et éviter répétitions
+
 class Lecteur :
     """Classe permettant la lecture des fichiers. S'initialise avec la fenêtre."""
     def __init__ (self, window):
@@ -11,29 +13,29 @@ class Lecteur :
         self.timer = QTimer ()
         self.timer.setSingleShot (True)
         self.reading = False
-        self.pausedTimeSave = None
+        self.paused_time_save = None
         self.data = []
-        self.heureDebut = None
+        self.heure_debut = None
 
-    def readMessages (self, nomFichier) :
+    def read_messages (self, nom_fichier) :
         """Méthode utilisée pour lire les fichiers contenants des messages,
         et executer les messages comme s'ils avaient envoyés par Ivy.
         /!\\ Les commandes de l'interface ne seront pas envoyées avec ce mode."""
         if not self.reading :
             self.reading = "MSG"
-            with open (nomFichier, 'r') as file :
+            with open (nom_fichier, 'r') as file :
                 self.data = file.readlines ()
-            self.heureDebut = time ()
+            self.heure_debut = time ()
             self.data = self.data [3:]
             self.data.reverse ()
             print (self.data[-1])
-            tempsMessage = int (self.data [-1].split ()[0])
-            self.timer.timeout.connect (lambda : self.readMsg())
-            self.timer.start (tempsMessage)
+            temps_message = int (self.data [-1].split ()[0])
+            self.timer.timeout.connect (self.read_msg)
+            self.timer.start (temps_message)
         else :
-            self.timer.start (self.pausedTimeSave)
+            self.timer.start (self.paused_time_save)
 
-    def readMsg(self):
+    def read_msg(self):
         """Méthode utilisée pour lire le message à la fin de self.data
         /!\\ Si ce message est une commande de l'interface, elle ne sera pas envoyée."""
 
@@ -76,20 +78,20 @@ class Lecteur :
             print ("La ligne [{}] pose un problème.".format (line))
             self.timer.start (1)
 
-    def readCommands (self, nomFichier):
+    def read_commands (self, nom_fichier):
         """Méthode utilisée pour lire un fichier contenant des commandes de l'interface."""
         if self.reading:
-            self.timer.start (self.pausedTimeSave)
+            self.timer.start (self.paused_time_save)
         else :
             self.reading = "CMD"
-            with open (nomFichier, 'r') as file:
+            with open (nom_fichier, 'r') as file:
                 self.data = file.readlines ()[3:]
             self.data.reverse ()
-            tempsCommande = int (self.data [-1].split ()[0])
-            self.timer.timeout.connect (self.readCmd)
-            self.timer.start (tempsCommande)
+            temps_commande = int (self.data [-1].split ()[0])
+            self.timer.timeout.connect (self.read_cmd)
+            self.timer.start (temps_commande)
 
-    def readCmd (self):
+    def read_cmd (self):
         """Méthode appelée pour envoyer la dernière commande de self.data"""
         line = self.data.pop (-1)
         try :
@@ -139,12 +141,12 @@ class Lecteur :
             if "essages" in path :
                 self.window.button_play.setChecked (True)
                 self.window.button_play.setStyleSheet ("background-color: red")
-                self.readMessages (path)
+                self.read_messages (path)
                 self.window.playback_sgnl.emit([0, 0, 1])
             elif "ommand" in path :
                 self.window.button_play.setChecked (True)
                 self.window.button_play.setStyleSheet ("background-color: red")
-                self.readCommands (path)
+                self.read_commands (path)
                 self.window.playback_sgnl.emit([0, 0, 0])
 
     def onStopButton (self):
@@ -158,6 +160,6 @@ class Lecteur :
 
     def onPauseButton (self):
         """Méthode appelée par un appui du bouton pause. Met la lecture du fichier en pause."""
-        self.pausedTimeSave = self.timer.remainingTime ()
+        self.paused_time_save = self.timer.remainingTime ()
         self.window.playback_sgnl.emit([-2, 0, 0])
         self.timer.stop ()
