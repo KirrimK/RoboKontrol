@@ -331,6 +331,7 @@ class Window(QMainWindow):
         aide.label = QLabel("".join(list_aide))
         aide.scroll.setWidget(aide.label)
         aide.layout.addWidget(aide.scroll)
+        aide.setFixedSize(750, 750)
         aide.exec_()
 
 def main(backend):
