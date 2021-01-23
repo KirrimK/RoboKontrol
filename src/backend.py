@@ -21,9 +21,9 @@ class WidgetBackend (QWidget):
     def __init__ (self, parent_backend):
         super().__init__()
         self.backend = parent_backend
-        self.position_updated.connect (self.backend.onPosRegSignal)
-        self.equipement_updated.connect (self.backend.onCaptRegSignal)
-        self.ActuDeclSignal.connect (self.backend.onActuDeclSignal)
+        self.position_updated.connect (self.backend.on_pos_reg_signal)
+        self.equipement_updated.connect (self.backend.on_capt_reg_signal)
+        self.ActuDeclSignal.connect (self.backend.on_actu_decl_signal)
 
 class Backend:
     """Un objet faisant le lien entre un Annuaire (module annuaire)
@@ -124,21 +124,21 @@ class Backend:
 
     #Réactions aux signaux Qt
 
-    def onPosRegSignal(self, liste):
+    def on_pos_reg_signal(self, liste):
         """Méthode appelée automatiquement par on_posreg
         Transmet les valeurs envoyées par le robot vers l'annuaire
         Input :
             [rid (str), x (str), y (str), theta (str)] (list)"""
-        rid, x, y, theta, _ = liste [0], liste [1], liste [2], liste [3], liste [4]
+        rid, posx, posy, theta = liste [0], liste [1], liste [2], liste [3]
         if self.annu is not None:
             if not self.annu.check_robot(rid):
                 self.track_robot(rid)
                 self.radio.send_cmd (rd.DESCR_CMD.format (rid))
-            self.annu.find (rid).set_pos (float (x), float(y), float(theta)*180/3.141592654)
+            self.annu.find (rid).set_pos (float (posx), float(posy), float(theta)*180/3.141592654)
             self.widget.UpdateTrigger.emit([])
             self.widget.MapTrigger.emit([])
 
-    def onActuDeclSignal (self, liste):
+    def on_actu_decl_signal (self, liste):
         """Fonction appelée automatiquement par on_actudecl.
         Ajoute l'actionnneur aid sur le robot rid.
         Si aid est le nom d'un capteur déjà présent sur le robot, la valeur est gardée.
@@ -148,33 +148,32 @@ class Backend:
         rid, aid, minv, maxv = liste [0], liste [1], liste [2], liste [3]
         step, droits, unit = liste [4], liste [5], liste [6]
         if self.annu is not None:
+
             if droits == 'RW':
-                binaire = False
-                if float (minv) + float (step) >= float (maxv) :
-                    binaire = True
-                if self.annu.find(rid,aid) is not None :
+                valeur = None
+                if self.annu.find(rid,aid) is not None:
+                    #un équipement existe déjà
                     valeur = self.annu.find(rid,aid).get_state()[0]
-                    self.annu.find(rid,aid).set_state(valeur)
-                if binaire :
+                if float (minv) + float (step) >= float (maxv):
                     self.annu.find(rid).create_eqp(aid, "Binaire")
-                else :
+                else:
                     self.annu.find(rid).create_eqp(aid, "Actionneur", float(minv), float(maxv),
                                                     float(step), unit)
+                if valeur is not None:
+                    #restauration de la valeur après la mise à jour de l'équipement
+                    self.annu.find(rid,aid).set_state(valeur)
+
             elif droits == 'READ':
-                add = False
                 if not self.annu.find (rid).check_eqp (aid):
-                    add, val = True, None
-                    if add:
-                        self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
-                        self.annu.find (rid, aid).set_state (val)
+                    self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
                 elif self.annu.find (rid, aid).get_type () is not dsp.DisplayActionneur :
-                    add, val = True, self.annu.find (rid, aid).get_state() [0]
-                    if add:
-                        self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
-                        self.annu.find (rid, aid).set_state (val)
+                    val = self.annu.find (rid, aid).get_state() [0]
+                    self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
+                    self.annu.find (rid, aid).set_state (val)
+
             self.widget.UpdateTrigger.emit([])
 
-    def onCaptRegSignal (self, liste):
+    def on_capt_reg_signal (self, liste):
         """Fonction appelée automatiquement par on_captreg.
         Change la valeur du capteur sid sur le robot rid.
         Si aucun robot rid n'est connu, le robot est ajouté.
@@ -190,6 +189,8 @@ class Backend:
                 self.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
             self.annu.find (rid,sid).set_state (float (valeur))
             self.widget.UpdateTrigger.emit([])
+
+    #Interaction avec robots
 
     def track_robot(self, robot_name):
         """Invoqué lors de la demande de tracking d'un robot via l'interface graphique,
@@ -279,7 +280,10 @@ class Backend:
             self.radio.send_cmd (rd.SPEED_CMD.format (rid, v_x, v_y, v_theta*3.141592654/180))
 
     def send_descr_cmd (self, rid):
-        """Envoi de demande de descritpion au robot"""
+        """Envoi de demande de description au robot
+
+        Entrée:
+            - rid (str): nom du robot"""
         if self.radio_started and self.annu is not None:
             self.radio.send_cmd (rd.DESCR_CMD.format (rid))
 
@@ -295,7 +299,6 @@ class Backend:
         if self.annu is not None and self.annu.find(rid) and self.annu.find(rid, eqp_name):
             if  self.annu.find (rid).isStopped :
                 self.annu.find (rid).isStopped = False
-            #self.annu.find(rid, eqp_name).updt_cmd() (déjà fait dans display)
         self.radio.send_cmd (rd.ACTUATOR_CMD.format (rid, eqp_name, state))
 
     def get_all_robots(self):

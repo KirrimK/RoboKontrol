@@ -4,8 +4,6 @@ from time import time
 from PyQt5.QtCore import QTimer
 from display import DisplayActionneur as ACT
 
-#TODO: reformater le code pour rendre plus lisible, et éviter répétitions
-
 class Lecteur :
     """Classe permettant la lecture des fichiers. S'initialise avec la fenêtre."""
     def __init__ (self, window):
@@ -47,32 +45,32 @@ class Lecteur :
         line = self.data.pop (-1)
         try:
             words = line.split ()
-            self.timer.start ((int (self.data[-1].split()[0])-int (words[0]))if len (self.data)!= 0 else 1)
+            self.timer.start( (int(self.data[-1].split()[0]) - int(words[0])) if len (self.data)!= 0 else 1)
             self.window.playback_sgnl.emit([1, len(self.data), 1])
-
-            if words [2]== 'PosReport':
-                self.window.backend.radio.on_posreg ("Lecteur",words [3], words [4], words [5], words [6])
-            elif words [2] == "ActuatorReport":
-                self.window.backend.radio.on_captreg ("Lecteur",words [3], words [4], words [5])
+            rid = words[3]
+            if words[2] == 'PosReport':
+                self.window.backend.radio.on_posreg ("Lecteur", rid, words[4], words[5], words[6])
+            elif words[2] == "ActuatorReport":
+                self.window.backend.radio.on_captreg ("Lecteur", rid, words[4], words[5])
             elif words[2] == 'ActuatorDecl':
-                self.window.backend.radio.on_actudecl ("Lecteur",words [3], words [4], words [5], words [6],
-                words [7],words [8], words[9])
-            elif words [1] == 'Interface':
-                if words [2] in ('PosCmd', 'PosCmdOrient'):
-                    rid, x, y, theta = words [3], words [4], words [5], (words [6] if len (words)==7 else None)
-                    if self.window.inspecteur.check_robot (words [3]):
-                        anc_texte = self.window.inspecteur.find (rid).qlineedit_pos_cmd.text ()
-                        texte = "{:04d} : {:04d}".format (int(float (x)), int(float(y)))
+                self.window.backend.radio.on_actudecl ("Lecteur", rid, words[4], words[5], words[6],
+                words[7], words[8], words[9])
+            elif words[1] == 'Interface':
+                if words[2] in ('PosCmd', 'PosCmdOrient'):
+                    x, y, theta = words[4], words[5], (words[6] if len(words)==7 else None)
+                    if self.window.inspecteur.check_robot(words[3]):
+                        anc_texte = self.window.inspecteur.find(rid).qlineedit_pos_cmd.text()
+                        texte = "{:04d} : {:04d}".format (int(float(x)), int(float(y)))
                         if theta is not None:
                             texte += " : {:03d}".format (int (float(theta)/3.141592654*180))
                         else :
-                            texte += anc_texte [10:]
-                        self.window.inspecteur.find (rid).qlineedit_pos_cmd.setText (texte)
-                elif words [2] == "ActuatorCmd":
-                    rid, sid, valeur = words [3], words [4], words [5]
-                    eqp_display = self.window.inspecteur.find (rid,sid)
+                            texte += anc_texte[10:]
+                        self.window.inspecteur.find(rid).qlineedit_pos_cmd.setText(texte)
+                elif words[2] == "ActuatorCmd":
+                    sid, valeur = words[4], words[5]
+                    eqp_display = self.window.inspecteur.find(rid,sid)
                     if eqp_display is not None and isinstance(eqp_display, ACT):
-                        eqp_display.updt_cmd (valeur)
+                        eqp_display.updt_cmd(valeur)
         except Exception as bug:
             print ("La ligne [{}] pose un problème.\n{}".format (line, bug))
             self.timer.start (1)
@@ -102,29 +100,30 @@ class Lecteur :
         line = self.data.pop (-1)
         try :
             words = line.split()
-            self.timer.start ((int (self.data[-1].split()[0])-int (words[0]))if len (self.data)!= 0 else 1)
+            self.timer.start( (int(self.data[-1].split()[0]) - int(words[0])) if len (self.data) != 0 else 1)
             self.window.playback_sgnl.emit([1, len(self.data), 0])
+            rid = words[2]
             if words [1] in ('PosCmd', 'PosCmdOrient'):
-                rid, x, y, theta = words [2], words [3], words [4], (words [5] if len (words)==6 else None)
-                if self.window.backend.annu.check_robot (rid):
-                    anc_texte = self.window.inspecteur.find (rid).qlineedit_pos_cmd.text ()
+                x, y, theta = words[3], words[4], (words[5] if len(words) == 6 else None)
+                if self.window.backend.annu.check_robot(rid):
+                    anc_texte = self.window.inspecteur.find(rid).qlineedit_pos_cmd.text()
                     texte = "{:04d} : {:04d}".format (int(float (x)), int(float(y)))
                     if theta is not None:
-                        texte += " : {:03d}".format (int (float(theta)/3.141592654*180))
+                        texte += " : {:03d}".format (int(float(theta)/3.141592654*180))
                     else :
-                        texte += anc_texte [10:]
-                    self.window.inspecteur.find (rid).qlineedit_pos_cmd.setText (texte)
-                self.window.backend.sendposcmd_robot (rid,(x,y,(float (theta) if len (words) == 6 else None)))
+                        texte += anc_texte[10:]
+                    self.window.inspecteur.find(rid).qlineedit_pos_cmd.setText(texte)
+                self.window.backend.sendposcmd_robot (rid, (x, y, (float(theta) if len (words) == 6 else None)))
             elif words [1] == 'Shutdown' :
-                self.window.backend.stopandforget_robot (words [2])
+                self.window.backend.stopandforget_robot (rid)
             elif words [1] == "Emergency" :
-                self.window.backend.emergency_stop_robot (words [2])
+                self.window.backend.emergency_stop_robot (rid)
             elif words [1] == "ActuatorsRequest":
-                self.window.backend.send_descr_cmd (words [2])
+                self.window.backend.send_descr_cmd (rid)
             elif words [1] == "SpeedCmd":
-                self.window.backend.send_speed_cmd (words [2], words [3], words [4], float (words [5]))
+                self.window.backend.send_speed_cmd (rid, words [3], words [4], float (words [5]))
             elif words [1] == "ActuatorCmd" :
-                rid, sid, val = words [2], words [3], words [4]
+                sid, val = words [3], words [4]
                 self.window.backend.sendeqpcmd (rid, sid, val)
                 eqp_display = self.window.inspecteur.find (rid,sid)
                 if eqp_display is not None and isinstance(eqp_display, ACT):

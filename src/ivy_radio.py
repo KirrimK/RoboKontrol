@@ -77,7 +77,6 @@ class Radio :
         if 'cmds' in args :
             self.record_cmds = True
 
-
     def register_stop (self, save = True, del_buffers = True, *args):
         """Arrête un enregistrement, supprime optionellemnt le tampon,
         et le sauvegarde vers un document .txt
@@ -87,43 +86,42 @@ class Radio :
             _ args : autres arguments entrés ('all', 'msgs' et/ou 'cmds' (strings))
                 considérés comme un tuple"""
         path = args [-1]
-        if 'all' in args :
+        #correction du chemin d'enregistrement si nécessaire
+        if path is not None:
+            if path != "":
+                if path [-1] != "/":
+                    path += "/"
+        else :
+            path = ""
+        tps = time()
+        if 'all' in args:
             args += ('msgs','cmds')
+
         if 'msgs' in args :
             self.record_msgs = False
-            if save :
-                if path is not None :
-                    if path != "":
-                        if path [-1] != "/":
-                            path += "/"
-                else :
-                    path = ""
-                timestamp_deb = time()
-                with open ('{}messages{}.txt'.format (path, int (timestamp_deb)),'a') as fichier :
-                    fichier.write ('{}\n\nTemps (ms)\tExpediteur\t\t\tMessage\n'.format (temps_deb (timestamp_deb)))
+            if save:
+                with open ('{}messages{}.txt'.format (path, int (tps)),'a') as fichier:
+                    fichier.write('{}\n\nTemps (ms)\tExpediteur\t\t\tMessage\n'.format(temps_deb(tps)))
                     if self.msgs_buffer != []:
                         premier_temps = self.msgs_buffer[0][0]
                         for ligne in self.msgs_buffer:
-                            fichier.write (temps (ligne[0], premier_temps)+'\t\t'+ligne[1]+'\t\t'+ligne[2]+'\n')
-            if del_buffers :
+                            fichier.write(temps(ligne[0], premier_temps)+'\t\t'+ligne[1]+'\t\t'+ligne[2]+'\n')
+            if del_buffers:
                 self.msgs_buffer = []
-        if 'cmds' in args :
+
+        if 'cmds' in args:
             self.record_cmds = False
-            if save :
-                if path != "":
-                    if path [-1] != "/":
-                        path += "/"
-                tps = time ()
-                with open ('{}commandes{}.txt'.format (path, int(tps)),'a') as fichier :
-                    fichier.write ('{}\n\nTemps (ms)\tCommande\n'.format (temps_deb(tps)))
+            if save:
+                with open('{}commandes{}.txt'.format (path, int(tps)),'a') as fichier:
+                    fichier.write('{}\n\nTemps (ms)\tCommande\n'.format (temps_deb(tps)))
                     if self.cmds_buffer != []:
                         premier_temps = self.cmds_buffer[0][0]
                         for ligne in self.cmds_buffer:
-                            fichier.write (temps (ligne[0], premier_temps)+'\t\t'+ligne[1]+'\n')
-            if del_buffers :
+                            fichier.write(temps(ligne[0], premier_temps)+'\t\t'+ligne[1]+'\n')
+            if del_buffers:
                 self.cmds_buffer = []
-     #REACTIONS AUX REGEXPS
 
+    #REACTIONS AUX REGEXPS
     def on_posreg (self, sender, *args):
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant la position"""
@@ -140,8 +138,8 @@ class Radio :
         """Fonction faisant le lien entre Ivy et le thread de main
         Envoie un signal Qt contenant la description d'un equipement"""
         if self.record_msgs :
-            message = "ActuatorDecl {} {} {} {} {} {} {}".format (args [0]+'_ghost', args [1], args [2], args [3],
-                        args [4], args [5], args [6])
+            message = "ActuatorDecl {} {} {} {} {} {} {}".format (args [0]+'_ghost',
+                            args [1], args [2], args [3], args [4], args [5], args [6])
             self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
             self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
@@ -175,7 +173,6 @@ class Radio :
             self.backend.widget.record_signal.emit(1)
         IvySendMsg (cmd)
 
-
     #Autres méthodes très utiles
     def start (self):
         """Démare la radio"""
@@ -185,14 +182,3 @@ class Radio :
     def stop (self, *args):
         """Appelé automatiquement à l'arrêt du programme. Enlève la radio du bus Ivy."""
         IvyStop()
-
-#if __name__ == '__main__' :
-#    #Tests du programme
-#    Radio1 = Radio ()
-#    Radio1.start()
-#    sleep (0.5) #/!\ Très important, la ligne précédente s'execute lentement
-#    #Actual tests :
-#    Radio1.send_cmd (POS_CMD.format ('test', 2000,0))
-#    #End tests
-#    sleep (1)
-#    Radio1.stop ()
