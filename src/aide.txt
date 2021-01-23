@@ -2,6 +2,9 @@ Bienvenue dans la section aide de RoboKontrol!
 Pour plus de détails, référez-vous au dépôt GitHub du projet:
 https://www.github.com/KirrimK/RoboKontrol
 
+Auteurs: Rémy Brévart, Victor De Crevoisier, Hippolyte Foulongne, Jacques Serien
+(N'hésitez pas à nous rapporter les bugs trouvés sur GitHub.)
+
 ———————————————————————————————————
 	CONNECTER UN ROBOT
 

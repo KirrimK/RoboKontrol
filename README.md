@@ -4,6 +4,9 @@ Une application Python/Qt servant d'interface pour le contrôle de robots et/ou 
 
 Développée pour le projet programmation python en première année ingénieur à [l'ENAC](https://www.enac.fr) dans le cadre du sujet "[Interface de contrôle d'un robot](https://e-campus.enac.fr/moodle/pluginfile.php/34661/course/section/23938/projet%20python%20-%20Interface%20de%20contr%C3%B4le%20dun%20robot.pdf)".
 
+Auteurs: Rémy Brévart, Victor De Crevoisier, Hippolyte Foulongne, Jacques Serien
+(N'hésitez pas à nous rapporter les bugs trouvés sur GitHub.)
+
 ## Installation:
 
 - Cloner le dépôt dans le dossier de votre choix: `git clone https://github.com/KirrimK/RoboKontrol`
