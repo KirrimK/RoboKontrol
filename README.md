@@ -24,6 +24,9 @@ Pour lancer l'application, executer `main.py` dans le dossier `src`.
 
 Les robots qui sont dans le canal Ivy de l'interface sont automatiquement affichés sur celle ci.
 
+Merci d'éviter de connecter des robots dont le nom se termine en "_ghost".
+Il est préférable de réserver ce genre de nom aux robots crées automatiquement lors d'une lecture de fichiers.
+
 #### COMMENT GUIDER LE ROBOT
 
 Pour sélectionner un robot, cliquer sur l'onglet portant son nom dans l'inspecteur, ou faites un clic droit sur sa représentation sur la carte.
