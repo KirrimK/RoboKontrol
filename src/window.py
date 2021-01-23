@@ -124,7 +124,7 @@ class Window(QMainWindow):
         self.button_pause.setFixedSize(QSIZE)
         self.button_pause.setText("||")
         self.button_pause.setCheckable (True)
-        self.button_pause.clicked.connect (self.onPauseButton)
+        self.button_pause.clicked.connect (self.on_pause_button)
         self.layout_menu.addWidget(self.button_pause)
 
         # Création du bouton arrêt
@@ -196,7 +196,7 @@ class Window(QMainWindow):
         if not self.button_pause.isChecked ():
             file_name = self.get_filename()
             self.settings_dict["Enregistrement/Playback (Dernière Lecture)"] = file_name
-        self.onPlayButton ()
+        self.on_play_button ()
 
     def get_filename(self):
         """Obtenir un nom de fichier à partir d'un QFileDialog"""
@@ -290,7 +290,7 @@ class Window(QMainWindow):
             self.button_play.setChecked (False)
             self.button_play.setStyleSheet (BUTTON_OFF)
             self.button_pause.setStyleSheet (BUTTON_OFF)
-            self.lecteur.onStopButton ()
+            self.lecteur.on_stop_button ()
 
     @pyqtSlot()
     def on_save_button(self):
@@ -302,22 +302,22 @@ class Window(QMainWindow):
             self.button_record.setChecked(False)
 
     @pyqtSlot()
-    def onPlayButton (self):
+    def on_play_button (self):
         """Bouton play cliqué"""
         if self.button_pause.isChecked ():
             self.button_pause.setChecked (False)
             self.button_pause.setStyleSheet (BUTTON_OFF)
-        self.lecteur.onPlayButton ()
+        self.lecteur.on_play_button ()
 
     @pyqtSlot ()
-    def onPauseButton (self):
+    def on_pause_button (self):
         """Bouton pause cliqué"""
         if self.button_play.isChecked ():
             self.button_play.setChecked (False)
             self.button_play.setStyleSheet (BUTTON_OFF)
             self.button_pause.setChecked (True)
             self.button_pause.setStyleSheet (BUTTON_ON)
-            self.lecteur.onPauseButton ()
+            self.lecteur.on_pause_button ()
 
     @pyqtSlot()
     def show_help(self):

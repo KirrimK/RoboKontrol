@@ -132,7 +132,7 @@ class Lecteur :
             print ("La ligne [{}] pose un problème.\n{}".format (line, bug))
             self.timer.start (1)
 
-    def onPlayButton (self):
+    def on_play_button (self):
         """Message appelé après un appui sur le bouton play. Appelle la bonne fonction de lecture de fichier."""
         path = self.window.settings_dict["Enregistrement/Playback (Dernière Lecture)"]
         if path not in (None, ""):
@@ -147,7 +147,7 @@ class Lecteur :
                 self.read_commands (path)
                 self.window.playback_sgnl.emit([0, 0, 0])
 
-    def onStopButton (self):
+    def on_stop_button (self):
         """Méthode appelée par un appui du bouton stop. Arrête la lecture du fichier."""
         if self.reading == "MSG":
             self.timer.timeout.disconnect ()
@@ -156,7 +156,7 @@ class Lecteur :
         self.window.playback_sgnl.emit([-1, 0, 0])
         self.reading = False
 
-    def onPauseButton (self):
+    def on_pause_button (self):
         """Méthode appelée par un appui du bouton pause. Met la lecture du fichier en pause."""
         self.paused_time_save = self.timer.remainingTime ()
         self.window.playback_sgnl.emit([-2, 0, 0])

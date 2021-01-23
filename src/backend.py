@@ -216,8 +216,8 @@ class Backend:
         if self.radio_started:
             self.radio.send_cmd (rd.STOP_BUTTON_CMD.format (rid))
         if self.annu.check_robot (rid):
-            self.annu.find (rid).isStopped = True
-        print ('Robot is stopped : {}'.format (self.annu.find (rid).isStopped))
+            self.annu.find (rid).is_stopped = True
+        print ('Robot is stopped : {}'.format (self.annu.find (rid).is_stopped))
 
     def stopandforget_robot(self, robot_name):
         """Permet d'arrêter le robot en question
@@ -263,8 +263,8 @@ class Backend:
 
         if self.annu is not None and self.annu.check_robot(rid) and self.radio_started:
             if self.annu.find (rid) is not None :
-                if  self.annu.find (rid).isStopped :
-                    self.annu.find (rid).isStopped = False
+                if  self.annu.find (rid).is_stopped :
+                    self.annu.find (rid).is_stopped = False
         if pos[2] is None:
             self.radio.send_cmd (rd.POS_CMD.format (rid, pos[0], pos[1]))
         else:
@@ -274,8 +274,8 @@ class Backend:
     def send_speed_cmd (self, rid, v_x, v_y, v_theta):
         """Envoi de commande de vitesse au robot"""
         if self.annu.find (rid) is not None and self.annu is not None:
-            if self.annu.find (rid).isStopped :
-                self.annu.find (rid).isStopped = False
+            if self.annu.find (rid).is_stopped :
+                self.annu.find (rid).is_stopped = False
         if self.radio_started:
             self.radio.send_cmd (rd.SPEED_CMD.format (rid, v_x, v_y, v_theta*3.141592654/180))
 
@@ -297,8 +297,8 @@ class Backend:
             - state (variable): l'état souhaité (se reférer au type d'equipement)
         """
         if self.annu is not None and self.annu.find(rid) and self.annu.find(rid, eqp_name):
-            if  self.annu.find (rid).isStopped :
-                self.annu.find (rid).isStopped = False
+            if  self.annu.find (rid).is_stopped :
+                self.annu.find (rid).is_stopped = False
         self.radio.send_cmd (rd.ACTUATOR_CMD.format (rid, eqp_name, state))
 
     def get_all_robots(self):

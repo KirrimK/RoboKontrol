@@ -218,7 +218,7 @@ class Robot:
         self.y = y
         self.theta = theta
         self.equipements = {}
-        self.isStopped = False
+        self.is_stopped = False
         if equipements is not None:
             for equipement in equipements:
                 self.updt_eqp(equipement)

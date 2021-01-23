@@ -148,7 +148,7 @@ class MapView(QtWidgets.QWidget):
             if self.selected_robot == robot:
                 painter.setPen(QPen(QColor(self.parent.settings_dict["Carte (Couleur Sélection)"]),
                                 4, Qt.SolidLine))
-            if bkd_robots[robot].isStopped:
+            if bkd_robots[robot].is_stopped:
                 painter.setPen(QPen(Qt.red, 4, Qt.SolidLine))
             painter.drawPie(outer_rect, start_angle, span_angle)
             painter.drawEllipse(robot_rect)
