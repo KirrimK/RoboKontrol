@@ -123,10 +123,12 @@ class DisplayRobot(anr.Robot, QWidget):
         self.layout_tab_robot.addWidget(self.scroll_area)
 
         self.button_delete.setFixedSize(175, 25)
-        self.button_delete.setText("Eteindre")
         if self.is_ghost:
             self.button_delete.setText("Oublier")
-        self.button_delete.clicked.connect(lambda: self.backend.stopandforget_robot(self.rid))
+            self.button_delete.clicked.connect(lambda: self.backend.forget_robot(self.rid))
+        else:
+            self.button_delete.setText("Eteindre")
+            self.button_delete.clicked.connect(lambda: self.backend.stopandforget_robot(self.rid))
 
         self.emergency_button.setText("Arrêt d'urgence")
         self.emergency_button.setStyleSheet(EMERGENCY_BUTTON)
