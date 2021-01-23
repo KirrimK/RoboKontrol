@@ -1,5 +1,5 @@
-"""main.py"""
-#regarder lib argsparse pour arguments ligne de cmd meilleurs
+""" Module main.py - exécution principale """
+
 import window
 import backend as ben
 import ivy_radio as rd
