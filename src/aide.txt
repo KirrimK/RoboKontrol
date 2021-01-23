@@ -8,6 +8,10 @@ https://www.github.com/KirrimK/RoboKontrol
 Les robots qui sont dans le canal Ivy de l'interface
 sont automatiquement affichés sur celle ci.
 
+SVP, ne connectez pas de robots dont le nom se finit en "_ghost". 
+Ces noms sont normalement resevés au robots affichés lors de la lecture 
+d'un fichier de messages.
+
 ———————————————————————————————————
 	COMMENT GUIDER LE ROBOT
 
