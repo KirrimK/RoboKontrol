@@ -8,7 +8,7 @@ import ivy_radio as rd
 
 class WidgetBackend (QWidget):
     """Classe implémentée car les signaux Qt doivent être envoyés par des objets Qt
-    Attributs : _radio (Radio) : l'objet parent auquel sont reliés les connections de signal."""
+    Attributs : backend (Backend) : l'objet parent auquel sont reliés les connections de signal."""
     NewRobotSignal = pyqtSignal (str)
     ActuDeclSignal = pyqtSignal (list)
     UpdateTrigger = pyqtSignal (list)
