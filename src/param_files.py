@@ -1,5 +1,4 @@
-"""Module externals.py - gestion de lecture et écriture dans les fichiers
-    + création de sous-process"""
+"""Module param_files.py - gestion de lecture et écriture dans les fichiers"""
 
 import os
 from operator import itemgetter
@@ -58,7 +57,7 @@ def settings_from_file(file_path):
     return dict(sorted(settings.items(), key=itemgetter(0)))
 
 def settings_to_file(path, settings):
-    """Sauvegarde des évènements Evt dans un fichier (*.xml)
+    """Sauvegarde des paramètres dans un fichier (*.xml)
     (génération par xml ElementTree)"""
     root = ET.Element("settings")
     for obj in settings:
