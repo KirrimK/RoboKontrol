@@ -5,6 +5,7 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
 import display as dsp
 import ivy_radio as rd
+import serial_radio as srd
 
 class WidgetBackend (QWidget):
     """Classe implémentée car les signaux Qt doivent être envoyés par des objets Qt
@@ -49,7 +50,7 @@ class Backend:
         self.runned_time = 0
         self.radio = None
         self.annu = None
-        if isinstance(radio, rd.Radio):
+        if isinstance(radio, rd.Radio) or isinstance (radio, srd.Radio):
             self.attach_radio(radio)
         self.widget = None
 
@@ -118,7 +119,7 @@ class Backend:
         Entrée:
             - radio (radio): la radio à attacher
         """
-        if isinstance(radio, rd.Radio) and self.radio is None:
+        if (isinstance(radio, rd.Radio) or isinstance (radio, srd.Radio)) and self.radio is None:
             self.radio = radio
             self.radio.backend = self
 
@@ -214,7 +215,7 @@ class Backend:
         Entrée :
             _ rid (str) : nom du robot à stopper"""
         if self.radio_started:
-            self.radio.send_cmd (rd.STOP_BUTTON_CMD.format (rid))
+            self.radio.send_stop_cmd (rid)
         if self.annu.check_robot (rid):
             self.annu.find (rid).is_stopped = True
         print ('Robot is stopped : {}'.format (self.annu.find (rid).is_stopped))
@@ -230,14 +231,14 @@ class Backend:
         if self.annu is not None:
             self.annu.remove_robot(robot_name)
         if self.radio_started:
-            self.radio.send_cmd (rd.KILL_CMD.format (robot_name))
+            self.radio.send_kill_cmd (robot_name)
         self.widget.UpdateTrigger.emit([])
         self.widget.MapTrigger.emit([])
 
     def stop_robot(self, robot_name):
         """Arrête un robot"""
         if self.radio_started:
-            self.radio.send_cmd (rd.KILL_CMD.format (robot_name))
+            self.radio.send_kill_cmd (robot_name)
 
     def forget_robot(self, robot_name):
         """Oublie toutes les informations connues sur le robot en question.
@@ -266,10 +267,9 @@ class Backend:
                 if  self.annu.find (rid).is_stopped :
                     self.annu.find (rid).is_stopped = False
         if pos[2] is None:
-            self.radio.send_cmd (rd.POS_CMD.format (rid, pos[0], pos[1]))
+            self.radio.send_pos_cmd (rid, pos[0], pos[1])
         else:
-            self.radio.send_cmd (rd.POS_ORIENT_CMD.format (rid, pos[0],
-                                                            pos[1], pos[2]*3.141592654/180))
+            self.radio.send_pos_orient_cmd (rid, pos[0], pos[1], pos[2]*3.141592654/180)
 
     def send_speed_cmd (self, rid, v_x, v_y, v_theta):
         """Envoi de commande de vitesse au robot"""
@@ -277,7 +277,7 @@ class Backend:
             if self.annu.find (rid).is_stopped :
                 self.annu.find (rid).is_stopped = False
         if self.radio_started:
-            self.radio.send_cmd (rd.SPEED_CMD.format (rid, v_x, v_y, v_theta))
+            self.radio.send_speed_cmd (rid, v_x, v_y, v_theta)
 
     def send_descr_cmd (self, rid):
         """Envoi de demande de description au robot
@@ -285,7 +285,7 @@ class Backend:
         Entrée:
             - rid (str): nom du robot"""
         if self.radio_started and self.annu is not None:
-            self.radio.send_cmd (rd.DESCR_CMD.format (rid))
+            self.radio.send_descr_cmd (rid)
 
     def sendeqpcmd(self, rid, eqp_name, state):
         """Envoie une commande d'état à un équipement (qui recoit des commandes)
@@ -299,7 +299,7 @@ class Backend:
         if self.annu is not None and self.annu.find(rid) and self.annu.find(rid, eqp_name):
             if  self.annu.find (rid).is_stopped :
                 self.annu.find (rid).is_stopped = False
-        self.radio.send_cmd (rd.ACTUATOR_CMD.format (rid, eqp_name, state))
+        self.radio.send_act_cmd (rid, eqp_name, state)
 
     def get_all_robots(self):
         """Retourne la liste de tous les noms des robots

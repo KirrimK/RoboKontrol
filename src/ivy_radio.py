@@ -34,8 +34,8 @@ def temps_deb (timestamp):
 
     Output : a formated string that gives a more explicit time than t
 
-    !!! Cette fonction est à l'heure d'hiver."""
-    itm = gmtime(timestamp+1*3600)
+    !!! Cette fonction est à l'heure d'été."""
+    itm = gmtime(timestamp+2*3600)
     return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (itm.tm_year, itm.tm_mon,
             itm.tm_mday, itm.tm_hour, itm.tm_min, itm.tm_sec) +'{:.3}'.format (timestamp%1)[1:]
 
@@ -159,6 +159,8 @@ class Radio :
         else :
             self.backend.premiers_messages.append (('actrep',[i for i in args]))
 
+    #Envoi de commandes 
+
     def send_cmd (self,cmd):
         """Envoie du texte vers le bus Ivy et le stocke optionnellement sur les tampons
         Input : _ cmd (str) : Le message à envoyer"""
@@ -172,6 +174,35 @@ class Radio :
         if self.record_cmds or self.record_msgs:
             self.backend.widget.record_signal.emit(1)
         IvySendMsg (cmd)
+
+    def send_speed_cmd (self, rid, v_x, v_y, v_theta):
+        """Méthode appelée par le backend. Envoie une commande de vitesse au robot rid."""
+        self.send_cmd(SPEED_CMD.format(rid, v_x, v_y, v_theta))
+
+    def send_pos_cmd (self, rid, x, y):
+        """Méthode appelée par le backend. Envoie une commande de position non orientée au robot."""
+        self.send_cmd (POS_CMD.format(rid, x, y))
+
+    def send_pos_orient_cmd (self, rid, x, y, theta):
+        """Méthode appelée par le backend. Envoie une commande de position orientée au robot."""
+        self.send_cmd (POS_ORIENT_CMD.format(rid,x,y,theta))
+
+    def send_act_cmd (self, rid, eid, val):
+        """Méthode appelée par le backend. 
+        Envoie la commande 'val' à l'actionneur 'eid' du robot 'rid'."""
+        self.send_cmd(ACTUATOR_CMD.format(rid, eid, val))
+    
+    def send_stop_cmd (self, rid):
+        """Méthode appelée par le backend. Stoppe les mouvements du robot rid"""
+        self.send_cmd (STOP_BUTTON_CMD.format(rid))
+
+    def send_kill_cmd (self, rid):
+        """Méthode appelée par le backend. Éteint le robot rid"""
+        self.send_cmd(KILL_CMD.format(rid))
+
+    def send_descr_cmd (self, rid):
+        """Méthode appelée par le backend. Demande au robot rid de déclarer tout ses équipements."""
+        self.send_cmd (DESCR_CMD.format(rid))
 
     #Autres méthodes très utiles
     def start (self):

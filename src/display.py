@@ -130,7 +130,7 @@ class DisplayRobot(anr.Robot, QWidget):
             self.button_delete.setText("Eteindre")
             self.button_delete.clicked.connect(lambda: self.backend.stopandforget_robot(self.rid))
 
-        self.emergency_button.setText("Arrêt d'urgence")
+        self.emergency_button.setText("STOP")
         self.emergency_button.setStyleSheet(EMERGENCY_BUTTON)
         if self.is_ghost:
             self.emergency_button.setText("Lecture")
