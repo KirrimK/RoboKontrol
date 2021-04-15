@@ -22,6 +22,7 @@ class MapView(QtWidgets.QWidget):
     """Un widget permettant de visualiser la carte et les robots dessus"""
     # Création d'un signal de sélection du robot sur la map
     selected_robot_signal = pyqtSignal(str)
+    force_repaint = pyqtSignal()
 
     def __init__(self, parent):
         super().__init__()
@@ -52,6 +53,7 @@ class MapView(QtWidgets.QWidget):
         self.svg_scl = False
 
         self.parent.backend.widget.MapTrigger.connect(self.should_repaint)
+        self.force_repaint.connect(self.should_repaint(True))
 
         self.setMouseTracking(True)
         self.key_binding={}
@@ -62,12 +64,12 @@ class MapView(QtWidgets.QWidget):
 
         self.show()
 
-    def should_repaint(self):
+    def should_repaint(self, force=False):
         """Décide si repeindre la map lors d'un MapTrigger est utile
         permet d'économiser de la performance, surtout si le scaling n'est
         pas activé"""
         new_robot_number = len(self.parent.backend.annu.robots.keys())
-        should_repaint = False
+        should_repaint = force
 
         #limitation des repaints à 13 par seconde
         try:
