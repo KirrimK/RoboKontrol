@@ -79,3 +79,80 @@ class Radio:
                             fichier.write(temps(ligne[0], premier_temps)+'\t\t'+ligne[1]+'\n')
             if del_buffers:
                 self.cmds_buffer = []
+    def on_posreg (self, sender, *args):
+        """Fonction faisant le lien entre Ivy et le thread de main
+        Envoie un signal Qt contenant la position"""
+        if self.record_msgs :
+            message = "PosReport {} {} {} {}".format (args[0]+'_ghost', args[1], args [2], args [3])
+            self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
+            self.backend.widget.record_signal.emit(1)
+        if self.backend.widget is not None :
+            self.backend.widget.position_updated.emit ([i for i in args]+[time()])
+        else:
+            self.backend.premiers_messages.append (('pos',[i for i in args]+[time()]))
+
+    def on_actudecl (self, sender, *args):
+        """Fonction faisant le lien entre Ivy et le thread de main
+        Envoie un signal Qt contenant la description d'un equipement"""
+        if self.record_msgs :
+            message = "ActuatorDecl {} {} {} {} {} {} {}".format (args [0]+'_ghost',
+                            args [1], args [2], args [3], args [4], args [5], args [6])
+            self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
+            self.backend.widget.record_signal.emit(1)
+        if self.backend.widget is not None :
+            self.backend.widget.ActuDeclSignal.emit ([i for i in args])
+        else :
+            self.backend.premiers_messages.append (('actdcl',[i for i in args]))
+
+    def on_captreg (self, sender, *args):
+        """Fonction faisant le lien entre Ivy et le thread de main
+        Envoie un signal Qt contenant un retour de capteur"""
+        if self.record_msgs :
+            message = "ActuatorReport {} {} {}".format (args[0]+'_ghost', args [1], args [2])
+            self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
+            self.backend.widget.record_signal.emit(1)
+        if self.backend.widget is not None :
+            self.backend.widget.equipement_updated.emit ([i for i in args]+[time()])
+        else :
+            self.backend.premiers_messages.append (('actrep',[i for i in args]))
+
+    #Envoi de commandes
+
+
+    def send_speed_cmd (self, rid, v_x, v_y, v_theta):
+        """Méthode appelée par le backend. Envoie une commande de vitesse au robot rid."""
+        pass
+
+    def send_pos_cmd (self, rid, x, y):
+        """Méthode appelée par le backend. Envoie une commande de position non orientée au robot."""
+        pass
+
+    def send_pos_orient_cmd (self, rid, x, y, theta):
+        """Méthode appelée par le backend. Envoie une commande de position orientée au robot."""
+        pass
+
+    def send_act_cmd (self, rid, eid, val):
+        """Méthode appelée par le backend. 
+        Envoie la commande 'val' à l'actionneur 'eid' du robot 'rid'."""
+        pass
+    
+    def send_stop_cmd (self, rid):
+        """Méthode appelée par le backend. Stoppe les mouvements du robot rid"""
+        pass
+
+    def send_kill_cmd (self, rid):
+        """Méthode appelée par le backend. Éteint le robot rid"""
+        pass
+
+    def send_descr_cmd (self, rid):
+        """Méthode appelée par le backend. Demande au robot rid de déclarer tout ses équipements."""
+        pass
+
+    #Autres méthodes très utiles
+    def start (self):
+        """Démare la radio"""
+        pass
+
+    def stop (self, *args):
+        """Appelé automatiquement à l'arrêt du programme. Enlève la radio du bus Ivy."""
+        pass
