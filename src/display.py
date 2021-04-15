@@ -132,7 +132,6 @@ class DisplayRobot(anr.Robot, QWidget):
 
         self.emergency_button.setText("STOP")
         self.emergency_button.setStyleSheet(EMERGENCY_BUTTON)
-        self.emergency_button.clicked.connect(lambda: self.parent_annu.window.map_view.forceRepaint.emit())
         if self.is_ghost:
             self.emergency_button.setText("Lecture")
             self.emergency_button.setStyleSheet(READONLY_BUTTON)
