@@ -62,12 +62,12 @@ class MapView(QtWidgets.QWidget):
 
         self.show()
 
-    def should_repaint(self, force=False):
+    def should_repaint(self):
         """Décide si repeindre la map lors d'un MapTrigger est utile
         permet d'économiser de la performance, surtout si le scaling n'est
         pas activé"""
         new_robot_number = len(self.parent.backend.annu.robots.keys())
-        should_repaint = force
+        should_repaint = False
 
         #limitation des repaints à 13 par seconde
         try:
@@ -87,7 +87,7 @@ class MapView(QtWidgets.QWidget):
             should_repaint = False
             return None
 
-        #les robots ont-ils bougé?
+        #les robots ont-ils bougé? un robot est-il en arrêt?
         for robot_nm in self.parent.backend.annu.robots:
             robot = self.parent.backend.annu.robots[robot_nm]
             robot_pos = [robot.x, robot.y, robot.theta]
@@ -96,6 +96,8 @@ class MapView(QtWidgets.QWidget):
                 should_repaint = True
             elif self.old_pos_dict.get(robot_nm) != robot_pos:
                 self.old_pos_dict[robot_nm] = robot_pos
+                should_repaint = True
+            if robot.is_stopped:
                 should_repaint = True
         #des robots sont-ils apparus ou ont-ils disparus?
         if new_robot_number != self.robot_number:
