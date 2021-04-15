@@ -36,8 +36,7 @@ def temps_deb (timestamp):
 
     !!! Cette fonction est à l'heure d'été."""
     itm = gmtime(timestamp+2*3600)
-    return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (itm.tm_year, itm.tm_mon,
-            itm.tm_mday, itm.tm_hour, itm.tm_min, itm.tm_sec) +'{:.3}'.format (timestamp%1)[1:]
+    return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (itm.tm_year, itm.tm_mon, itm.tm_mday, itm.tm_hour, itm.tm_min, itm.tm_sec) +'{:.3}'.format (timestamp%1)[1:]
 
 class Radio :
     """Classe de l'objet qui est connecté au channel Ivy
