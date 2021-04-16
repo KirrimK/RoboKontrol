@@ -158,7 +158,7 @@ class Radio :
         else :
             self.backend.premiers_messages.append (('actrep',[i for i in args]))
 
-    #Envoi de commandes 
+    #Envoi de commandes
 
     def send_cmd (self,cmd):
         """Envoie du texte vers le bus Ivy et le stocke optionnellement sur les tampons
@@ -194,6 +194,7 @@ class Radio :
     def send_stop_cmd (self, rid):
         """Méthode appelée par le backend. Stoppe les mouvements du robot rid"""
         self.send_cmd (STOP_BUTTON_CMD.format(rid))
+        self.send_speed_cmd (rid,0,0,0)
 
     def send_kill_cmd (self, rid):
         """Méthode appelée par le backend. Éteint le robot rid"""

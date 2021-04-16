@@ -1,5 +1,6 @@
 """Module utilisé pour commiuniquer en serial via un X-Bee avec le robot"""
 import serial
+import threading
 from time import time, gmtime
 
 def temps (tps, prem_tps):
@@ -21,6 +22,7 @@ def temps_deb (timestamp):
 class Radio:
     def __init__(self, ):
         self.backend = None
+        self.thread_ecoute = threading.Thread ( target=self.ecoute,)
         self.cmds_buffer = []
         self.msgs_buffer = []
         self.record_msgs = False
@@ -149,10 +151,15 @@ class Radio:
         pass
 
     #Autres méthodes très utiles
+    """def ecoute (self):
+        self.serialObject = serial.Serial('COM1', baudrate=9600)
+        while True:
+            self.serialObject.readline ()"""
+
     def start (self):
         """Démare la radio"""
-        pass
+        self.thread_ecoute.start()
 
     def stop (self, *args):
         """Appelé automatiquement à l'arrêt du programme. Enlève la radio du bus Ivy."""
-        pass
+        self.thread_ecoute._stop ()
