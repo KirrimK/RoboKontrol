@@ -3,9 +3,11 @@
 import window
 import sys
 import backend as ben
-if len (sys.argv) > 1 and sys.argv [1]=="Ivy":
+if len (sys.argv) > 1 and sys.argv [1] in ["ivy", "Ivy"]:
     import ivy_radio as rd
+    print("Mode Ivy démarré.")
 else:
+    print("Mode Série démarré.")
     import serial_radio as rd
 
 if __name__ == "__main__":

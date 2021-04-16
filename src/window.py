@@ -38,7 +38,10 @@ class Window(QMainWindow):
 
         super().__init__()
         self.resize(1200, 600)
-        self.setWindowTitle("RoboKontrol")
+        if len (sys.argv) > 1 and sys.argv [1] in ["ivy", "Ivy"]:
+            self.setWindowTitle("RoboKontrol (Mode Ivy)")
+        else:
+            self.setWindowTitle("RoboKontrol (Mode Série)")
         self.setWindowIcon(QIcon("app_icon.png"))
         self.setStyleSheet(WINDOW_STYLE)
 
