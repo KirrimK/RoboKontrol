@@ -3,6 +3,20 @@ import serial
 import threading
 from time import time, gmtime
 
+
+ACTU_DECL = 'ActuatorDecl (.+) (.+) (.+) (.+) (.+) (.+) (.*)'
+POS_REG = 'PosReport (.+) (.+) (.+) (.+)'
+CAPT_REG = 'ActuatorReport (.+) (.+) (.+)'
+
+
+SPEED_CMD = "SpeedCmd {} {} {} {}"
+POS_CMD =  "PosCmd {} {} {}"
+POS_ORIENT_CMD = "PosCmdOrient {} {} {} {}"
+ACTUATOR_CMD = "ActuatorCmd {} {} {}"
+STOP_BUTTON_CMD = "Emergency {}"
+KILL_CMD = "Shutdown {}"
+DESCR_CMD = "ActuatorsRequest {}"
+
 def temps (tps, prem_tps):
     """Input : _timestamp (float) : donné par time ()
                     _ premier_timestamp : date du premier timestamp de la session d'enregistrement
@@ -27,6 +41,8 @@ class Radio:
         self.msgs_buffer = []
         self.record_msgs = False
         self.record_cmds = False
+        self.listen = True        
+        self.serialObject = serial.Serial('COM1', baudrate=9600)
 
     def register_start (self, *args):
         """Change l'attribut record_msgs et/ou record_cmds vers True
@@ -81,37 +97,37 @@ class Radio:
                             fichier.write(temps(ligne[0], premier_temps)+'\t\t'+ligne[1]+'\n')
             if del_buffers:
                 self.cmds_buffer = []
-    def on_posreg (self, sender, *args):
-        """Fonction faisant le lien entre Ivy et le thread de main
+    def on_posreg (self, *args):
+        """Fonction faisant le lien entre le thread d'écoute serial et le thread de main
         Envoie un signal Qt contenant la position"""
         if self.record_msgs :
             message = "PosReport {} {} {} {}".format (args[0]+'_ghost', args[1], args [2], args [3])
-            self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
+            self.msgs_buffer.append ((time(),args[0], message))
             self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
             self.backend.widget.position_updated.emit ([i for i in args]+[time()])
         else:
             self.backend.premiers_messages.append (('pos',[i for i in args]+[time()]))
 
-    def on_actudecl (self, sender, *args):
-        """Fonction faisant le lien entre Ivy et le thread de main
+    def on_actudecl (self, *args):
+        """Fonction faisant le lien entre le thread d'écoute serial et le thread de main
         Envoie un signal Qt contenant la description d'un equipement"""
         if self.record_msgs :
             message = "ActuatorDecl {} {} {} {} {} {} {}".format (args [0]+'_ghost',
                             args [1], args [2], args [3], args [4], args [5], args [6])
-            self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
+            self.msgs_buffer.append ((time(),args[0], message))
             self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
             self.backend.widget.ActuDeclSignal.emit ([i for i in args])
         else :
             self.backend.premiers_messages.append (('actdcl',[i for i in args]))
 
-    def on_captreg (self, sender, *args):
-        """Fonction faisant le lien entre Ivy et le thread de main
+    def on_captreg (self, *args):
+        """Fonction faisant le lien entre le thread d'écoute serial et le thread de main
         Envoie un signal Qt contenant un retour de capteur"""
         if self.record_msgs :
             message = "ActuatorReport {} {} {}".format (args[0]+'_ghost', args [1], args [2])
-            self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
+            self.msgs_buffer.append ((time(),args [0], message))
             self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
             self.backend.widget.equipement_updated.emit ([i for i in args]+[time()])
@@ -120,46 +136,57 @@ class Radio:
 
     #Envoi de commandes
 
+    def send_cmd (self, cmd):
+        """Méthode appelée par les méthodes de serial_radio. Envoie la commande cmd sur le port serial"""
+        self.serialObject.write (cmd)
 
     def send_speed_cmd (self, rid, v_x, v_y, v_theta):
         """Méthode appelée par le backend. Envoie une commande de vitesse au robot rid."""
-        pass
+        self.send_cmd (SPEED_CMD.format (rid, v_x, v_y, v_theta))
 
     def send_pos_cmd (self, rid, x, y):
         """Méthode appelée par le backend. Envoie une commande de position non orientée au robot."""
-        pass
+        self.send_cmd (POS_CMD.format (rid, x, y))
 
     def send_pos_orient_cmd (self, rid, x, y, theta):
         """Méthode appelée par le backend. Envoie une commande de position orientée au robot."""
-        pass
+        self.send_cmd (POS_ORIENT_CMD.format (rid, x, y, theta))
 
     def send_act_cmd (self, rid, eid, val):
         """Méthode appelée par le backend. 
         Envoie la commande 'val' à l'actionneur 'eid' du robot 'rid'."""
-        pass
+        self.send_cmd (ACTUATOR_CMD.format (rid, eid, val))
     
     def send_stop_cmd (self, rid):
         """Méthode appelée par le backend. Stoppe les mouvements du robot rid"""
-        pass
+        self.send_cmd (STOP_BUTTON_CMD.format (rid))
+        self.send_cmd (SPEED_CMD.format (rid, 0, 0, 0))
 
     def send_kill_cmd (self, rid):
         """Méthode appelée par le backend. Éteint le robot rid"""
-        pass
+        self.send_cmd (KILL_CMD.format (rid))
 
     def send_descr_cmd (self, rid):
         """Méthode appelée par le backend. Demande au robot rid de déclarer tout ses équipements."""
-        pass
+        self.send_cmd (DESCR_CMD.format (rid))
 
     #Autres méthodes très utiles
-    """def ecoute (self):
-        self.serialObject = serial.Serial('COM1', baudrate=9600)
-        while True:
-            self.serialObject.readline ()"""
+
+    def ecoute (self):
+        while self.listen:
+            message = self.serialObject.readline ()
+            if message [0] == POS_REG [0]:
+                self.on_posreg ()
+            elif message [0] == ACTU_DECL [0]:
+                self.on_actudecl ()
+            elif message [0] == CAPT_REG [0]:
+                self.on_captreg ()
 
     def start (self):
-        """Démare la radio"""
+        """Démarre le thread d'écoute"""
         self.thread_ecoute.start()
 
     def stop (self, *args):
-        """Appelé automatiquement à l'arrêt du programme. Enlève la radio du bus Ivy."""
-        self.thread_ecoute._stop ()
+        """Appelé automatiquement à l'arrêt du programme. 
+        Met la condition de bouclage du thread d'écoute à False"""
+        self.listen = False
