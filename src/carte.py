@@ -177,15 +177,16 @@ class MapView(QtWidgets.QWidget):
 
     def paint(self):
         """Dessin de la map et des robots"""
-        self.width = self.geometry().width()
-        self.height = self.geometry().height()
-        painter = QPainter(self)
+        if self.svg_data is not None :
+            self.width = self.geometry().width()
+            self.height = self.geometry().height()
+            painter = QPainter(self)
 
-        self.paint_map(painter)
-        self.paint_robots(painter)
-        self.paint_vector(painter)
+            self.paint_map(painter)
+            self.paint_robots(painter)
+            self.paint_vector(painter)
 
-    def updt_map_data(self, config_path, width, height):
+    def updt_map_data (self, config_path, width, height):
         """Mise à jour des objets à dessiner sur la map
 
         Entrée:
@@ -325,10 +326,11 @@ class MapView(QtWidgets.QWidget):
                     qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
                     qle_poscmd.setText("{} : {} : {}".format(int(cmd[0]), int(cmd[1]), int(cmd[2])))
             else:
-                cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], None]
-                self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
-                qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
-                qle_poscmd.setText("{} : {} : 000".format(int(cmd[0]), int(cmd[1])))
+                if self.selected_robot is not None:
+                    cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], None]
+                    self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
+                    qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
+                    qle_poscmd.setText("{} : {} : 000".format(int(cmd[0]), int(cmd[1])))
 
     def mouseMoveEvent(self, event):
         """Quand la souris est bougée sur la fenêtre"""

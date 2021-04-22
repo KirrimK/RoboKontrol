@@ -42,7 +42,7 @@ class Radio:
         self.record_msgs = False
         self.record_cmds = False
         self.listen = True        
-        self.serialObject = serial.Serial('COM1', baudrate=9600)
+        self.serialObject = serial.Serial (port = None, baudrate=9600, timeout =1)
 
     def register_start (self, *args):
         """Change l'attribut record_msgs et/ou record_cmds vers True
@@ -97,6 +97,7 @@ class Radio:
                             fichier.write(temps(ligne[0], premier_temps)+'\t\t'+ligne[1]+'\n')
             if del_buffers:
                 self.cmds_buffer = []
+
     def on_posreg (self, *args):
         """Fonction faisant le lien entre le thread d'écoute serial et le thread de main
         Envoie un signal Qt contenant la position"""
@@ -175,6 +176,7 @@ class Radio:
     def ecoute (self):
         while self.listen:
             message = self.serialObject.readline ()
+            message = message.decode ()
             if message [0] == POS_REG [0]:
                 self.on_posreg ()
             elif message [0] == ACTU_DECL [0]:
