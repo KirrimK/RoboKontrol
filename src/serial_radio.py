@@ -34,7 +34,7 @@ def temps_deb (timestamp):
             itm.tm_mday, itm.tm_hour, itm.tm_min, itm.tm_sec) +'{:.3}'.format (timestamp%1)[1:]
 
 class Radio:
-    def __init__(self, ):
+    def __init__(self, nom_port):
         self.backend = None
         self.thread_ecoute = threading.Thread ( target=self.ecoute,)
         self.cmds_buffer = []
@@ -42,7 +42,7 @@ class Radio:
         self.record_msgs = False
         self.record_cmds = False
         self.listen = True        
-        self.serialObject = serial.Serial (port = None, baudrate=9600, timeout =1)
+        self.serialObject = serial.Serial (port = nom_port, baudrate=9600, timeout =1)
 
     def register_start (self, *args):
         """Change l'attribut record_msgs et/ou record_cmds vers True

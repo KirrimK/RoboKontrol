@@ -11,5 +11,5 @@ else:
     import serial_radio as rd
 
 if __name__ == "__main__":
-    with ben.Backend(rd.Radio()) as backend:
+    with ben.Backend(rd.Radio() if sys.argv[1] in ["ivy", "Ivy"] else rd.Radio(sys.argv[1])) as backend:
         window.main(backend)
