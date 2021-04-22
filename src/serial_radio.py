@@ -4,18 +4,18 @@ import threading
 from time import time, gmtime
 
 
-ACTU_DECL = 'ActuatorDecl (.+) (.+) (.+) (.+) (.+) (.+) (.*)'
-POS_REG = 'PosReport (.+) (.+) (.+) (.+)'
-CAPT_REG = 'ActuatorReport (.+) (.+) (.+)'
+ACTU_DECL = 'B {} {} {} {} {} {} {}'
+POS_REG = 'R {} {} {} {}'
+CAPT_REG = 'C {} {} {}'
 
 
-SPEED_CMD = "SpeedCmd {} {} {} {}"
-POS_CMD =  "PosCmd {} {} {}"
-POS_ORIENT_CMD = "PosCmdOrient {} {} {} {}"
-ACTUATOR_CMD = "ActuatorCmd {} {} {}"
-STOP_BUTTON_CMD = "Emergency {}"
-KILL_CMD = "Shutdown {}"
-DESCR_CMD = "ActuatorsRequest {}"
+SPEED_CMD = "S {} {} {} {}"
+POS_CMD =  "P {} {} {}"
+POS_ORIENT_CMD = "O {} {} {} {}"
+ACTUATOR_CMD = "A {} {} {}"
+STOP_BUTTON_CMD = "E {}"
+KILL_CMD = "K {}"
+DESCR_CMD = "D {}"
 
 def temps (tps, prem_tps):
     """Input : _timestamp (float) : donné par time ()
