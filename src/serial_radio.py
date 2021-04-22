@@ -5,17 +5,27 @@ from time import time, gmtime
 
 
 ACTU_DECL = 'B {} {} {} {} {} {} {}'
+#            B indicatifRobot   indicatifEquipement valMin  valMax   droits    unité 
+# ([droits] est soit R pour un capteur, soit W pour un actionneur)
 POS_REG = 'R {} {} {} {}'
+#           R indicatifRobot    x   y   theta
 CAPT_REG = 'C {} {} {}'
+#           C   indicatifRobot  indicatifEquipement valeur
 
 
 SPEED_CMD = "S {} {} {} {}"
+#            S  IndicatifRobot  vX vY vTheta
 POS_CMD =  "P {} {} {}"
+#           P   IndicatifRobot  x   y
 POS_ORIENT_CMD = "O {} {} {} {}"
+#                 O IndicatifRobot  x   y   theta
 ACTUATOR_CMD = "A {} {} {}"
+#               A   indicatifRobot  indicatifEquipement valeur
 STOP_BUTTON_CMD = "E {}"
+#                  E    indicatifRobot
 KILL_CMD = "K {}"
 DESCR_CMD = "D {}"
+#            D  indicatif
 
 def temps (tps, prem_tps):
     """Input : _timestamp (float) : donné par time ()
