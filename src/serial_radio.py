@@ -187,12 +187,16 @@ class Radio:
         while self.listen:
             message = self.serialObject.readline ()
             message = message.decode ()
-            if message [0] == POS_REG [0]:
-                self.on_posreg ()
-            elif message [0] == ACTU_DECL [0]:
-                self.on_actudecl ()
-            elif message [0] == CAPT_REG [0]:
-                self.on_captreg ()
+            if len (message) != 0:
+                if message [0] == POS_REG [0]:
+                    args = message.split (' ')
+                    self.on_posreg (args [1], args [2], args [3], args [4])
+                elif message [0] == ACTU_DECL [0]:
+                    args = message.split (' ')
+                    self.on_actudecl (args [1], args [2], args [3], args [4], args [5], args [6])
+                elif message [0] == CAPT_REG [0]:
+                    args = message.split (' ')
+                    self.on_captreg (args [1], args [2], args [3])
 
     def start (self):
         """Démarre le thread d'écoute"""
