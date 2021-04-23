@@ -134,7 +134,7 @@ class Backend:
         if self.annu is not None:
             if not self.annu.check_robot(rid):
                 self.track_robot(rid)
-                self.radio.send_cmd (rd.DESCR_CMD.format (rid))
+                self.radio.send_descr_cmd (rid)
             self.annu.find (rid).set_pos (float (posx), float(posy), float(theta)*180/3.141592654)
             self.widget.UpdateTrigger.emit([])
             self.widget.MapTrigger.emit([])

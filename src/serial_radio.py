@@ -5,26 +5,26 @@ from time import time, gmtime
 
 
 ACTU_DECL = 'B {} {} {} {} {} {} {}'
-#            B indicatifRobot   indicatifEquipement valMin  valMax   droits    unité 
-# ([droits] est soit R pour un capteur, soit W pour un actionneur)
+#            B indicatifRobot   indicatifEquipement valMin  valMax  step   droits    unité 
+# ([droits] est soit R pour un capteur, soit RW pour un actionneur)
 POS_REG = 'R {} {} {} {}'
 #           R indicatifRobot    x   y   theta
 CAPT_REG = 'C {} {} {}'
 #           C   indicatifRobot  indicatifEquipement valeur
 
 
-SPEED_CMD = "S {} {} {} {}"
+SPEED_CMD = "S {} {} {} {}\n"
 #            S  IndicatifRobot  vX vY vTheta
-POS_CMD =  "P {} {} {}"
+POS_CMD =  "P {} {} {}\n"
 #           P   IndicatifRobot  x   y
-POS_ORIENT_CMD = "O {} {} {} {}"
+POS_ORIENT_CMD = "O {} {} {} {}\n"
 #                 O IndicatifRobot  x   y   theta
-ACTUATOR_CMD = "A {} {} {}"
+ACTUATOR_CMD = "A {} {} {}\n"
 #               A   indicatifRobot  indicatifEquipement valeur
-STOP_BUTTON_CMD = "E {}"
+STOP_BUTTON_CMD = "E {}\n"
 #                  E    indicatifRobot
-KILL_CMD = "K {}"
-DESCR_CMD = "D {}"
+KILL_CMD = "K {}\n"
+DESCR_CMD = "D {}\n"
 #            D  indicatif
 
 def temps (tps, prem_tps):
@@ -52,7 +52,7 @@ class Radio:
         self.record_msgs = False
         self.record_cmds = False
         self.listen = True        
-        self.serialObject = serial.Serial (port = nom_port, baudrate=9600, timeout =1)
+        self.serialObject = serial.Serial (port = nom_port, baudrate=57600, timeout =1)
 
     def register_start (self, *args):
         """Change l'attribut record_msgs et/ou record_cmds vers True
@@ -149,7 +149,7 @@ class Radio:
 
     def send_cmd (self, cmd):
         """Méthode appelée par les méthodes de serial_radio. Envoie la commande cmd sur le port serial"""
-        self.serialObject.write (cmd)
+        self.serialObject.write (cmd.encode ('utf-8'))
 
     def send_speed_cmd (self, rid, v_x, v_y, v_theta):
         """Méthode appelée par le backend. Envoie une commande de vitesse au robot rid."""
@@ -193,7 +193,7 @@ class Radio:
                     self.on_posreg (args [1], args [2], args [3], args [4])
                 elif message [0] == ACTU_DECL [0]:
                     args = message.split (' ')
-                    self.on_actudecl (args [1], args [2], args [3], args [4], args [5], args [6])
+                    self.on_actudecl (args [1], args [2], args [3], args [4], args [5], args [6], args [7])
                 elif message [0] == CAPT_REG [0]:
                     args = message.split (' ')
                     self.on_captreg (args [1], args [2], args [3])
