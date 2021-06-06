@@ -21,10 +21,10 @@ POS_ORIENT_CMD = "O {} {} {} {}\n"
 #                 O IndicatifRobot  x   y   theta
 ACTUATOR_CMD = "A {} {} {}\n"
 #               A   indicatifRobot  indicatifEquipement valeur
-STOP_BUTTON_CMD = "E {}\n"
+STOP_BUTTON_CMD = "E {} \n"
 #                  E    indicatifRobot
-KILL_CMD = "K {}\n"
-DESCR_CMD = "D {}\n"
+KILL_CMD = "K {} \n"
+DESCR_CMD = "D {} \n"
 #            D  indicatif
 
 def temps (tps, prem_tps):
