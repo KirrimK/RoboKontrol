@@ -1,27 +1,12 @@
-"""Module ivy_radio.py - module de gestion des communications via Ivy-python"""
-
-import logging
+import serial
+import threading
+from messages import *
 from time import time, gmtime
 from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
+import logging
 
-IVYAPPNAME = 'Radio'
 
-	#Informations
-"""Le premier groupe de capture est le nom du robot"""
 
-ACTU_DECL = 'ActuatorDecl (.+) (.+) (.+) (.+) (.+) (.+) (.*)'
-POS_REG = 'PosReport (.+) (.+) (.+) (.+)'
-CAPT_REG = 'ActuatorReport (.+) (.+) (.+)'
-
-	#Commands
-"""Le premier argument sera le nom du robot"""
-SPEED_CMD = "SpeedCmd {} {} {} {}"
-POS_CMD =  "PosCmd {} {} {}"
-POS_ORIENT_CMD = "PosCmdOrient {} {} {} {}"
-ACTUATOR_CMD = "ActuatorCmd {} {} {}"
-STOP_BUTTON_CMD = "Emergency {}"
-KILL_CMD = "Shutdown {}"
-DESCR_CMD = "ActuatorsRequest {}"
 
 def temps (tps, prem_tps):
     """Input : _timestamp (float) : donné par time ()
@@ -36,35 +21,16 @@ def temps_deb (timestamp):
 
     !!! Cette fonction est à l'heure d'été."""
     itm = gmtime(timestamp+2*3600)
-    return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (itm.tm_year, itm.tm_mon, itm.tm_mday, itm.tm_hour, itm.tm_min, itm.tm_sec) +'{:.3}'.format (timestamp%1)[1:]
+    return '{:04d}/{:02d}/{:02d}\t{:02d}:{:02d}:{:02d}'.format (itm.tm_year, itm.tm_mon,
+            itm.tm_mday, itm.tm_hour, itm.tm_min, itm.tm_sec) +'{:.3}'.format (timestamp%1)[1:]
 
-class Radio :
-    """Classe de l'objet qui est connecté au channel Ivy
-
-    Attributs :
-    _ backend (backend.Backend) : objet faisant le lien entre l'annuaire et la radio
-    _ widget (RadioWidget) : objet permettant d'envoyer des signaux Qt
-    _ cmds_buffer (list) : Stocke les commandes envoyées sous forme de tuple (timestamp, commande)
-    _ msgs_buffer (list) : Stocke tous les messages sous forme de tuple (timestamp, sender, message)
-    _ record_msgs (bool) : Condition d'enregistrement de tous les messages
-    _ record_cmds (bool) : Condition d'enregistrement des commandes envoyées
-    _ bus (str) : Utile pour faire tourner Ivy
-    _ nom (str) : Stocke l'IVYAPPNAME"""
-    def __init__ (self):
+class Radio:
+    def __init__(self):
         self.backend = None
         self.cmds_buffer = []
         self.msgs_buffer = []
         self.record_msgs = False
         self.record_cmds = False
-        IvyInit (IVYAPPNAME,IVYAPPNAME+" is ready!")
-        self.bus = "127.255.255.255:2010"
-        self.nom = IVYAPPNAME
-
-        IvyBindMsg (self.on_posreg, POS_REG)
-        IvyBindMsg (self.on_captreg, CAPT_REG)
-        IvyBindMsg (self.on_actudecl, ACTU_DECL)
-
-    #ENREGISTREMENT
 
     def register_start (self, *args):
         """Change l'attribut record_msgs et/ou record_cmds vers True
@@ -120,38 +86,37 @@ class Radio :
             if del_buffers:
                 self.cmds_buffer = []
 
-    #REACTIONS AUX REGEXPS
-    def on_posreg (self, sender, *args):
-        """Fonction faisant le lien entre Ivy et le thread de main
+    def on_posreg (self, *args):
+        """Fonction faisant le lien entre le thread d'écoute serial et le thread de main
         Envoie un signal Qt contenant la position"""
         if self.record_msgs :
             message = "PosReport {} {} {} {}".format (args[0]+'_ghost', args[1], args [2], args [3])
-            self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
+            self.msgs_buffer.append ((time(),args[0], message))
             self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
             self.backend.widget.position_updated.emit ([i for i in args]+[time()])
         else:
             self.backend.premiers_messages.append (('pos',[i for i in args]+[time()]))
 
-    def on_actudecl (self, sender, *args):
-        """Fonction faisant le lien entre Ivy et le thread de main
+    def on_actudecl (self, *args):
+        """Fonction faisant le lien entre le thread d'écoute serial et le thread de main
         Envoie un signal Qt contenant la description d'un equipement"""
         if self.record_msgs :
             message = "ActuatorDecl {} {} {} {} {} {} {}".format (args [0]+'_ghost',
                             args [1], args [2], args [3], args [4], args [5], args [6])
-            self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
+            self.msgs_buffer.append ((time(),args[0], message))
             self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
             self.backend.widget.ActuDeclSignal.emit ([i for i in args])
         else :
             self.backend.premiers_messages.append (('actdcl',[i for i in args]))
 
-    def on_captreg (self, sender, *args):
-        """Fonction faisant le lien entre Ivy et le thread de main
+    def on_captreg (self, *args):
+        """Fonction faisant le lien entre le thread d'écoute serial et le thread de main
         Envoie un signal Qt contenant un retour de capteur"""
         if self.record_msgs :
             message = "ActuatorReport {} {} {}".format (args[0]+'_ghost', args [1], args [2])
-            self.msgs_buffer.append ((time(),str(sender).split ('@')[0], message))
+            self.msgs_buffer.append ((time(),args [0], message))
             self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
             self.backend.widget.equipement_updated.emit ([i for i in args]+[time()])
@@ -160,6 +125,91 @@ class Radio :
 
     #Envoi de commandes
 
+
+    def send_speed_cmd (self, rid, v_x, v_y, v_theta):
+        """Méthode appelée par le backend. Envoie une commande de vitesse au robot rid."""
+        self.send_cmd (SPEED_CMD.format (rid, v_x, v_y, v_theta))
+
+    def send_pos_cmd (self, rid, x, y):
+        """Méthode appelée par le backend. Envoie une commande de position non orientée au robot."""
+        self.send_cmd (POS_CMD.format (rid, x, y))
+
+    def send_pos_orient_cmd (self, rid, x, y, theta):
+        """Méthode appelée par le backend. Envoie une commande de position orientée au robot."""
+        self.send_cmd (POS_ORIENT_CMD.format (rid, x, y, theta))
+
+    def send_act_cmd (self, rid, eid, val):
+        """Méthode appelée par le backend. 
+        Envoie la commande 'val' à l'actionneur 'eid' du robot 'rid'."""
+        self.send_cmd (ACTUATOR_CMD.format (rid, eid, val))
+    
+    def send_stop_cmd (self, rid):
+        """Méthode appelée par le backend. Stoppe les mouvements du robot rid"""
+        self.send_cmd (STOP_BUTTON_CMD.format (rid))
+        self.send_cmd (SPEED_CMD.format (rid, 0, 0, 0))
+
+    def send_kill_cmd (self, rid):
+        """Méthode appelée par le backend. Éteint le robot rid"""
+        self.send_cmd (KILL_CMD.format (rid))
+
+    def send_descr_cmd (self, rid):
+        """Méthode appelée par le backend. Demande au robot rid de déclarer tout ses équipements."""
+        self.send_cmd (DESCR_CMD.format (rid))
+
+    #Autres méthodes très utiles
+
+    
+
+    
+class serialRadio(Radio):
+    def __init__(self, nom_port):
+        Radio.__init__(self)
+        self.thread_ecoute = threading.Thread ( target=self.ecoute,)
+        self.listen = True        
+        self.serialObject = serial.Serial (port = nom_port, baudrate=57600, timeout =1)
+    def start (self):
+        """Démarre le thread d'écoute"""
+        self.thread_ecoute.start()
+    def stop (self, *args):
+        """Appelé automatiquement à l'arrêt du programme. 
+        Met la condition de bouclage du thread d'écoute à False"""
+        self.listen = False
+    def ecoute (self):
+        while self.listen:
+            message = self.serialObject.readline ()
+            message = message.decode ()
+            if len (message) != 0:
+                if message [0] == POS_REG [0]:
+                    args = message.split (' ')
+                    if len(args[0])==1:
+                        self.on_posreg (args [1], args [2], args [3], args [4])
+                elif message [0] == ACTU_DECL [0]:
+                    args = message.split (' ')
+                    if len(args[0])==1:
+                        self.on_actudecl (args [1], args [2], args [3], args [4], args [5], args [6], args [7])
+                elif message [0] == CAPT_REG [0]:
+                    args = message.split (' ')
+                    if len(args[0])==1:
+                        self.on_captreg (args [1], args [2], args [3])
+    def send_cmd (self, cmd):
+        """Méthode appelée par les méthodes de serial_radio. Envoie la commande cmd sur le port serial"""
+        self.serialObject.write (cmd.encode ('utf-8'))
+class ivyRadio (Radio):
+    def __init__(self):
+        Radio.__init__(self)
+        self.nom = 'Radio'
+        IvyInit (self.nom,self.nom+" is ready!")
+        self.bus = "127.255.255.255:2010"
+
+        IvyBindMsg (self.onBind1, 'PosReport (.+) (.+) (.+) (.+)')
+        IvyBindMsg (self.onBind2, 'ActuatorReport (.+) (.+) (.+)')
+        IvyBindMsg (self.onBind3, 'ActuatorDecl (.+) (.+) (.+) (.+) (.+) (.+) (.*)')
+    def onBind1 (self, sender, *args):
+        self.on_posreg(args[0],args[1],args[2],args[3])
+    def onBind2 (self, sender, *args):
+        self.on_captreg(args[0],args[1],args[2])
+    def onBind3 (self,sender,*args):
+        self.on_actudecl(args[0],args[1],args[2],args[3],args[4],args[5],args[6])
     def send_cmd (self,cmd):
         """Envoie du texte vers le bus Ivy et le stocke optionnellement sur les tampons
         Input : _ cmd (str) : Le message à envoyer"""
@@ -173,38 +223,6 @@ class Radio :
         if self.record_cmds or self.record_msgs:
             self.backend.widget.record_signal.emit(1)
         IvySendMsg (cmd)
-
-    def send_speed_cmd (self, rid, v_x, v_y, v_theta):
-        """Méthode appelée par le backend. Envoie une commande de vitesse au robot rid."""
-        self.send_cmd(SPEED_CMD.format(rid, v_x, v_y, v_theta))
-
-    def send_pos_cmd (self, rid, x, y):
-        """Méthode appelée par le backend. Envoie une commande de position non orientée au robot."""
-        self.send_cmd (POS_CMD.format(rid, x, y))
-
-    def send_pos_orient_cmd (self, rid, x, y, theta):
-        """Méthode appelée par le backend. Envoie une commande de position orientée au robot."""
-        self.send_cmd (POS_ORIENT_CMD.format(rid,x,y,theta))
-
-    def send_act_cmd (self, rid, eid, val):
-        """Méthode appelée par le backend. 
-        Envoie la commande 'val' à l'actionneur 'eid' du robot 'rid'."""
-        self.send_cmd(ACTUATOR_CMD.format(rid, eid, val))
-    
-    def send_stop_cmd (self, rid):
-        """Méthode appelée par le backend. Stoppe les mouvements du robot rid"""
-        self.send_cmd (STOP_BUTTON_CMD.format(rid))
-        self.send_speed_cmd (rid,0,0,0)
-
-    def send_kill_cmd (self, rid):
-        """Méthode appelée par le backend. Éteint le robot rid"""
-        self.send_cmd(KILL_CMD.format(rid))
-
-    def send_descr_cmd (self, rid):
-        """Méthode appelée par le backend. Demande au robot rid de déclarer tout ses équipements."""
-        self.send_cmd (DESCR_CMD.format(rid))
-
-    #Autres méthodes très utiles
     def start (self):
         """Démare la radio"""
         IvyStart (self.bus)

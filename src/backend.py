@@ -4,8 +4,8 @@ from time import time
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
 import display as dsp
-import ivy_radio as rd
-import serial_radio as srd
+from radios import ivyRadio, serialRadio
+import messages
 
 class WidgetBackend (QWidget):
     """Classe implémentée car les signaux Qt doivent être envoyés par des objets Qt
@@ -32,7 +32,7 @@ class Backend:
 
     Entrée:
         - annu (annuaire.Annuaire)
-        - radio (rd.Radio)
+        - radio (radios.Radio)
         - flag (int, default = 0)
             - -1: vraiment aucune impression console
             -  0: pas d'impression console à part le message de lancement et celui d'arrêt
@@ -50,7 +50,7 @@ class Backend:
         self.runned_time = 0
         self.radio = None
         self.annu = None
-        if isinstance(radio, rd.Radio) or isinstance (radio, srd.Radio):
+        if isinstance(radio, ivyRadio) or isinstance (radio, serialRadio):
             self.attach_radio(radio)
         self.widget = None
 
@@ -119,7 +119,7 @@ class Backend:
         Entrée:
             - radio (radio): la radio à attacher
         """
-        if (isinstance(radio, rd.Radio) or isinstance (radio, srd.Radio)) and self.radio is None:
+        if (isinstance(radio, ivyRadio) or isinstance (radio, serialRadio)) and self.radio is None:
             self.radio = radio
             self.radio.backend = self
 
@@ -185,7 +185,7 @@ class Backend:
         if self.annu is not None:
             if not self.annu.check_robot (rid):
                 self.track_robot (rid)
-                self.radio.send_cmd (rd.DESCR_CMD.format (rid))
+                self.radio.send_cmd (messages.DESCR_CMD.format (rid))
             if not self.annu.find (rid).check_eqp (sid):
                 self.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
             self.annu.find (rid,sid).set_state (float (valeur))
