@@ -47,16 +47,18 @@ class Lecteur :
             words = line.split ()
             self.timer.start( (int(self.data[-1].split()[0]) - int(words[0])) if len (self.data)!= 0 else 1)
             self.window.playback_sgnl.emit([1, len(self.data), 1])
-            rid = words[3]
-            if words[2] == 'PosReport':
-                self.window.backend.radio.on_posreg ("Lecteur", rid, words[4], words[5], words[6])
-            elif words[2] == "ActuatorReport":
-                self.window.backend.radio.on_captreg ("Lecteur", rid, words[4], words[5])
-            elif words[2] == 'ActuatorDecl':
-                self.window.backend.radio.on_actudecl ("Lecteur", rid, words[4], words[5], words[6],
-                words[7], words[8], words[9])
-            elif words[1] == 'Interface':
-                if words[2] in ('PosCmd', 'PosCmdOrient'):
+            rid, message, sender = words[3], words[2], words[1]
+            if message == 'PosReport':
+                x, y, z = words[4], words[5], words[6]
+                self.window.backend.radio.on_posreg ("Lecteur", rid, x, y, z)
+            elif message == "ActuatorReport":
+                sid, val =words[4], words[5]
+                self.window.backend.radio.on_captreg ("Lecteur", rid, sid, val)
+            elif message == 'ActuatorDecl':
+                sid, mini, maxi, step, droits, unit = words[4], words[5], words[6], words[7], words[8], words[9]
+                self.window.backend.radio.on_actudecl ("Lecteur", rid, sid, mini, maxi, step, droits, unit)
+            elif sender == 'Interface':
+                if message in ('PosCmd', 'PosCmdOrient'):
                     x, y, theta = words[4], words[5], (words[6] if len(words)==7 else None)
                     if self.window.inspecteur.check_robot(words[3]):
                         anc_texte = self.window.inspecteur.find(rid).qlineedit_pos_cmd.text()
@@ -66,7 +68,7 @@ class Lecteur :
                         else :
                             texte += anc_texte[10:]
                         self.window.inspecteur.find(rid).qlineedit_pos_cmd.setText(texte)
-                elif words[2] == "ActuatorCmd":
+                elif message == "ActuatorCmd":
                     sid, valeur = words[4], words[5]
                     eqp_display = self.window.inspecteur.find(rid,sid)
                     if eqp_display is not None and isinstance(eqp_display, ACT):

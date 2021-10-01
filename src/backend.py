@@ -5,7 +5,6 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
 import display as dsp
 from radios import ivyRadio, serialRadio
-import messages
 
 class WidgetBackend (QWidget):
     """Classe implémentée car les signaux Qt doivent être envoyés par des objets Qt
@@ -185,7 +184,7 @@ class Backend:
         if self.annu is not None:
             if not self.annu.check_robot (rid):
                 self.track_robot (rid)
-                self.radio.send_cmd (messages.DESCR_CMD.format (rid))
+                self.radio.send_descr_cmd(rid)
             if not self.annu.find (rid).check_eqp (sid):
                 self.annu.find (rid).create_eqp (sid, "Capteur", None , None, None, None)
             self.annu.find (rid,sid).set_state (float (valeur))

@@ -10,7 +10,7 @@ Auteurs: Rémy Brévart, Victor De Crevoisier, Hippolyte Foulongne, Jacques Seri
 ## Installation:
 
 - Cloner le dépôt dans le dossier de votre choix: `git clone https://github.com/KirrimK/RoboKontrol`
-- Installer les librairies python requises: `pip install ivy-python lxml PyQt5 serial`
+- Installer les librairies python requises: `pip install ivy-python lxml PyQt5 pyserial`
 - Sous Linux, il peut être nécessaire d'installer le paquet QtSvg séparément: `sudo apt-get install python3-pyqt5.qtsvg` (sous Ubuntu)
 - Sur les installations python >= 3.9, il est possible que la librairie Ivy fasse toujours appel à une fonction dépréciée de python 3.8 qui n'existe plus. Si ce problème vous arrive, référez-vous à ce lien: [https://gitlab.com/ivybus/ivy-python/-/issues/1](https://gitlab.com/ivybus/ivy-python/-/issues/1)
 
