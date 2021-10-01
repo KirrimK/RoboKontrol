@@ -184,6 +184,7 @@ class serialRadio(Radio):
         
         self.messages["SPEED_CMD"]="S {} {} {} {}\n"#S indicatifRobot vX vY vThetaself.messages["POS_CMD"]="P {} {} {}\n"#P indicatifRobot x y
         self.messages["POS_ORIENT_CMD"] = "O {} {} {} {}\n" #O indicatifRobot  x   y   theta
+        self.messages["POS_CMD"]="P {} {} {}"#P indicatifRobot  x   y
         self.messages["ACTUATOR_CMD"] = "A {} {} {}\n"#A indicatifRobot indicatifEquipement valeur
         self.messages["STOP_BUTTON_CMD"] = "E {} \n"#E indicatifRobot
         self.messages["KILL_CMD"] = "K {} \n"#K indicatifRobot
@@ -232,17 +233,17 @@ class ivyRadio (Radio):
         IvyInit (self.nom,self.nom+" is ready!")
         self.bus = "127.255.255.255:2010"
         #Definition des messages et commandes Ivy
-        self.messages['ACTU_DECL']='B {} {} {} {} {} {} {}'#B indicatifRobot indicatifEquipement valMin valMax step droits unité 
-        self.messages['POS_REG']='R {} {} {} {}'#R indicatifRobot x y theta
-        self.messages['CAPT_REG']='C {} {} {}'#C indicatifRobot indicatifCapteur valeur
+        self.messages['ACTU_DECL']='ActuatorDeclare {} {} {} {} {} {} {}'#B indicatifRobot indicatifEquipement valMin valMax step droits unité 
+        self.messages['POS_REG']='PosReport {} {} {} {}'#R indicatifRobot x y theta
+        self.messages['CAPT_REG']='CaptReport {} {} {}'#C indicatifRobot indicatifCapteur valeur
 
-        
-        self.messages["SPEED_CMD"]="S {} {} {} {}\n"#S indicatifRobot vX vY vThetaself.messages["POS_CMD"]="P {} {} {}\n"#P indicatifRobot x y
-        self.messages["POS_ORIENT_CMD"] = "O {} {} {} {}\n" #O indicatifRobot  x   y   theta
-        self.messages["ACTUATOR_CMD"] = "A {} {} {}\n"#A indicatifRobot indicatifEquipement valeur
-        self.messages["STOP_BUTTON_CMD"] = "E {} \n"#E indicatifRobot
-        self.messages["KILL_CMD"] = "K {} \n"#K indicatifRobot
-        self.messages["DESCR_CMD"] = "D {} \n"#D indicatifRobot
+        self.messages["POS_CMD"]="PosCommand {} {} {}"#P indicatifRobot  x   y
+        self.messages["SPEED_CMD"]="SpeedCommand {} {} {} {}\n"#S indicatifRobot vX vY vThetaself.messages["POS_CMD"]="P {} {} {}\n"#P indicatifRobot x y
+        self.messages["POS_ORIENT_CMD"] = "PosOrientCommand {} {} {} {}\n" #O indicatifRobot  x   y   theta
+        self.messages["ACTUATOR_CMD"] = "ActuatorCommand {} {} {}\n"#A indicatifRobot indicatifEquipement valeur
+        self.messages["STOP_BUTTON_CMD"] = "Emmergency {} \n"#E indicatifRobot
+        self.messages["KILL_CMD"] = "Kill {} \n"#K indicatifRobot
+        self.messages["DESCR_CMD"] = "DecriptionCommand {} \n"#D indicatifRobot
 
         IvyBindMsg (self.onBind1, self.messages["POS_REG"].format ('(.+)','(.+)','(.+)','(.+)'))
         IvyBindMsg (self.onBind2, self.messages["CAPT_REG"].format('(.+)','(.+)','(.+)'))
