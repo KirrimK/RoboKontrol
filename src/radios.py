@@ -184,7 +184,7 @@ class serialRadio(Radio):
         
         self.messages["SPEED_CMD"]="S {} {} {} {}\n"#S indicatifRobot vX vY vThetaself.messages["POS_CMD"]="P {} {} {}\n"#P indicatifRobot x y
         self.messages["POS_ORIENT_CMD"] = "O {} {} {} {}\n" #O indicatifRobot  x   y   theta
-        self.messages["POS_CMD"]="P {} {} {}"#P indicatifRobot  x   y
+        self.messages["POS_CMD"]="P {} {} {}\n"#P indicatifRobot  x   y
         self.messages["ACTUATOR_CMD"] = "A {} {} {}\n"#A indicatifRobot indicatifEquipement valeur
         self.messages["STOP_BUTTON_CMD"] = "E {} \n"#E indicatifRobot
         self.messages["KILL_CMD"] = "K {} \n"#K indicatifRobot
@@ -237,7 +237,7 @@ class ivyRadio (Radio):
         self.messages['POS_REG']='PosReport {} {} {} {}'#R indicatifRobot x y theta
         self.messages['CAPT_REG']='CaptReport {} {} {}'#C indicatifRobot indicatifCapteur valeur
 
-        self.messages["POS_CMD"]="PosCommand {} {} {}"#P indicatifRobot  x   y
+        self.messages["POS_CMD"]="PosCommand {} {} {}\n"#P indicatifRobot  x   y
         self.messages["SPEED_CMD"]="SpeedCommand {} {} {} {}\n"#S indicatifRobot vX vY vThetaself.messages["POS_CMD"]="P {} {} {}\n"#P indicatifRobot x y
         self.messages["POS_ORIENT_CMD"] = "PosOrientCommand {} {} {} {}\n" #O indicatifRobot  x   y   theta
         self.messages["ACTUATOR_CMD"] = "ActuatorCommand {} {} {}\n"#A indicatifRobot indicatifEquipement valeur
