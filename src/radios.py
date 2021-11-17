@@ -247,7 +247,7 @@ class ivyRadio (Radio):
 
         IvyBindMsg (self.onBind1, self.messages["POS_REG"].format ('(.+)','(.+)','(.+)','(.+)'))
         IvyBindMsg (self.onBind2, self.messages["CAPT_REG"].format('(.+)','(.+)','(.+)'))
-        IvyBindMsg (self.onBind3, self.messages["ACTU_DECL"].format('(.+)','(.+)','(.+)','(.+)''(.+)','(.+)','(.+)'))
+        IvyBindMsg (self.onBind3, self.messages["ACTU_DECL"].format('(.+)','(.+)','(.+)','(.+)','(.+)','(.+)','(.+)'))
     
     def onBind1 (self, sender, rid, x, y, theta):
         """Fonction servant à se débarasser de l'objet sender donné par le bind Ivy"""
