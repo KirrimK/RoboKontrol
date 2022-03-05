@@ -211,15 +211,15 @@ class serialRadio(Radio):
                 if message [0] == self.messages["POS_REG"] [0]:
                     args = message.split (' ')
                     if len(args[0])==1:
-                        self.on_posreg (args [1], args [2], args [3], args [4])
+                        self.on_posreg ("serial", args [1], args [2], args [3])
                 elif message [0] == self.messages["ACTU_DECL"] [0]:
                     args = message.split (' ')
                     if len(args[0])==1:
-                        self.on_actudecl (args [1], args [2], args [3], args [4], args [5], args [6], args [7])
+                        self.on_actudecl ("serial", args [1], args [2], args [3], args [4], args [5], args [6])
                 elif message [0] == self.messages["CAPT_REG"] [0]:
                     args = message.split (' ')
                     if len(args[0])==1:
-                        self.on_captreg (args [1], args [2], args [3])
+                        self.on_captreg ("serial", args [1], args [2])
     def send_cmd (self, cmd):
         """Méthode appelée par les méthodes de serial_radio. Envoie la commande cmd sur le port serial"""
         self.serialObject.write (cmd.encode ('utf-8'))
@@ -246,19 +246,19 @@ class ivyRadio (Radio):
         self.messages["KILL_CMD"] = "Kill\n"#K
         self.messages["DESCR_CMD"] = "DecriptionCommand\n"#D
 
-        IvyBindMsg (self.onBind1, self.messages["POS_REG"].format ('(.+)','(.+)','(.+)','(.+)'))
-        IvyBindMsg (self.onBind2, self.messages["CAPT_REG"].format('(.+)','(.+)','(.+)'))
-        IvyBindMsg (self.onBind3, self.messages["ACTU_DECL"].format('(.+)','(.+)','(.+)','(.+)','(.+)','(.+)','(.+)'))
+        IvyBindMsg (self.onBind1, self.messages["POS_REG"].format ('(.+)','(.+)','(.+)'))
+        IvyBindMsg (self.onBind2, self.messages["CAPT_REG"].format('(.+)','(.+)'))
+        IvyBindMsg (self.onBind3, self.messages["ACTU_DECL"].format('(.+)','(.+)','(.+)','(.+)','(.+)','(.+)'))
     
-    def onBind1 (self, sender, rid, x, y, theta):
+    def onBind1 (self, sender, x, y, theta):
         """Fonction servant à se débarasser de l'objet sender donné par le bind Ivy"""
-        self.on_posreg(rid, x, y, theta)
-    def onBind2 (self, sender, rid, sid, val):
+        self.on_posreg("rid", x, y, theta)
+    def onBind2 (self, sender, sid, val):
         """Fonction servant à se débarasser de l'objet sender donné par le bind Ivy"""
-        self.on_captreg(rid, sid, val)
-    def onBind3 (self, sender, rid, sid, mini, maxi, step, droits, unit):
+        self.on_captreg("rid", sid, val)
+    def onBind3 (self, sender, sid, mini, maxi, step, droits, unit):
         """Fonction servant à se débarasser de l'objet sender donné par le bind Ivy"""
-        self.on_actudecl(rid, sid, mini, maxi, step, droits, unit)
+        self.on_actudecl("rid", sid, mini, maxi, step, droits, unit)
 
     def send_cmd (self,cmd):
         """Envoie du texte vers le bus Ivy et le stocke optionnellement sur les tampons
