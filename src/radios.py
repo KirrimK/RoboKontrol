@@ -138,35 +138,35 @@ class Radio:
     #Envoi de commandes
 
 
-    def send_speed_cmd (self, rid, v_x, v_y, v_theta):
+    def send_speed_cmd (self, rid, v_x, v_theta):
         """Méthode appelée par le backend. Envoie une commande de vitesse au robot rid."""
-        self.send_cmd (self.messages["SPEED_CMD"].format (rid, v_x, v_y, v_theta))
+        self.send_cmd (self.messages["SPEED_CMD"].format (v_x, v_theta))
 
     def send_pos_cmd (self, rid, x, y):
         """Méthode appelée par le backend. Envoie une commande de position non orientée au robot."""
-        self.send_cmd (self.messages["POS_CMD"].format (rid, x, y))
+        self.send_cmd (self.messages["POS_CMD"].format (x, y))
 
     def send_pos_orient_cmd (self, rid, x, y, theta):
         """Méthode appelée par le backend. Envoie une commande de position orientée au robot."""
-        self.send_cmd (self.messages["POS_ORIENT_CMD"].format (rid, x, y, theta))
+        self.send_cmd (self.messages["POS_ORIENT_CMD"].format (x, y, theta))
 
     def send_act_cmd (self, rid, eid, val):
         """Méthode appelée par le backend. 
         Envoie la commande 'val' à l'actionneur 'eid' du robot 'rid'."""
-        self.send_cmd (self.messages["ACTUATOR_CMD"].format (rid, eid, val))
+        self.send_cmd (self.messages["ACTUATOR_CMD"].format (eid, val))
     
     def send_stop_cmd (self, rid):
         """Méthode appelée par le backend. Stoppe les mouvements du robot rid"""
-        self.send_cmd (self.messages["STOP_BUTTON_CMD"].format (rid))
-        self.send_cmd (self.messages["SPEED_CMD"].format (rid, 0, 0, 0))
+        self.send_cmd (self.messages["STOP_BUTTON_CMD"].format ())
+        self.send_cmd (self.messages["SPEED_CMD"].format (0, 0, 0))
 
     def send_kill_cmd (self, rid):
         """Méthode appelée par le backend. Éteint le robot rid"""
-        self.send_cmd (self.messages["KILL_CMD"].format (rid))
+        self.send_cmd (self.messages["KILL_CMD"].format ())
 
     def send_descr_cmd (self, rid):
         """Méthode appelée par le backend. Demande au robot rid de déclarer tout ses équipements."""
-        self.send_cmd (self.messages["DESCR_CMD"].format (rid))
+        self.send_cmd (self.messages["DESCR_CMD"].format ())
 
     #Autres méthodes très utiles
 
@@ -182,7 +182,7 @@ class serialRadio(Radio):
         self.messages['CAPT_REG']='c {} {}'#C indicatifCapteur valeur
 
         
-        self.messages["SPEED_CMD"]="s {} {} {}\n"#S vX vY vThetaself.messages["POS_CMD"]="P {} {} {}\n"#P indicatifRobot x y
+        self.messages["SPEED_CMD"]="v {} {}\n"#S vX vY vThetaself.messages["POS_CMD"]="P {} {} {}\n"#P indicatifRobot x y
         self.messages["POS_ORIENT_CMD"] = "o {} {} {}\n" #O x   y   theta
         self.messages["POS_CMD"]="p {} {}\n"#P x   y
         self.messages["ACTUATOR_CMD"] = "a {} {}\n"#A indicatifEquipement valeur
@@ -238,7 +238,7 @@ class ivyRadio (Radio):
         self.messages['CAPT_REG']='CaptReport {} {}'#C indicatifCapteur valeur
 
         self.messages["POS_CMD"]="PosCommand {} {}\n"#P  x   y
-        self.messages["SPEED_CMD"]="SpeedCommand {} {} {}\n"#S vX vY(0) vTheta
+        self.messages["SPEED_CMD"]="SpeedCommand {} {}\n"#S vX vTheta
         self.messages["POS_CMD"]="P {} {}\n"#P x y
         self.messages["POS_ORIENT_CMD"] = "PosOrientCommand {} {} {}\n" #O  x   y   theta
         self.messages["ACTUATOR_CMD"] = "ActuatorCommand {} {}\n"#A indicatifEquipement valeur
