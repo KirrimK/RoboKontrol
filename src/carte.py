@@ -168,7 +168,7 @@ class MapView(QtWidgets.QWidget):
         #paint map outline (for alignment purposes)
         if self.parent.settings_dict["Carte (Outline)"]:
             maprt_size, maprt_pos = self.calc_pos_size([self.map_width, self.map_height], [0, 0])
-            painter.drawRect(QRect(maprt_pos[0], maprt_pos[1], maprt_size[0], maprt_size[1]))
+            painter.drawRect(QRect(int(maprt_pos[0]), int(maprt_pos[1]), int(maprt_size[0]), int(maprt_size[1])))
 
     def paint_vector(self, painter):
         """Dessine la ligne pour les clics-glissés"""
