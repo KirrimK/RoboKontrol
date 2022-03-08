@@ -276,7 +276,7 @@ class Backend:
             if self.annu.find (rid).is_stopped :
                 self.annu.find (rid).is_stopped = False
         if self.radio_started:
-            self.radio.send_speed_cmd (rid, int(v_x), int(v_y), int(v_theta))
+            self.radio.send_speed_cmd (rid, int(v_x), int(v_theta))
 
     def send_descr_cmd (self, rid):
         """Envoi de demande de description au robot
