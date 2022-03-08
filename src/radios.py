@@ -191,7 +191,7 @@ class serialRadio(Radio):
         self.messages["DESCR_CMD"] = "d\n"#D 
         self.thread_ecoute = threading.Thread ( target=self.ecoute,)
         self.listen = True        
-        self.serialObject = serial.Serial (port = nom_port, baudrate=57600, timeout =1)
+        self.serialObject = serial.Serial (port = nom_port, baudrate=9600, timeout =1)
     def start (self):
         """Démarre le thread d'écoute"""
         self.thread_ecoute.start()
