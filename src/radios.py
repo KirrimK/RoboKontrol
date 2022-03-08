@@ -186,7 +186,7 @@ class serialRadio(Radio):
         self.messages["POS_ORIENT_CMD"] = "o {} {} {}\n" #O x   y   theta
         self.messages["POS_CMD"]="p {} {}\n"#P x   y
         self.messages["ACTUATOR_CMD"] = "a {} {}\n"#A indicatifEquipement valeur
-        self.messages["STOP_BUTTON_CMD"] = "e\n"#E
+        self.messages["STOP_BUTTON_CMD"] = "s\n"#E
         self.messages["KILL_CMD"] = "k\n"#K 
         self.messages["DESCR_CMD"] = "d\n"#D 
         self.thread_ecoute = threading.Thread ( target=self.ecoute,)
