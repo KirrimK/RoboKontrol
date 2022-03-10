@@ -248,7 +248,8 @@ class MapView(QtWidgets.QWidget):
             if self.keys != new_keys:
                 #les touches pressées ont changé
                 self.keys = new_keys
-                self.updt_speed_cmd()
+                if not event.isAutoRepeat():
+                    self.updt_speed_cmd()
 
     def keyReleaseEvent(self,event):
         """Une touche du clavier est relachée"""
@@ -269,13 +270,15 @@ class MapView(QtWidgets.QWidget):
             if self.keys != new_keys:
                 #les touches pressées ont changé
                 self.keys = new_keys
-                self.updt_speed_cmd()
+                if not event.isAutoRepeat():
+                    self.updt_speed_cmd()
 
     def updt_speed_cmd(self):
         """Mise à jour de la speed command du ctrl clavier
         si une touche est modifiée"""
-        ur_mult = 2 if self.keys[4] == 1 else 1
-        tht_mlt = 1
+        print("send")
+        ur_mult = 600 if self.keys[4] == 1 else 200
+        tht_mlt = 30 if self.keys[4] == 1 else 10
         speed_ur = (ur_mult if self.keys[0] else 0) + (-ur_mult if self.keys[1] else 0)
         speed_utheta = (tht_mlt if self.keys[2] else 0) + (-tht_mlt if self.keys[3] else 0)
         self.parent.backend.send_speed_cmd(self.selected_robot, speed_ur, 0, speed_utheta)
