@@ -205,21 +205,24 @@ class serialRadio(Radio):
         Lit l'entrée serie et appelle les fonctions concernées si elle reconnait un message de robot.
         S'arrête quand le booléen listen est mis à False."""
         while self.listen:
-            message = self.serialObject.readline ()
-            message = message.decode ()
-            if len (message) != 0:
-                if message [0] == self.messages["POS_REG"] [0]:
-                    args = message.split (' ')
-                    if len(args[0])==1:
-                        self.on_posreg ("serial", args [1], args [2], args [3])
-                elif message [0] == self.messages["ACTU_DECL"] [0]:
-                    args = message.split (' ')
-                    if len(args[0])==1:
-                        self.on_actudecl ("serial", args [1], args [2], args [3], args [4], args [5], args [6])
-                elif message [0] == self.messages["CAPT_REG"] [0]:
-                    args = message.split (' ')
-                    if len(args[0])==1:
-                        self.on_captreg ("serial", args [1], args [2])
+            try:
+                message = self.serialObject.readline ()
+                message = message.decode ()
+                if len (message) != 0:
+                    if message [0] == self.messages["POS_REG"] [0]:
+                        args = message.split (' ')
+                        if len(args[0])==1:
+                            self.on_posreg ("serial", args [1], args [2], args [3])
+                    elif message [0] == self.messages["ACTU_DECL"] [0]:
+                        args = message.split (' ')
+                        if len(args[0])==1:
+                            self.on_actudecl ("serial", args [1], args [2], args [3], args [4], args [5], args [6])
+                    elif message [0] == self.messages["CAPT_REG"] [0]:
+                        args = message.split (' ')
+                        if len(args[0])==1:
+                            self.on_captreg ("serial", args [1], args [2])
+            except Exception as e:
+                print(e)
     def send_cmd (self, cmd):
         """Méthode appelée par les méthodes de serial_radio. Envoie la commande cmd sur le port serial"""
         self.serialObject.write (cmd.encode ('utf-8'))

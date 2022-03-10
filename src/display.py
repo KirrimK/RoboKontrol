@@ -507,6 +507,7 @@ class DisplayActionneur(anr.Actionneur, QWidget):
         self.slider_equipement.setMinimum(self.min_val)
         self.slider_equipement.setMaximum(self.max_val)
         self.slider_equipement.setSingleStep(self.step)
+        self.slider_equipement.sliderReleased.connect(self.on_releaseSlider)
         self.slider_equipement.valueChanged.connect(self.onvaluechanged_slider)
         self.layout_discret.addWidget(self.slider_equipement)
         self.doublespinbox_eqp.setFixedSize(75, 30)
@@ -556,7 +557,12 @@ class DisplayActionneur(anr.Actionneur, QWidget):
     def onvaluechanged_slider(self):
         """ Affiche et envoie vers backend la dernière commande d'un actionneur discret"""
         if not self.updated_outside:
-            self.backend.sendeqpcmd(self.parent_robot.rid, self.nom, self.doublespinbox_eqp.value())
             self.label_command.setText(str(self.slider_equipement.value()))
+
+    @pyqtSlot()
+    def on_releaseSlider(self):
+        if not self.updated_outside:
+            self.backend.sendeqpcmd(self.parent_robot.rid, self.nom, self.doublespinbox_eqp.value())
             self.doublespinbox_eqp.setValue(self.slider_equipement.value())
             self.updt_cmd(self.slider_equipement.value())
+
