@@ -153,6 +153,7 @@ class Radio:
     def send_act_cmd (self, rid, eid, val):
         """Méthode appelée par le backend. 
         Envoie la commande 'val' à l'actionneur 'eid' du robot 'rid'."""
+        val=int(val)
         self.send_cmd (self.messages["ACTUATOR_CMD"].format (eid, val))
     
     def send_stop_cmd (self, rid):
@@ -221,6 +222,8 @@ class serialRadio(Radio):
                         args = message.split (' ')
                         if len(args[0])==1:
                             self.on_captreg ("serial", args [1], args [2])
+                    elif message[0] == 'm':
+                        print(message[1:])
             except Exception as e:
                 print(e)
     def send_cmd (self, cmd):

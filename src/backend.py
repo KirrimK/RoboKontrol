@@ -163,7 +163,7 @@ class Backend:
                     #restauration de la valeur après la mise à jour de l'équipement
                     self.annu.find(rid,aid).set_state(valeur)
 
-            elif droits == 'READ':
+            elif droits == 'R':
                 if not self.annu.find (rid).check_eqp (aid):
                     self.annu.find (rid).create_eqp (aid, "Capteur", minv, maxv, step, unit)
                 elif self.annu.find (rid, aid).get_type () is not dsp.DisplayActionneur :
@@ -298,7 +298,7 @@ class Backend:
         if self.annu is not None and self.annu.find(rid) and self.annu.find(rid, eqp_name):
             if  self.annu.find (rid).is_stopped :
                 self.annu.find (rid).is_stopped = False
-        self.radio.send_act_cmd (rid, eqp_name, state)
+        self.radio.send_act_cmd (rid, eqp_name[0:2], state)#[0] temporarire
 
     def get_all_robots(self):
         """Retourne la liste de tous les noms des robots

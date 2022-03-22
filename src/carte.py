@@ -276,7 +276,7 @@ class MapView(QtWidgets.QWidget):
     def updt_speed_cmd(self):
         """Mise à jour de la speed command du ctrl clavier
         si une touche est modifiée"""
-        ur_mult = 600 if self.keys[4] == 1 else 200
+        ur_mult = 1000 if self.keys[4] == 1 else 200
         tht_mlt = 30 if self.keys[4] == 1 else 10
         speed_ur = (ur_mult if self.keys[0] else 0) + (-ur_mult if self.keys[1] else 0)
         speed_utheta = (tht_mlt if self.keys[2] else 0) + (-tht_mlt if self.keys[3] else 0)
