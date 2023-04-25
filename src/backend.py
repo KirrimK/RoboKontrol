@@ -270,6 +270,27 @@ class Backend:
         else:
             self.radio.send_pos_orient_cmd (rid, int(pos[0]), int(pos[1]), pos[2]*3.141592654/180)
 
+    def sendposreset_robot(self, rid, pos):
+        """reset robot pos
+
+        Entrée:
+            - rid (str): nom du robot
+            - pos (float, float, float): "vecteur" position de la destination du robot
+                - [0]: x
+                - [1]: y
+                - [2]: theta (si non spécifié, mettre à None)
+        """
+
+        if self.annu is not None and self.annu.check_robot(rid) and self.radio_started:
+            if self.annu.find (rid) is not None :
+                if  self.annu.find (rid).is_stopped :
+                    self.annu.find (rid).is_stopped = False
+        if pos[2] is None:
+            self.radio.send_pos_reset (rid, int(pos[0]), int(pos[1]))
+        else:
+            self.radio.send_pos_reset (rid, int(pos[0]), int(pos[1]), pos[2]*3.141592654/180)
+
+
     def send_speed_cmd (self, rid, v_x, v_y, v_theta):
         """Envoi de commande de vitesse au robot"""
         if self.annu.find (rid) is not None and self.annu is not None:

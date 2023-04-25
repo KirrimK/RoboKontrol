@@ -294,6 +294,7 @@ class ecalRadio(Radio):
         Radio.__init__(self)
         ecal_core.initialize(sys.argv, "teleguidageRobotRoboKontrol")
         self.setPositionPub = ProtoPublisher("set_position", robotMsg.Position)
+        self.resetPositionPub = ProtoPublisher("reset", robotMsg.Position)
         self.stopMessagePub = ProtoPublisher("stop",robotMsg.EmptyMessage)
 
         self.odomPositionSub = ProtoSubscriber('odom_pos', robotMsg.Position)
@@ -332,3 +333,7 @@ class ecalRadio(Radio):
         """Méthode appelée par le backend. Stoppe les mouvements du robot rid"""
         self.stopMessagePub.send(robotMsg.EmptyMessage(placeHolderToMakeItWork=0.0))
     
+    def send_pos_reset(self, rid, x, y, theta=None):
+        if theta is None:
+            theta = self.lastTheta
+        self.resetPositionPub.send(robotMsg.Position(x=x/1000,y=y/1000,theta=theta))

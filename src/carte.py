@@ -144,8 +144,9 @@ class MapView(QtWidgets.QWidget):
             big_offset = [mrbpos[0] - mrbsize[0], mrbpos[1] - mrbsize[1]]
             robot_rect = QRect(int(pos_offset[0]), int(pos_offset[1]), int(mrbsize[0]),int( mrbsize[1]))
             outer_rect = QRect(int(big_offset[0]), int(big_offset[1]), int(2*mrbsize[0]), int(2*mrbsize[1]))
-            start_angle = int((robot_pos[2] + 3) * 16)
             span_angle = int(6 * 16)
+            start_angle = int((robot_pos[2]) * 16 - span_angle/2)
+            
             old_pen = painter.pen()
             if self.selected_robot == robot:
                 painter.setPen(QPen(QColor(self.parent.settings_dict["Carte (Couleur Sélection)"]),
@@ -320,15 +321,22 @@ class MapView(QtWidgets.QWidget):
                 #le clic n'était pas statique
                 angle = (atan2(-diff_y, diff_x)*360/(2*pi))
                 cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], angle]
-                self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
-                qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
-                qle_poscmd.setText("{} : {} : {}".format(int(cmd[0]), int(cmd[1]), int(cmd[2])))
+                
+                if event.modifiers() & Qt.ControlModifier:
+                    self.parent.backend.sendposreset_robot(self.selected_robot, cmd)
+                else:
+                    self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
+                    qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
+                    qle_poscmd.setText("{} : {} : {}".format(int(cmd[0]), int(cmd[1]), int(cmd[2])))
             else:
                 if self.selected_robot is not None:
                     cmd = [self.relative_init_mspos[0], self.relative_init_mspos[1], None]
-                    self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
-                    qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
-                    qle_poscmd.setText("{} : {} : 000".format(int(cmd[0]), int(cmd[1])))
+                    if event.modifiers() & Qt.ControlModifier:
+                        self.parent.backend.sendposreset_robot(self.selected_robot, cmd)
+                    else:
+                        self.parent.backend.sendposcmd_robot(self.selected_robot, cmd)
+                        qle_poscmd = self.parent.inspecteur.find(self.selected_robot).qlineedit_pos_cmd
+                        qle_poscmd.setText("{} : {} : 000".format(int(cmd[0]), int(cmd[1])))
 
     def mouseMoveEvent(self, event):
         """Quand la souris est bougée sur la fenêtre"""
