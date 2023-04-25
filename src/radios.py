@@ -1,8 +1,13 @@
 import serial
 import threading
-from time import time, gmtime
+from time import time, gmtime, sleep
 from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
+import ecal.core.core as ecal_core
+from ecal.core.publisher import ProtoPublisher, StringPublisher
+from ecal.core.subscriber import ProtoSubscriber, StringSubscriber
+import generated.robotMsgs_pb2 as robotMsg
 import logging
+import sys
 
 
 
@@ -170,6 +175,15 @@ class Radio:
 
     #Autres méthodes très utiles
 
+    def start (self):
+        pass #placeholder pour classes supérieures
+
+    def stop (self):
+        pass #placeholder pour classes supérieures
+
+    def send_cmd (self, msg):
+        pass #placeholder pour classes supérieures
+
     
 
     
@@ -248,7 +262,6 @@ class ivyRadio (Radio):
         IvyBindMsg (self.onBind1, self.messages["POS_REG"].format ('(.+)','(.+)','(.+)','(.+)'))
         IvyBindMsg (self.onBind2, self.messages["CAPT_REG"].format('(.+)','(.+)','(.+)'))
         IvyBindMsg (self.onBind3, self.messages["ACTU_DECL"].format('(.+)','(.+)','(.+)','(.+)','(.+)','(.+)','(.+)'))
-    
     def onBind1 (self, sender, rid, x, y, theta):
         """Fonction servant à se débarasser de l'objet sender donné par le bind Ivy"""
         self.on_posreg(rid, x, y, theta)
@@ -273,3 +286,49 @@ class ivyRadio (Radio):
     def stop (self, *args):
         """Appelé automatiquement à l'arrêt du programme. Enlève la radio du bus Ivy."""
         IvyStop()
+
+
+class ecalRadio(Radio):
+    """Classe de radio permettant la connection aux channels eCal. Téléguidage du robot 2023"""
+    def __init__(self):
+        Radio.__init__(self)
+        ecal_core.initialize(sys.argv, "teleguidageRobotRoboKontrol")
+        self.setPositionPub = ProtoPublisher("set_position", robotMsg.Position)
+        self.stopMessagePub = ProtoPublisher("stop",robotMsg.EmptyMessage)
+
+        self.odomPositionSub = ProtoSubscriber('odom_pos', robotMsg.Position)
+        self.odomPositionSub.set_callback(self.onPosRecv)
+        self.lastTheta = None
+        #sleep(1)# time needed to initialize ecal
+
+    def onPosRecv(self,topic_name,msg, temps):
+        x = int(msg.x*1000)
+        y= int(msg.y*1000)
+        theta = msg.theta
+        self.lastTheta=theta
+        if self.record_msgs :
+            message = "PosReport {} {} {} {}".format ('Cooking-Mama_ghost', x, y, theta)
+            self.msgs_buffer.append ((time(),'Cooking-Mama', message))
+            self.backend.widget.record_signal.emit(1)
+        if self.backend.widget is not None :
+            self.backend.widget.position_updated.emit (['Cooking-Mama', x, y, theta, time()])
+        else:
+            self.backend.premiers_messages.append (('pos',['Cooking-Mama', x, y, theta, time()]))
+
+    def send_pos_cmd (self, rid, x, y):
+        x/=1000
+        y/=1000
+        if self.lastTheta is not None:
+            self.setPositionPub.send(robotMsg.Position(x=x,y=y,theta=self.lastTheta))
+        else:
+            self.setPositionPub.send(robotMsg.Position(x=x,y=y,theta=0.0))
+        
+    def send_pos_orient_cmd (self, rid, x, y, theta):
+        xCmd = x/1000
+        yCmd = y/1000
+        self.setPositionPub.send(robotMsg.Position(x=xCmd,y=yCmd,theta=theta))
+
+    def send_stop_cmd (self, rid):
+        """Méthode appelée par le backend. Stoppe les mouvements du robot rid"""
+        self.stopMessagePub.send(robotMsg.EmptyMessage(placeHolderToMakeItWork=0.0))
+    

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package enac;
+
+message EmptyMessage {
+    float placeHolderToMakeItWork = 1;
+}
+
+message Position {
+    float x = 1;
+    float y = 2;
+    float theta = 3;
+}
+
+enum ProximityStatus { 
+    OK = 0;
+    WARNING = 1;
+    STOP = 2;
+}
+
+message Proximity { 
+    float closest_distance = 1;
+    ProximityStatus status = 2;
+}
