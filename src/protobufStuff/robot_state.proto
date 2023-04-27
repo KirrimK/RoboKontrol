@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package enac;
+
+//SPEED_REG = "SpeedCmd {} (.+) (.+) (.+)"
+//POS_REG = "PosCmd {} (.+) (.+)"
+//POS_ORIENT_REG = "PosCmdOrient {} (.+) (.+) (.+)"
+//ACTUATOR_CMD = "ActuatorCmd {} (.+) (.+)"
+//ACTUATORS_REQUEST = "ActuatorsRequest {}"
+//
+//ACTUATOR_DECL = "ActuatorDecl {} {} {} {} {} {} {}"
+//POS_REPORT = "PosReport {} {} {} {}"
+//ACTUATOR_REPORT = "ActuatorReport {} {} {}"
+//
+//KILL_CMD = "Shutdown {}"
+//
+//to generate python protobuff code type in a terminal:
+//protoc --proto_path=proto --python_out=generated robot_state.proto
+//
+// Careful with travel message : don't send all fields at 0 or it might crash on subscriber (empty message)
+message no_args_func_ {
+    float nothing = 1;
+}
+
+message Position {
+    float x = 1;
+    float y = 2;
+    float theta = 3;
+}
+
+message SetState {
+    int32 plate_position = 1; // Position of the "plateau"
+    int32 plate_number = 2; // Number of the action, value to display, ...
+    bool cerise_drop=3;
+    int32 claw_state = 4;
+}
+
+message Speed {
+   float vx = 1;
+   float vy = 2;
+   float vtheta = 3;
+}
+
+message Match {
+    string status = 1;
+    int32 score = 2;
+}
+
+message Action {
+    int32 action = 1;
+}
+
+enum Color {
+    BLUE = 0;
+    GREEN = 1;
+}
+
+message Side {
+    Color color = 1;
+}
+
+
+
+//message Odom {
+//    Position position = 1;
+//    Speed speed = 2;
+//    double timestamp = 3; 
+//}
+//
+//message HolonomicSpeed {
+//    float speed = 1; // in meters
+//    float angle = 2; // in degrees
+//}

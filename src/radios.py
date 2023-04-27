@@ -5,7 +5,7 @@ from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
 import ecal.core.core as ecal_core
 from ecal.core.publisher import ProtoPublisher, StringPublisher
 from ecal.core.subscriber import ProtoSubscriber, StringSubscriber
-import generated.robotMsgs_pb2 as robotMsg
+import generated.robot_state_pb2 as robotMsg
 import logging
 import sys
 
@@ -295,10 +295,16 @@ class ecalRadio(Radio):
         ecal_core.initialize(sys.argv, "teleguidageRobotRoboKontrol")
         self.setPositionPub = ProtoPublisher("set_position", robotMsg.Position)
         self.resetPositionPub = ProtoPublisher("reset", robotMsg.Position)
-        self.stopMessagePub = ProtoPublisher("stop",robotMsg.EmptyMessage)
+        self.stopMessagePub = ProtoPublisher("stop",robotMsg.no_args_func_)
 
         self.odomPositionSub = ProtoSubscriber('odom_pos', robotMsg.Position)
+        self.optitrackPositionSub = ProtoSubscriber('optitrack_pos', robotMsg.Position)
+        self.lidarPositionSub = ProtoSubscriber('lidar_pos', robotMsg.Position)
+        self.smoothPositionSub = ProtoSubscriber('smooth_pos', robotMsg.Position)
         self.odomPositionSub.set_callback(self.onPosRecv)
+        self.optitrackPositionSub.set_callback(self.onPosRecv)
+        self.lidarPositionSub.set_callback(self.onPosRecv)
+        self.smoothPositionSub.set_callback(self.onPosRecv)
         self.lastTheta = None
         #sleep(1)# time needed to initialize ecal
 
@@ -307,14 +313,16 @@ class ecalRadio(Radio):
         y= int(msg.y*1000)
         theta = msg.theta
         self.lastTheta=theta
+        rid = "Cooking-Mama" if topic_name == "odom_pos" else topic_name 
+        
         if self.record_msgs :
-            message = "PosReport {} {} {} {}".format ('Cooking-Mama_ghost', x, y, theta)
-            self.msgs_buffer.append ((time(),'Cooking-Mama', message))
+            message = "PosReport {} {} {} {}".format (rid+'_ghost', x, y, theta)
+            self.msgs_buffer.append ((time(),rid, message))
             self.backend.widget.record_signal.emit(1)
         if self.backend.widget is not None :
-            self.backend.widget.position_updated.emit (['Cooking-Mama', x, y, theta, time()])
+            self.backend.widget.position_updated.emit ([rid, x, y, theta, time()])
         else:
-            self.backend.premiers_messages.append (('pos',['Cooking-Mama', x, y, theta, time()]))
+            self.backend.premiers_messages.append (('pos',[rid, x, y, theta, time()]))
 
     def send_pos_cmd (self, rid, x, y):
         x/=1000
@@ -331,7 +339,7 @@ class ecalRadio(Radio):
 
     def send_stop_cmd (self, rid):
         """Méthode appelée par le backend. Stoppe les mouvements du robot rid"""
-        self.stopMessagePub.send(robotMsg.EmptyMessage(placeHolderToMakeItWork=0.0))
+        self.stopMessagePub.send(robotMsg.no_args_func_(nothing=0.0))
     
     def send_pos_reset(self, rid, x, y, theta=None):
         if theta is None:

@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package enac;
+
+message Lidar {
+    int32 nb_pts = 1;
+    float angle_increment = 2;
+    repeated float angles = 3; // degrees in [0, 360] trigonometric/anticlockwise, starting from origin of lidar
+    repeated float distances = 4; // Meters 
+}
+
+enum ProximityStatus { 
+    OK = 0;
+    WARNING = 1;
+    STOP = 2;
+}
+
+message Proximity { 
+    float closest_distance = 1;
+    ProximityStatus status = 2;
+}
+
+message Obstacles {
+    repeated float x = 1;
+    repeated float y = 2;
+}
+
