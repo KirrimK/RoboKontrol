@@ -296,10 +296,10 @@ class ecalRadio(Radio):
         ecal_core.initialize(sys.argv, "teleguidageRobotRoboKontrol")
         self.setPositionPub = ProtoPublisher("set_position", robotMsg.Position)
         self.resetPositionPub = ProtoPublisher("reset", robotMsg.Position)
-        self.stopMessagePub = ProtoPublisher("stop",robotMsg.no_arg_func)
-        self.demandeDescrPub = ProtoPublisher("demandDescr",robotMsg.no_arg_func)
+        self.stopMessagePub = ProtoPublisher("stop",robotMsg.no_args_func_)
+        self.demandeDescrPub = ProtoPublisher("demandDescr",robotMsg.no_args_func_)
         
-        self.DesciptionSub = ProtoPublisher ("description", rKCompatibilityMsg.CapteurDeclaration)
+        self.DesciptionSub = ProtoSubscriber ("description", rKCompatibilityMsg.CapteurDeclaration)
         self.odomPositionSub.set_callback(self.on_actudecl)
         self.odomPositionSub = ProtoSubscriber('odom_pos', robotMsg.Position)
         self.optitrackPositionSub = ProtoSubscriber('optitrack_pos', robotMsg.Position)
