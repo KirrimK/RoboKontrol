@@ -6,7 +6,6 @@ import ecal.core.core as ecal_core
 from ecal.core.publisher import ProtoPublisher, StringPublisher
 from ecal.core.subscriber import ProtoSubscriber, StringSubscriber
 import generated.robot_state_pb2 as robotMsg
-import generated.roboKontrolCompatibility_pb2 as rKCompatibilityMsg
 import logging
 import sys
 
@@ -297,10 +296,7 @@ class ecalRadio(Radio):
         self.setPositionPub = ProtoPublisher("set_position", robotMsg.Position)
         self.resetPositionPub = ProtoPublisher("reset", robotMsg.Position)
         self.stopMessagePub = ProtoPublisher("stop",robotMsg.no_args_func_)
-        self.demandeDescrPub = ProtoPublisher("demandDescr",robotMsg.no_args_func_)
         
-        self.DesciptionSub = ProtoSubscriber ("description", rKCompatibilityMsg.CapteurDeclaration)
-        self.odomPositionSub.set_callback(self.on_actudecl)
         self.odomPositionSub = ProtoSubscriber('odom_pos', robotMsg.Position)
         self.optitrackPositionSub = ProtoSubscriber('optitrack_pos', robotMsg.Position)
         self.lidarPositionSub = ProtoSubscriber('lidar_pos', robotMsg.Position)
@@ -312,8 +308,6 @@ class ecalRadio(Radio):
         self.lastTheta = None
         sleep(1)# time needed to initialize ecal
 
-    def on_actudecl(self,topic_name,msg, temps):
-        return super().on_actudecl("Cooking-Mama", msg.equipmentId, msg.mini, msg.maxi, msg.step, msg.rights, msg.unit)
 
 
     def onPosRecv(self,topic_name,msg, temps):
