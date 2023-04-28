@@ -16,7 +16,7 @@ ROBOT_BRUSH = QBrush(QColor(ROBOT_COLOR), Qt.SolidPattern)
 SELECTED_RB_BRUSH = QBrush(QColor(SELECT_COLOR), Qt.SolidPattern)
 STOPPED_BRUSH = QBrush(QColor(STOPPED_COLOR), Qt.SolidPattern)
 CLICK_BRUSH = QBrush(QColor(CLICK_COLOR), Qt.Dense7Pattern)
-ROBOT_SIZE = 200
+ROBOT_SIZE = 320
 
 class MapView(QtWidgets.QWidget):
     """Un widget permettant de visualiser la carte et les robots dessus"""
