@@ -298,12 +298,15 @@ class ecalRadio(Radio):
         self.stopMessagePub = ProtoPublisher("stop",robotMsg.no_args_func_)
         
         self.odomPositionSub = ProtoSubscriber('odom_pos', robotMsg.Position)
-        self.optitrackPositionSub = ProtoSubscriber('optitrack_pos', robotMsg.Position)
-        self.lidarPositionSub = ProtoSubscriber('lidar_pos', robotMsg.Position)
-        self.smoothPositionSub = ProtoSubscriber('smooth_pos', robotMsg.Position)
         self.odomPositionSub.set_callback(self.onPosRecv)
+
+        self.optitrackPositionSub = ProtoSubscriber('optitrack_pos', robotMsg.Position)
         self.optitrackPositionSub.set_callback(self.onPosRecv)
+
+        self.lidarPositionSub = ProtoSubscriber('lidar_pos', robotMsg.Position)
         self.lidarPositionSub.set_callback(self.onPosRecv)
+        
+        self.smoothPositionSub = ProtoSubscriber('smooth_pos', robotMsg.Position)
         self.smoothPositionSub.set_callback(self.onPosRecv)
         self.lastTheta = None
         sleep(1)# time needed to initialize ecal
@@ -348,6 +351,3 @@ class ecalRadio(Radio):
             theta = self.lastTheta
         self.resetPositionPub.send(robotMsg.Position(x=x/1000,y=y/1000,theta=theta))
     
-    def send_descr_cmd (self, rid):
-        """Méthode appelée par le backend. Demande au robot rid de déclarer tout ses équipements."""
-        self.demandeDescrPub.send(robotMsg.EmptyMessage)
