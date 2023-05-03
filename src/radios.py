@@ -330,12 +330,12 @@ class ecalRadio(Radio):
             self.backend.premiers_messages.append (('pos',[rid, x, y, theta, time()]))
 
     def send_pos_cmd (self, rid, x, y):
-        x/=1000
-        y/=1000
+        xCmd/=1000
+        yCmd/=1000
         if self.lastTheta is not None:
-            self.setPositionPub.send(robotMsg.Position(x=x,y=y,theta=self.lastTheta))
+            self.setPositionPub.send(robotMsg.Position(x=xCmd,y=yCmd,theta=self.lastTheta))
         else:
-            self.setPositionPub.send(robotMsg.Position(x=x,y=y,theta=0.0))
+            self.setPositionPub.send(robotMsg.Position(x=xCmd,y=yCmd,theta=0.0))
         
     def send_pos_orient_cmd (self, rid, x, y, theta):
         xCmd = x/1000
@@ -351,3 +351,5 @@ class ecalRadio(Radio):
             theta = self.lastTheta
         self.resetPositionPub.send(robotMsg.Position(x=x/1000,y=y/1000,theta=theta))
     
+    def send_descr_cmd (self, rid):
+        pass
