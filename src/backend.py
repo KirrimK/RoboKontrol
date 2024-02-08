@@ -4,7 +4,7 @@ from time import time
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
 import display as dsp
-from radios import ivyRadio, serialRadio, ecalRadio
+from radios import serialRadio, ecalRadio
 
 class WidgetBackend (QWidget):
     """Classe implémentée car les signaux Qt doivent être envoyés par des objets Qt
@@ -49,7 +49,7 @@ class Backend:
         self.runned_time = 0
         self.radio = None
         self.annu = None
-        if isinstance(radio, ivyRadio) or isinstance (radio, serialRadio) or isinstance (radio,ecalRadio):
+        if isinstance (radio, serialRadio) or isinstance (radio,ecalRadio):
             self.attach_radio(radio)
         self.widget = None
 
@@ -118,7 +118,7 @@ class Backend:
         Entrée:
             - radio (radio): la radio à attacher
         """
-        if (isinstance(radio, ivyRadio) or isinstance (radio, serialRadio) or isinstance (radio,ecalRadio)) and self.radio is None:
+        if (isinstance (radio, serialRadio) or isinstance (radio,ecalRadio)) and self.radio is None:
             self.radio = radio
             self.radio.backend = self
 

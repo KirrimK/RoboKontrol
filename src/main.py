@@ -4,7 +4,7 @@ import window
 import sys
 import backend as ben
 import time
-from radios import ivyRadio, serialRadio, ecalRadio
+from radios import serialRadio, ecalRadio
 
     
 

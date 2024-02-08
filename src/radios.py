@@ -1,7 +1,7 @@
 import serial
 import threading
 from time import time, gmtime, sleep
-from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
+# from ivy.std_api import IvyStart, IvyStop, IvyInit, IvyBindMsg, IvySendMsg
 import ecal.core.core as ecal_core
 from ecal.core.publisher import ProtoPublisher, StringPublisher
 from ecal.core.subscriber import ProtoSubscriber, StringSubscriber
@@ -239,53 +239,53 @@ class serialRadio(Radio):
         self.serialObject.write (cmd.encode ('utf-8'))
 
 
-class ivyRadio (Radio):
-    """Classe de radio permettant la connection à un bus Ivy. Servait à des fins de debug de l'IHM avant le passage au serial"""
-    def __init__(self):
-        Radio.__init__(self)
-        self.nom = 'Radio'
-        IvyInit (self.nom,self.nom+" is ready!")
-        self.bus = "127.255.255.255:2010"
-        #Definition des messages et commandes Ivy
-        self.messages['ACTU_DECL']='ActuatorDeclare {} {} {} {} {} {} {}'#B indicatifRobot indicatifEquipement valMin valMax step droits unité 
-        self.messages['POS_REG']='PosReport {} {} {} {}'#R indicatifRobot x y theta
-        self.messages['CAPT_REG']='CaptReport {} {} {}'#C indicatifRobot indicatifCapteur valeur
+# class ivyRadio (Radio):
+#     """Classe de radio permettant la connection à un bus Ivy. Servait à des fins de debug de l'IHM avant le passage au serial"""
+#     def __init__(self):
+#         Radio.__init__(self)
+#         self.nom = 'Radio'
+#         IvyInit (self.nom,self.nom+" is ready!")
+#         self.bus = "127.255.255.255:2010"
+#         #Definition des messages et commandes Ivy
+#         self.messages['ACTU_DECL']='ActuatorDeclare {} {} {} {} {} {} {}'#B indicatifRobot indicatifEquipement valMin valMax step droits unité 
+#         self.messages['POS_REG']='PosReport {} {} {} {}'#R indicatifRobot x y theta
+#         self.messages['CAPT_REG']='CaptReport {} {} {}'#C indicatifRobot indicatifCapteur valeur
 
-        self.messages["POS_CMD"]="PosCommand {} {} {}\n"#P indicatifRobot  x   y
-        self.messages["SPEED_CMD"]="SpeedCommand {} {} {} {}\n"#S indicatifRobot vX vY vThetaself.messages["POS_CMD"]="P {} {} {}\n"#P indicatifRobot x y
-        self.messages["POS_ORIENT_CMD"] = "PosOrientCommand {} {} {} {}\n" #O indicatifRobot  x   y   theta
-        self.messages["ACTUATOR_CMD"] = "ActuatorCommand {} {} {}\n"#A indicatifRobot indicatifEquipement valeur
-        self.messages["STOP_BUTTON_CMD"] = "Emmergency {} \n"#E indicatifRobot
-        self.messages["KILL_CMD"] = "Kill {} \n"#K indicatifRobot
-        self.messages["DESCR_CMD"] = "DecriptionCommand {} \n"#D indicatifRobot
+#         self.messages["POS_CMD"]="PosCommand {} {} {}\n"#P indicatifRobot  x   y
+#         self.messages["SPEED_CMD"]="SpeedCommand {} {} {} {}\n"#S indicatifRobot vX vY vThetaself.messages["POS_CMD"]="P {} {} {}\n"#P indicatifRobot x y
+#         self.messages["POS_ORIENT_CMD"] = "PosOrientCommand {} {} {} {}\n" #O indicatifRobot  x   y   theta
+#         self.messages["ACTUATOR_CMD"] = "ActuatorCommand {} {} {}\n"#A indicatifRobot indicatifEquipement valeur
+#         self.messages["STOP_BUTTON_CMD"] = "Emmergency {} \n"#E indicatifRobot
+#         self.messages["KILL_CMD"] = "Kill {} \n"#K indicatifRobot
+#         self.messages["DESCR_CMD"] = "DecriptionCommand {} \n"#D indicatifRobot
 
-        IvyBindMsg (self.onBind1, self.messages["POS_REG"].format ('(.+)','(.+)','(.+)','(.+)'))
-        IvyBindMsg (self.onBind2, self.messages["CAPT_REG"].format('(.+)','(.+)','(.+)'))
-        IvyBindMsg (self.onBind3, self.messages["ACTU_DECL"].format('(.+)','(.+)','(.+)','(.+)','(.+)','(.+)','(.+)'))
-    def onBind1 (self, sender, rid, x, y, theta):
-        """Fonction servant à se débarasser de l'objet sender donné par le bind Ivy"""
-        self.on_posreg(rid, x, y, theta)
-    def onBind2 (self, sender, rid, sid, val):
-        """Fonction servant à se débarasser de l'objet sender donné par le bind Ivy"""
-        self.on_captreg(rid, sid, val)
-    def onBind3 (self, sender, rid, sid, mini, maxi, step, droits, unit):
-        """Fonction servant à se débarasser de l'objet sender donné par le bind Ivy"""
-        self.on_actudecl(rid, sid, mini, maxi, step, droits, unit)
+#         IvyBindMsg (self.onBind1, self.messages["POS_REG"].format ('(.+)','(.+)','(.+)','(.+)'))
+#         IvyBindMsg (self.onBind2, self.messages["CAPT_REG"].format('(.+)','(.+)','(.+)'))
+#         IvyBindMsg (self.onBind3, self.messages["ACTU_DECL"].format('(.+)','(.+)','(.+)','(.+)','(.+)','(.+)','(.+)'))
+#     def onBind1 (self, sender, rid, x, y, theta):
+#         """Fonction servant à se débarasser de l'objet sender donné par le bind Ivy"""
+#         self.on_posreg(rid, x, y, theta)
+#     def onBind2 (self, sender, rid, sid, val):
+#         """Fonction servant à se débarasser de l'objet sender donné par le bind Ivy"""
+#         self.on_captreg(rid, sid, val)
+#     def onBind3 (self, sender, rid, sid, mini, maxi, step, droits, unit):
+#         """Fonction servant à se débarasser de l'objet sender donné par le bind Ivy"""
+#         self.on_actudecl(rid, sid, mini, maxi, step, droits, unit)
 
-    def send_cmd (self,cmd):
-        """Envoie du texte vers le bus Ivy et le stocke optionnellement sur les tampons
-        Input : _ cmd (str) : Le message à envoyer"""
-        self.saveSent(cmd)
-        IvySendMsg (cmd)
+#     def send_cmd (self,cmd):
+#         """Envoie du texte vers le bus Ivy et le stocke optionnellement sur les tampons
+#         Input : _ cmd (str) : Le message à envoyer"""
+#         self.saveSent(cmd)
+#         IvySendMsg (cmd)
 
-    def start (self):
-        """Démare la radio"""
-        IvyStart (self.bus)
-        logging.getLogger('Ivy').setLevel(logging.WARN)
+#     def start (self):
+#         """Démare la radio"""
+#         IvyStart (self.bus)
+#         logging.getLogger('Ivy').setLevel(logging.WARN)
 
-    def stop (self, *args):
-        """Appelé automatiquement à l'arrêt du programme. Enlève la radio du bus Ivy."""
-        IvyStop()
+#     def stop (self, *args):
+#         """Appelé automatiquement à l'arrêt du programme. Enlève la radio du bus Ivy."""
+#         IvyStop()
 
 
 class ecalRadio(Radio):
@@ -308,14 +308,18 @@ class ecalRadio(Radio):
         
         self.smoothPositionSub = ProtoSubscriber('smooth_pos', robotMsg.Position)
         self.smoothPositionSub.set_callback(self.onPosRecv)
+
+        self.carrotPositionSub = ProtoSubscriber('carrot_pos', robotMsg.Position)
+        self.carrotPositionSub.set_callback(self.onPosRecv)
+
         self.lastTheta = None
         sleep(1)# time needed to initialize ecal
 
 
 
     def onPosRecv(self,topic_name,msg, temps):
-        x = int(msg.x*1000)
-        y= int(msg.y*1000)
+        x = int(msg.x)
+        y= int(msg.y)
         theta = msg.theta
         self.lastTheta=theta
         rid = "Cooking-Mama" if topic_name == "odom_pos" else topic_name 
@@ -330,16 +334,16 @@ class ecalRadio(Radio):
             self.backend.premiers_messages.append (('pos',[rid, x, y, theta, time()]))
 
     def send_pos_cmd (self, rid, x, y):
-        xCmd = x/1000
-        yCmd = y/1000
+        xCmd = x
+        yCmd = y
         if self.lastTheta is not None:
             self.setPositionPub.send(robotMsg.Position(x=xCmd,y=yCmd,theta=self.lastTheta))
         else:
             self.setPositionPub.send(robotMsg.Position(x=xCmd,y=yCmd,theta=0.0))
         
     def send_pos_orient_cmd (self, rid, x, y, theta):
-        xCmd = x/1000
-        yCmd = y/1000
+        xCmd = x
+        yCmd = y
         self.setPositionPub.send(robotMsg.Position(x=xCmd,y=yCmd,theta=theta))
 
     def send_stop_cmd (self, rid):
@@ -349,7 +353,7 @@ class ecalRadio(Radio):
     def send_pos_reset(self, rid, x, y, theta=None):
         if theta is None:
             theta = self.lastTheta
-        self.resetPositionPub.send(robotMsg.Position(x=x/1000,y=y/1000,theta=theta))
+        self.resetPositionPub.send(robotMsg.Position(x=x,y=y,theta=theta))
     
     def send_descr_cmd (self, rid):
         pass
